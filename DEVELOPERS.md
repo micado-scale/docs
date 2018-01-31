@@ -55,7 +55,7 @@ We use a private docker registry to develop MiCADO components. This registry is 
 
 * The address of the registry: _cola-registry.lpds.sztaki.hu_
 
-* To get access, contact with Attila Farkas (attila.farkas@sztaki.mta.hu) at SZTAKI.
+* To get access, contact with DevNull group (devnull@lpds.sztaki.hu) at SZTAKI.
 
 * The naming convention in the registry: _username/imagename:version_
 
