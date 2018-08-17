@@ -19,8 +19,8 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'micado'
-copyright = '2018, Attila Farkas'
+project = 'MiCADO'
+copyright = '2018, Cloud Orchestration at the Level of Application'
 author = 'Attila Farkas'
 
 # The short X.Y version
@@ -128,7 +128,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'micado.tex', 'micado Documentation',
+    (master_doc, 'MiCADO.tex', 'MiCADO Documentation',
      'Attila Farkas', 'manual'),
 ]
 
@@ -138,7 +138,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'micado', 'micado Documentation',
+    (master_doc, 'micado', 'MiCADO Documentation',
      [author], 1)
 ]
 
@@ -149,7 +149,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'micado', 'micado Documentation',
-     author, 'micado', 'One line description of project.',
+    (master_doc, 'MiCADO', 'MiCADO Documentation',
+     author, 'MiCADO', 'One line description of project.',
      'Miscellaneous'),
 ]
