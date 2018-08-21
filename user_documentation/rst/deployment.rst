@@ -10,9 +10,10 @@ Git & Ansible 2.4 or greater are needed on your (local) machine to run the Ansib
 
 **The version of Ansible in the Ubuntu 16.04 APT repository is outdated and insufficient**
 
-Install Ansible on Ubuntu 16.04
--------------------------------
+Ansible
+-------
 
+Install Ansible on Ubuntu 16.04.
 ::
 
    sudo apt-get update
