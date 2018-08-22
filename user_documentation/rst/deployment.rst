@@ -112,4 +112,4 @@ At the end of the deployment, core MiCADO services will be running on the MiCADO
 Check the logs
 ==============
 
-Alternatively, you can SSH into MiCADO master and check the logs at any point after MiCADO is succesfully deployed. - All logs are kept under ``/var/log/micado`` and are organised by component. *Scaling decisions, for example, can be inspected under ``/var/log/micado/policykeeper``*
+Alternatively, you can SSH into MiCADO master and check the logs at any point after MiCADO is succesfully deployed. All logs are kept under ``/var/log/micado`` and are organised by component. Scaling decisions, for example, can be inspected under ``/var/log/micado/policykeeper``
