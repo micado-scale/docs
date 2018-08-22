@@ -22,9 +22,7 @@ Install Ansible on Ubuntu 16.04.
    sudo apt-get update
    sudo apt-get install ansible
 
-To install Ansible on other operation system follow the `official
-installation
-guide <#https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`__.
+To install Ansible on other operation system follow the `official installation guide <#https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`__.
 
 Installation
 ============
@@ -54,7 +52,25 @@ MiCADO master will use this credential to start/stop VM instances (MiCADO worker
 
 Edit credentials.yml to add cloud credentials. You will find predefined sections in the template for each cloud interface type MiCADO supports. Fill only the section belonging to your target cloud.
 
-Step 3: (Optional) Specify details of your private Docker repository.
+Specify the provisioning method for the x509 keypair used for TLS encryption of the management interface.
+
+* The 'self-signed' option generates a new keypair with the specified hostname as subject (or 'micado-master' if omitted).
+* The 'user-supplied' option lets the user add the keypair as plain multiline strings (in unencrypted format) in the ansible_user_data.yml file under the 'cert' and 'key' subkeys respectively.
+
+Optionally you can use the `Ansible Vault <#https://docs.ansible.com/ansible/2.4/vault.html>`_ mechanism to keep the credential data in an encrypted format. To achieve this, create the above file using Vault with the command
+
+::
+
+    ansible-vault create credentials.yml
+
+
+This will launch *vi* or the editor defined in the ``$EDITOR`` environment variable to make changes to the file. If you wish to make any changes to the previously encrypted file, you can use the command
+
+::
+
+    ansible-vault edit credentials.yml
+
+Step 3b: (Optional) Specify details of your private Docker repository.
 ---------------------------------------------------------------------
 
 Set the Docker login credentials of your private Docker registries in which your personal containers are stored. We recommend making a copy of our predefined template and edit it. The ansible playbook expects the docker registry details in a file, called docker-cred.yml. Please, do not modify the structure of the template!
@@ -73,7 +89,7 @@ This new VM will host the MiCADO master core services. Use any of aws, ec2, nova
 
 ::
 
-   TCP: 22,2377,3000,4000,5000,5050,7946,8080,8300,8301,8302,8500,8600,9090,9093,12345
+   TCP: 22,2377,7946,8300,8301,8302,8500,8600
    UDP: 4789,7946,8301,8302,8600
 
 Step 5: Customize the inventory file for the MiCADO master.
@@ -94,6 +110,12 @@ Step 6: Start the installation of MiCADO master.
 ::
 
    ansible-playbook -i hosts micado-master.yml
+
+If you have used Vault to encrypt your credentials, you have to add the path to your vault credentials to the command line as described in the `Ansible Vault documentation <#https://docs.ansible.com/ansible/2.4/vault.html#providing-vault-passwords>`_ or provide it via com mand line using the command
+::
+
+    ansible-playbook -i hosts micado-master.yml --ask-vault-pass
+
 
 Health checking
 ===============
