@@ -37,7 +37,7 @@ This application demonstrates a deadline policy using CQueue. CQueue provides a 
 *  Step7: Run ``./3-deploy-cq-worker-to-micado.sh`` to deploy the CQworker service, which will consume the items from the CQueue server i.e. execute the containers specified by the items.
 *  Step8: Monitor the application:
 
-    -  visit http://micado.master.ip:4000/docker-visualizer to see the number of nodes and containers.
+    -  visit https://[micado.master.ip]:[port]/docker-visualizer to see the number of nodes and containers.
     -  watch the log of policy keeper on the MiCADO master    (/var/log/micado/policykeeper).
 
 *  Step9: Run ``./4-list-running-apps.sh`` to list the apps you are running under MiCADO.
