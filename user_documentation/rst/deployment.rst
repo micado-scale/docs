@@ -70,8 +70,28 @@ This will launch *vi* or the editor defined in the ``$EDITOR`` environment varia
 
     ansible-vault edit credentials.yml
 
+Step 3a: (Optional) Specify security settings and credentials.
+--------------------------------------------------------------
+
+MiCADO master will use these security-related settings and credentials during provisioning.
+
+::
+
+   cp sample-security-cred.yml security-cred.yml
+   vi security-cred.yml
+
+Specify the provisioning method for the x509 keypair used for TLS encryption of the management interface in the ``tls`` subtree:
+
+* The 'self-signed' option generates a new keypair with the specified hostname as subject (or 'micado-master' if omitted).
+* The 'user-supplied' option lets the user add the keypair as plain multiline strings (in unencrypted format) in the ansible_user_data.yml file under the 'cert' and 'key' subkeys respectively.
+
+Specify the default username and password for the administrative we user in the the ``authentication`` subtree.
+
+Optionally you may use the Ansible Vault mechanism as described in Step 2 to protect the confidentiality and integrity of this file as well.
+
+
 Step 3b: (Optional) Specify details of your private Docker repository.
----------------------------------------------------------------------
+----------------------------------------------------------------------
 
 Set the Docker login credentials of your private Docker registries in which your personal containers are stored. We recommend making a copy of our predefined template and edit it. The ansible playbook expects the docker registry details in a file, called docker-cred.yml. Please, do not modify the structure of the template!
 
@@ -81,6 +101,8 @@ Set the Docker login credentials of your private Docker registries in which your
    vi docker-cred.yml
 
 Edit docker-cred.yml and add username, password, and repository url. To login to the default docker_hub, leave DOCKER_REPO as is (a blank string).
+
+Optionally you may use the Ansible Vault mechanism as described in Step 2 to protect the confidentiality and integrity of this file as well.
 
 Step 4: Launch an empty cloud VM instance for MiCADO master.
 ------------------------------------------------------------
@@ -102,7 +124,8 @@ We recommend making a copy of our predefined template and edit it. Use the templ
    cp sample-hosts hosts
    vi hosts
 
-Edit the ``hosts`` file to set ansible variables for MiCADO master machine. Update the following parameters: ansible_host=\ *IP*, ansible_connection=\ *ssh* and ansible_user=\ *YOUR SUDOER ACCOUNT*. To specify the listening port of the MiCADO web interface, please edit the *web_listening_port* parameter, which defaults to the default HTTPS port (443/TCP). Please, revise the other parameters as well, however in most cases the default values are correct.
+Edit the ``hosts`` file to set ansible variables for MiCADO master machine. Update the following parameters: ansible_host=\ *IP*, ansible_connection=\ *ssh* and ansible_user=\ *YOUR SUDOER ACCOUNT*. To specify the listening port of the MiCADO web interface, please edit the *web_listening_port* parameter, which defaults to the default HTTPS port (443/TCP). Please, revise the other parameters as well, however in most cases the default values are correct. To change the default port of the MiCADO web management interface edit the value of the ``web_listening_port`` variable.
+
 
 Step 6: Start the installation of MiCADO master.
 ------------------------------------------------
@@ -122,14 +145,11 @@ Health checking
 
 At the end of the deployment, core MiCADO services will be running on the MiCADO master machine. Here are the commands to test the operation of some of the core MiCADO services:
 
-*  Occopus:
-::
-
-    curl -s -X GET http://IP:5000/infrastructures/
 *  Prometheus:
+
 ::
 
-    curl -s http://IP:9090/api/v1/status/config | jq '.status'
+    curl -s https://[username]:[password]@[IP]:[port]/prometheus/api/v1/status/config | jq '.status'
 
 Check the logs
 ==============
