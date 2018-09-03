@@ -149,7 +149,7 @@ At the end of the deployment, core MiCADO services will be running on the MiCADO
 
 ::
 
-    curl -s https://[username]:[password]@[IP]:[port]/prometheus/api/v1/status/config | jq '.status'
+    curl --insecure -s https://[username]:[password]@[IP]:[port]/prometheus/api/v1/status/config | jq '.status'
 
 Check the logs
 ==============
