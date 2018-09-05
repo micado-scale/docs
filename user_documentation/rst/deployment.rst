@@ -1,19 +1,33 @@
 Deployment
 **********
 
-As stated in the above section, to use MiCADO, you need to deploy the MiCADO services on a (separate) virtual machine, called MiCADO master. We recommend doing the installation remotely i.e. to download the Ansible playbook on your local machine and run the deployment on an empty virtual machine dedicated for this purpose on your preferred cloud.
+To deploy MiCADO you need a (separate) virtual machine, called MiCADO master. There are two ways of deployment:
+
+* remote: download the Ansible playbook on your local machine, configure the MiCADO master as target machine and run the playbook to perform the deployment remotely.
+* local: login to the MiCADO master, download the Ansible playbook, configure the localhost as target machine and run the playbook to perform the deployment locally.
+
+We recommend to perform the installation remotely as all your configuration files are preserved on your machine, i.e. it is easier to repeat the deployment if needed.
 
 Prerequisites
 =============
 
-Git & Ansible 2.4 or greater are needed on your (local) machine to run the Ansible playbook.
+For the MiCADO master: 
 
-**The version of Ansible in the Ubuntu 16.04 APT repository is outdated and insufficient**
+* Ubuntu 16.04
+
+For the host where the Ansible playbook is executed (differs depending on local or remote):
+
+* Ansible 2.4 or greater
+* Git
+
 
 Ansible
 -------
 
-Install Ansible on Ubuntu 16.04.
+Note: Ansible in the Ubuntu 16.04 APT repository is outdated and insufficient (at the time of writing this document)
+
+To install Ansible on Ubuntu 16.04, use these commands:
+
 ::
 
    sudo apt-get update
@@ -24,10 +38,21 @@ Install Ansible on Ubuntu 16.04.
 
 To install Ansible on other operation system follow the `official installation guide <#https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`__.
 
+Git
+---
+
+To install Git on Ubuntu, use this command:
+
+::
+
+   sudo apt-get install git-all
+
+To install Git on other operating system follow the `official installation guide <#https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`__.
+
 Installation
 ============
 
-Perform the following steps on your local machine.
+Perform the following steps either on your local machine or on MiCADO master depending on the installation method.
 
 Step 1: Download the ansible playbook.
 --------------------------------------
@@ -38,12 +63,12 @@ Currently, MiCADO v5 version is available.
 
    git clone https://github.com/micado-scale/ansible-micado.git ansible-micado
    cd ansible-micado
-   git checkout master
+   git checkout develop
 
 Step 2: Specify credential for instantiating MiCADO workers.
 ------------------------------------------------------------
 
-MiCADO master will use this credential to start/stop VM instances (MiCADO workers) to realize scaling. Credentials here should belong to the same cloud as where MiCADO master is running. We recommend making a copy of our predefined template and edit it. The ansible playbook expects the credential in a file, called credentials.yml. Please, do not modify the structure of the template!
+MiCADO master will use this credential to start/stop VM instances (MiCADO workers) to host the application and to realize scaling. Credentials here should belong to the same cloud as where MiCADO master is running. We recommend making a copy of our predefined template and edit it. The ansible playbook expects the credential in a file, called credentials.yml. Please, do not modify the structure of the template!
 
 ::
 
@@ -119,8 +144,18 @@ We recommend making a copy of our predefined template and edit it. Use the templ
    cp sample-hosts hosts
    vi hosts
 
-Edit the ``hosts`` file to set ansible variables for MiCADO master machine. Update the following parameters: ansible_host=\ *IP*, ansible_connection=\ *ssh* and ansible_user=\ *YOUR SUDOER ACCOUNT*. To specify the listening port of the MiCADO web interface, please edit the *web_listening_port* parameter, which defaults to the default HTTPS port (443/TCP). Please, revise the other parameters as well, however in most cases the default values are correct. To change the default port of the MiCADO web management interface edit the value of the ``web_listening_port`` variable.
+Edit the ``hosts`` file to set ansible variables for MiCADO master machine. Update the following parameters: 
 
+* **ansible_host**: specifies the publicly reachable ip address of MiCADO master. Set the public or floating ip of the master regardless the deployment method is remote or local. The ip specified here is used by the Dashboard for webpage redirection as well
+* **ansible_connection**: specifies how the target host can be reached. Use "ssh" for remote or "local" for local installation. In case of remote installation, make sure you can authenticate yourself against MiCADO master. We recommend to deploy your public ssh key on MiCADO master before starting the deployment
+* **ansible_user**: specifies the name of your sudoer account, defaults to "ubuntu"
+* **ansible_become**: specifies if account change is needed to become root, defaults to "True"
+* **ansible_become_method**: specifies which command to use to become superuser, defaults to "sudo"
+* **ansible_python_interpreter**: specifies the interpreter to be used for ansible on the target host, defaults to "/usr/bin/python3"
+* **docker_cred_path**: sets the path of file storing the credentials for private docker registries, defaults to "./docker-cred.yml"
+* **web_listening_port**: specifies the listening port of the management interface including the MiCADO dashboard and the REST interface, defaults to the default HTTPS port (443/TCP) 
+
+Please, revise all the parameters, however in most cases the default values are correct. 
 
 Step 6: Start the installation of MiCADO master.
 ------------------------------------------------
