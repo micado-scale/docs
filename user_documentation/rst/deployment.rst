@@ -52,11 +52,6 @@ MiCADO master will use this credential to start/stop VM instances (MiCADO worker
 
 Edit credentials.yml to add cloud credentials. You will find predefined sections in the template for each cloud interface type MiCADO supports. Fill only the section belonging to your target cloud.
 
-Specify the provisioning method for the x509 keypair used for TLS encryption of the management interface.
-
-* The 'self-signed' option generates a new keypair with the specified hostname as subject (or 'micado-master' if omitted).
-* The 'user-supplied' option lets the user add the keypair as plain multiline strings (in unencrypted format) in the ansible_user_data.yml file under the 'cert' and 'key' subkeys respectively.
-
 Optionally you can use the `Ansible Vault <#https://docs.ansible.com/ansible/2.4/vault.html>`_ mechanism to keep the credential data in an encrypted format. To achieve this, create the above file using Vault with the command
 
 ::
