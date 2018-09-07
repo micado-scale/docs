@@ -13,6 +13,8 @@ This application contains a single service, performing a constant CPU load. The 
 *  Step3: Update the parameter file, called ``_settings``. You need the ip address for the MiCADO master and should name the application by setting the APP_ID  ***the application ID can not contain any underscores ( _ )**
 *  Step4: run ``1-submit-tosca-stressng.sh`` to create the minimum number of MiCADO worker nodes and to deploy the docker stack including the stressng service defined in the ``stressng.yaml`` TOSCA description. A few minutes after successful deployment, the system should respond by scaling up virtual machines and containers to the maximum specified.
 *  Step4a: run ``2-list-apps.sh`` to see currently running applications and their IDs
+*  Step4b: run ``query-services.sh`` to see the details of docker services of your application
+*  Step4c: run ``query-nodes.sh`` to see the details of docker nodes hosting your application
 *  Step5: run ``3-update-tosca-stressng.sh`` to update the service and reduce the CPU load. After a few moments the system should respond by scaling down virtual machines and containers to the minimum specified.
 *  Step6: run ``4-undeploy-stressng.sh`` to remove the stressng stack and all the MiCADO worker nodes
 
@@ -35,11 +37,8 @@ This application demonstrates a deadline policy using CQueue. CQueue provides a 
     -  Update the value for the ‘DEADLINE’ which is under the ‘policies/scalability/properties/constants’ section. The value has been extracted in the previous step. Please, note that defining a deadline in the past results in scaling the application to the maximum (2 nodes and 10 containers).
 
 *  Step7: Run ``./3-deploy-cq-worker-to-micado.sh`` to deploy the CQworker service, which will consume the items from the CQueue server i.e. execute the containers specified by the items.
-*  Step8: Monitor the application:
-
-    -  visit https://[micado.master.ip]:[port]/docker-visualizer to see the number of nodes and containers.
-    -  watch the log of policy keeper on the MiCADO master    (/var/log/micado/policykeeper).
-
-*  Step9: Run ``./4-list-running-apps.sh`` to list the apps you are running under MiCADO.
-*  Step10: Run ``./5-undeploy-cq-worker-from-micado.sh`` to remove your application from MiCADO when all items are consumed.
-*  Step11: You can have a look at the state ``./cqueue-get-job-status.sh <task_id>`` or stdout of container executions ``./cqueue-get-job-status.sh <task_id>`` using one of the task id values printed during Step 3.
+*  Step8a: Run ``./4-list-running-apps.sh`` to list the apps running under MiCADO.
+*  Step8b: run ``query-services.sh`` to see the details of docker services of your application
+*  Step8c: run ``query-nodes.sh`` to see the details of docker nodes hosting your application
+*  Step9: Run ``./5-undeploy-cq-worker-from-micado.sh`` to remove your application from MiCADO when all items are consumed.
+*  Step10: You can have a look at the state ``./cqueue-get-job-status.sh <task_id>`` or stdout of container executions ``./cqueue-get-job-status.sh <task_id>`` using one of the task id values printed during Step 3.
