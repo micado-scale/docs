@@ -131,8 +131,12 @@ This new VM will host the MiCADO master core services. Use any of aws, ec2, nova
 
 ::
 
-   TCP: 22,2377,7946,8300,8301,8302,8500,8600
+   TCP: 22,2377,7946,8300,8301,8302,8500,8600,[web_listening_port]
    UDP: 4789,7946,8301,8302,8600
+
+**NOTE:** ``web_listening_port`` is defined in the ansible inventory file called ``hosts`` and defaults to ``443``
+
+**NOTE:** MiCADO master has built-in firewall, therefore you can leave all ports open at cloud level.
 
 Step 5: Customize the inventory file for the MiCADO master.
 -----------------------------------------------------------
