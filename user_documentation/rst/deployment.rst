@@ -187,3 +187,15 @@ Check the logs
 ==============
 
 You can SSH into MiCADO master and check the logs at any point after MiCADO is succesfully deployed. All logs are kept under ``/var/log/micado`` and are organised by components. Scaling decisions, for example, can be inspected under ``/var/log/micado/policykeeper``
+
+Accessing user service
+======================
+
+In case your application contains container exposing a service, you have two alternatives to access its endpoint:
+
+* via MiCADO master: open up your service port number on the MiCADO master's internal firewall before deployment. To do that, extend the firewall configuration by editing the file(s) located at in the ``roles/micado-master/templates/iptables`` directory. Make sure you open up the cloud firewall as well for the MiCADO master!
+
+* via MiCADO worker: query the ip address of the worker nodes. You can do that through the Dashboard of MiCADO, the Dashboard of your cloud or the REST API of MiCADO. Make sure the port of your service is open up by the cloud firewall for the MiCADO workers!
+
+
+
