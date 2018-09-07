@@ -173,19 +173,17 @@ If you have used Vault to encrypt your credentials, you have to add the path to 
 
     ansible-playbook -i hosts micado-master.yml --ask-vault-pass
 
+After deployment
+================
 
-Health checking
-===============
+Once the deployment has successfully finished, you can proceed with 
 
-At the end of the deployment, core MiCADO services will be running on the MiCADO master machine. Here are the commands to test the operation of some of the core MiCADO services:
-
-*  Prometheus:
-
-::
-
-    curl --insecure -s https://[username]:[password]@[IP]:[port]/prometheus/api/v1/status/config | jq '.status'
+* visiting the :ref:`dashboard`
+* using the :ref:`restapi`
+* playing with the :ref:`tutorials`
+* creating your :ref:`applicationdescription`
 
 Check the logs
 ==============
 
-Alternatively, you can SSH into MiCADO master and check the logs at any point after MiCADO is succesfully deployed. All logs are kept under ``/var/log/micado`` and are organised by component. Scaling decisions, for example, can be inspected under ``/var/log/micado/policykeeper``
+You can SSH into MiCADO master and check the logs at any point after MiCADO is succesfully deployed. All logs are kept under ``/var/log/micado`` and are organised by components. Scaling decisions, for example, can be inspected under ``/var/log/micado/policykeeper``

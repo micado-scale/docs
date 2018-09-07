@@ -1,3 +1,5 @@
+.. _applicationdescription:
+
 Application description
 ***********************
 
