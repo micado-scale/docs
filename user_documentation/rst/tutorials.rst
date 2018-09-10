@@ -8,7 +8,9 @@ You can find test application(s) under the subdirectories of the ‘testing’ d
 stressng
 ========
 
-This application contains a single service, performing a constant CPU load. The policy defined for this application scales up/down both nodes and the stressng service based on cpu consumption. Helper scripts have been added to the directory to ease application handling.
+This application contains a single service, performing a constant CPU load. The policy defined for this application scales up/down both nodes and the stressng service based on cpu consumption. Helper scripts have been added to the directory to ease application handling. 
+
+**Note:** make sure you have the ``jq`` tool installed required by the helper scripts.
 
 *  Step1: add your ``public_key_id`` to both the ``stressng.yaml`` and ``stressng-update.yaml`` files. Without this CloudSigma does not execute the contextualisation on the MiCADO worker nodes. The ID must point to your public ssh key under your account in CloudSigma. You can find it on the CloudSigma Web UI under the “Access & Security/Keys Management” menu as **Uuid**.
 * Step2: add a proper ``firewall_policy`` to both the ``stressng.yaml`` and ``stressng-update.yaml`` files. Without this MiCADO master will not reach MiCADO worker nodes. Firewall policy ID can be retrieved from a rule defined under the “Networking/Policies” menu. The following ports must be opened for MiCADO workers: all inbound connections from MiCADO master
@@ -24,6 +26,8 @@ cqueue
 ======
 
 This application demonstrates a deadline policy using CQueue. CQueue provides a lightweight queueing service for executing containers. CQueue server (implemented by RabbitMQ, Redis and a web-based frontend) stores items where each represents a container execution. CQueue worker fetches an item and preform the execution of the container locally. The demonstration below shows that the items can be consumed by deadline using MiCADO for scaling the CQueue worker. The demonstration requires the deployment of a CQueue server separately, then the submission of the CQueue worker to MiCADO with the appropriate (predefined) scaling policy.
+
+**Note:** make sure you have the ``jq`` tool installed required by the helper scripts.
 
 *  Step1: Launch a separate VM and deploy CQueue server using the compose file, called ``docker-compose-cqueue-server.yaml``. You need to install docker and docker-compose to use the compose file. This will be your cqueue server to store items representing container execution requests. Important: you have to open ports defined under the ‘ports’ section for each of the four services defined in the compose file.
 *  Step2: Update the parameter file, called ``_settings`` . You need the ip address for the MiCADO master and for the CQueue server.
