@@ -63,7 +63,7 @@ Currently, MiCADO v5 version is available.
 
    git clone https://github.com/micado-scale/ansible-micado.git ansible-micado
    cd ansible-micado
-   git checkout develop
+   git checkout v0.6.0
 
 Step 2: Specify credential for instantiating MiCADO workers.
 ------------------------------------------------------------
