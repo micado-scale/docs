@@ -1,3 +1,5 @@
+.. _applicationdescription:
+
 Application description
 ***********************
 
@@ -18,7 +20,7 @@ description:
    tosca_definitions_version: tosca_simple_yaml_1_0
 
    imports:
-     - https://raw.githubusercontent.com/micado-scale/tosca/v0.5.0/micado_types.yaml
+     - https://raw.githubusercontent.com/micado-scale/tosca/v0.6.0/micado_types.yaml
 
    repositories:
      docker_hub: https://hub.docker.com/
@@ -210,7 +212,7 @@ To instantiate MiCADO workers on a cloud through EC2 interface, please use the t
          properties:
            cloud:
              interface_cloud: ec2
-             endpoint_cloud: ADD_YOUR_ENDPOINT (e.g ec2.eu-west-1.amazonaws.com )
+             endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com )
          capabilities:
            host:
              properties:

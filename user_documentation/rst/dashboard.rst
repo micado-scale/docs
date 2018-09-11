@@ -1,7 +1,9 @@
+.. _dashboard:
+
 Dashboard
 *********
 
-MiCADO has a simple dashboard that collects web-based user interfaces into a single view. To access the Dashboard, visit ``http://IP:4000``.
+MiCADO has a simple dashboard that collects web-based user interfaces into a single view. To access the Dashboard, visit ``https://[IP]:[port]``.
 
 The following webpages are currently exposed:
 
