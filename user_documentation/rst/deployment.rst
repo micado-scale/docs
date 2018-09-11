@@ -57,8 +57,6 @@ Perform the following steps either on your local machine or on MiCADO master dep
 Step 1: Download the ansible playbook.
 --------------------------------------
 
-Currently, MiCADO v5 version is available.
-
 ::
 
    git clone https://github.com/micado-scale/ansible-micado.git ansible-micado
