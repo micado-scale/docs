@@ -11,7 +11,7 @@ We recommend to perform the installation remotely as all your configuration file
 Prerequisites
 =============
 
-For the MiCADO master: 
+For the MiCADO master:
 
 * Ubuntu 16.04
 
@@ -36,7 +36,7 @@ To install Ansible on Ubuntu 16.04, use these commands:
    sudo apt-get update
    sudo apt-get install ansible
 
-To install Ansible on other operation system follow the `official installation guide <#https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`__.
+To install Ansible on other operation system follow the `official installation guide <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`__.
 
 Git
 ---
@@ -47,7 +47,7 @@ To install Git on Ubuntu, use this command:
 
    sudo apt-get install git-all
 
-To install Git on other operating system follow the `official installation guide <#https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`__.
+To install Git on other operating system follow the `official installation guide <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`__.
 
 Installation
 ============
@@ -77,7 +77,7 @@ MiCADO master will use this credential to start/stop VM instances (MiCADO worker
 
 Edit credentials.yml to add cloud credentials. You will find predefined sections in the template for each cloud interface type MiCADO supports. Fill only the section belonging to your target cloud.
 
-Optionally you can use the `Ansible Vault <#https://docs.ansible.com/ansible/2.4/vault.html>`_ mechanism to keep the credential data in an encrypted format. To achieve this, create the above file using Vault with the command
+Optionally you can use the `Ansible Vault <https://docs.ansible.com/ansible/2.4/vault.html>`_ mechanism to keep the credential data in an encrypted format. To achieve this, create the above file using Vault with the command
 
 ::
 
@@ -148,7 +148,7 @@ We recommend making a copy of our predefined template and edit it. Use the templ
    cp sample-hosts hosts
    vi hosts
 
-Edit the ``hosts`` file to set ansible variables for MiCADO master machine. Update the following parameters: 
+Edit the ``hosts`` file to set ansible variables for MiCADO master machine. Update the following parameters:
 
 * **ansible_host**: specifies the publicly reachable ip address of MiCADO master. Set the public or floating ip of the master regardless the deployment method is remote or local. The ip specified here is used by the Dashboard for webpage redirection as well
 * **ansible_connection**: specifies how the target host can be reached. Use "ssh" for remote or "local" for local installation. In case of remote installation, make sure you can authenticate yourself against MiCADO master. We recommend to deploy your public ssh key on MiCADO master before starting the deployment
@@ -157,9 +157,9 @@ Edit the ``hosts`` file to set ansible variables for MiCADO master machine. Upda
 * **ansible_become_method**: specifies which command to use to become superuser, defaults to "sudo"
 * **ansible_python_interpreter**: specifies the interpreter to be used for ansible on the target host, defaults to "/usr/bin/python3"
 * **docker_cred_path**: sets the path of file storing the credentials for private docker registries, defaults to "./docker-cred.yml"
-* **web_listening_port**: specifies the listening port of the management interface including the MiCADO dashboard and the REST interface, defaults to the default HTTPS port (443/TCP) 
+* **web_listening_port**: specifies the listening port of the management interface including the MiCADO dashboard and the REST interface, defaults to the default HTTPS port (443/TCP)
 
-Please, revise all the parameters, however in most cases the default values are correct. 
+Please, revise all the parameters, however in most cases the default values are correct.
 
 Step 6: Start the installation of MiCADO master.
 ------------------------------------------------
@@ -168,7 +168,7 @@ Step 6: Start the installation of MiCADO master.
 
    ansible-playbook -i hosts micado-master.yml
 
-If you have used Vault to encrypt your credentials, you have to add the path to your vault credentials to the command line as described in the `Ansible Vault documentation <#https://docs.ansible.com/ansible/2.4/vault.html#providing-vault-passwords>`_ or provide it via com mand line using the command
+If you have used Vault to encrypt your credentials, you have to add the path to your vault credentials to the command line as described in the `Ansible Vault documentation <https://docs.ansible.com/ansible/2.4/vault.html#providing-vault-passwords>`_ or provide it via command line using the command
 ::
 
     ansible-playbook -i hosts micado-master.yml --ask-vault-pass
@@ -176,7 +176,7 @@ If you have used Vault to encrypt your credentials, you have to add the path to 
 After deployment
 ================
 
-Once the deployment has successfully finished, you can proceed with 
+Once the deployment has successfully finished, you can proceed with
 
 * visiting the :ref:`dashboard`
 * using the :ref:`restapi`
@@ -196,6 +196,3 @@ In case your application contains container exposing a service, you have two alt
 * via MiCADO master: open up your service port number on the MiCADO master's internal firewall before deployment. To do that, extend the firewall configuration by editing the file(s) located at in the ``roles/micado-master/templates/iptables`` directory. Make sure you open up the cloud firewall as well for the MiCADO master!
 
 * via MiCADO worker: query the ip address of the worker nodes. You can do that through the Dashboard of MiCADO, the Dashboard of your cloud or the REST API of MiCADO. Make sure the port of your service is open up by the cloud firewall for the MiCADO workers!
-
-
-
