@@ -15,6 +15,10 @@ For the MiCADO master:
 
 * Ubuntu 16.04
 
+For the MiCADO worker nodes:
+
+* A MiCADO-supported cloud: OpenStack, OpenNebula, AmazonEC2 or CloudSigma
+
 For the host where the Ansible playbook is executed (differs depending on local or remote):
 
 * Ansible 2.4 or greater
