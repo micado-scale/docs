@@ -92,7 +92,7 @@ This will launch *vi* or the editor defined in the ``$EDITOR`` environment varia
 
     ansible-vault edit credentials.yml
 
-Step 3a: (Optional) Specify security settings and credentials.
+Step 3a: Specify security settings and credentials.
 --------------------------------------------------------------
 
 MiCADO master will use these security-related settings and credentials during provisioning.
