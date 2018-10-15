@@ -70,7 +70,7 @@ Step 1: Download the ansible playbook.
 
    git clone https://github.com/micado-scale/ansible-micado.git ansible-micado
    cd ansible-micado
-   git checkout v0.6.0
+   git checkout v0.6.1
 
 Step 2: Specify cloud credential for instantiating MiCADO workers.
 ------------------------------------------------------------------
