@@ -1,6 +1,21 @@
 Release Notes
 *************
 
+**v0.6.1 (15 Oct 2018)**
+
+- enable VM-only deployments
+- add support for special characters in SSL credentials
+- fix missing vm instance number reset at undeployment
+- add option to disable auto-updates on worker nodes
+- modify default launch-order of TOSCA adaptors
+- add cloud-specific TOSCA templates and improve helper scripts for stressng
+- flatten CPU scaling policies
+- improve virtual machine build time
+- fix Zorp starting dependency
+- fix Docker login timing issue
+- remove unnecessary port from docker compose file
+- enable Prometheus DB export
+
 **v0.6.0 (10 Sept 2018)**
 
 - introduce documentation repository and host its content at http://micado-scale.readthedocs.io
@@ -13,7 +28,7 @@ Release Notes
 - fix issue with worker node deployment in EC2 clouds
 - fix issue with user-defined Docker networks in OpenStack clouds
 - make Submitter response message structure uniform
-- add 'nodes' and 'services' query methods to REST API 
+- add 'nodes' and 'services' query methods to REST API
 - improve 'stressng' and 'cqueue' test helper scripts
 - add more compose properties to custom TOSCA definition
 - fix floating ip issues in the Dashboard component
