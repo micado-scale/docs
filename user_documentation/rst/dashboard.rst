@@ -11,6 +11,6 @@ MiCADO has a simple dashboard that collects web-based user interfaces into a sin
 
 The following webpages are currently exposed:
 
-* Kubernetes Dashboard: A read-only instance of the Kubernetes WebUI providing a full overview of the infrastructure
+* Kubernetes Dashboard: A read-only instance of the Kubernetes WebUI providing a full overview of the infrastructure. Simply *SKIP* the authentication pop-up to gain read-only access to the dashboard.
 * Grafana: graphically visualize the resources (nodes, containers) in time. After deploying your application, you can select the service whose metrics you want using the 'Service' drop down running above the graphs area.
 * Prometheus: monitoring subsystem. Recommended for developers, experts.
