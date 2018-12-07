@@ -10,7 +10,7 @@ Application description has four main sections:
 * **tosca_definitions_version**: ``tosca_simple_yaml_1_0``.
 * **imports**: a list of urls pointing to custom TOSCA types. The default url points to the custom types defined for MiCADO. Please, do not modify this url.
 * **repositories**: docker repositories with their addresses.
-* **topology_template**: the main part of the application description to define 1) kubernetes deployments (as swarm services), 2) virtual machine (under the **node_templates** section) and 3) the scaling policy under the **policies** subsection. These sections will be detailed in subsections below.
+* **topology_template**: the main part of the application description to define 1) kubernetes deployments (of docker containers), 2) virtual machine (under the **node_templates** section) and 3) the scaling policy under the **policies** subsection. These sections will be detailed in subsections below.
 
 Here is an overview example for the structure of the MiCADO application
 description:
