@@ -98,8 +98,8 @@ Under the **properties** section of an app (see **YOUR_KUBERNETES_APP**) you can
 * **entrypoint**: override the default entrypoint of container.
 * **environment**: map of all required environment variables.
 * **expose**: expose ports without publishing them to the host machine.
-* **volumes**: list of bind mount (host-container) volumes for the service in the format _/source/etc/data:/target/etc/data_
-* **ports**: list of published ports to the host machine. *Unlike Docker* this does not make the container accessible from the outside.
+* **volumes**: list of bind mount (host-container) volumes for the service in the format */source/etc/data:/target/etc/data*
+* **ports**: list of published ports to the host machine. **Unlike Docker** this does not make the container accessible from the outside.
 * **labels**: map of metadata like Docker labels and/or Kubernetes instructions (see NOTE).
 
 *NOTE*
