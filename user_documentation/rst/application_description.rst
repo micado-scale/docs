@@ -88,8 +88,8 @@ Under the node_templates section you can define one or more apps to create a Kub
             file: YOUR_DOCKER_IMAGE
             repository: docker_hub
 
-The fields under the **properties** section of the Kubernetes app are derived from a docker-compose file. Therefore, you can additional information about the properties in the `docker compose documentation <https://docs.docker.com/compose/compose-file/#service-configuration-reference>`__. The syntax of the property values is the same as in the docker-compose
-file. In the first implementation of Kubernetes as container orchestrator, these properties are still in the docker-compose format. The Compose properties will be translated into Kubernetes specs on deployment.
+The fields under the **properties** section of the Kubernetes app are derived from a docker-compose file and converted using Kompose. You can find additional information about the properties in the `docker compose documentation <https://docs.docker.com/compose/compose-file/#service-configuration-reference>` and see what `Kompose supports here <http://kompose.io/conversion/>`. The syntax of the property values is currently the same as in docker-compose 
+file. The Compose properties will be translated into Kubernetes specs on deployment.
 
 Under the **properties** section of an app (see **YOUR_KUBERNETES_APP**) you can specify the following keywords.:
 
@@ -98,12 +98,13 @@ Under the **properties** section of an app (see **YOUR_KUBERNETES_APP**) you can
 * **entrypoint**: override the default entrypoint of container.
 * **environment**: map of all required environment variables.
 * **expose**: expose ports without publishing them to the host machine.
-* **labels**: map of metadata like Docker labels.
-* **logging**: map of the logging configuration.
-* **networks**: list of connected networks for the service.
-* **volumes**: list of connected volumes for the service.
-* **ports**: list of published ports to the host machine.
-* **secrets**: list of per-service secrets to grant access for the service.
+* **volumes**: list of bind mount (host-container) volumes for the service in the format _/source/etc/data:/target/etc/data_
+* **ports**: list of published ports to the host machine. *Unlike Docker* this does not make the container accessible from the outside.
+* **labels**: map of metadata like Docker labels and/or Kubernetes instructions (see NOTE).
+
+*NOTE*
+**labels** can also be used to pass instructions to Kubernetes (full list: http://kompose.io/user-guide/#labels)
+* **kompose.service.type: 'nodeport'** will make the container accessible at *<worker_node_ip>:port* where port can be found on the Kubernetes Dashboard under *Discovery and load balancing > Services > my_app > Internal endpoints*
 
 Under the **artifacts** section you can define the docker image for the
 kubernetes app. Three fields must be defined:
@@ -112,10 +113,9 @@ kubernetes app. Three fields must be defined:
 * **file**: docker image for the kubernetes app (e.g. sztakilpds/cqueue_frontend:latest )
 * **repository**: name of the repository where the image is located. The name used here (e.g. docker_hub), must be defined at the top of the description under the **repositories** section.
 
-To define a Docker network (see **YOUR_DOCKER_NETWORK**) the following fields must be specified:
+Kubernetes networking is inherently different to the approach taken by Docker. This is a complex subject which is worth a read: https://kubernetes.io/docs/concepts/cluster-administration/networking/
 
-*  **attachable**: if set to true, then standalone containers can attach to this network, in addition to services
-*  **driver**: specify which driver should be used for this network. (overlay, bridge, etc.)
+Since every pod gets its own IP, which any pod can by default use to communicate with any other pod, this means there is no network to explicitly define. If **ports** is defined in the definition above, pods can reach each other over CoreDNS via their hostname (container name).
 
 Specification of the Virtual Machine
 ====================================
