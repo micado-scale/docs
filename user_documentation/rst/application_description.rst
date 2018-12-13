@@ -70,7 +70,7 @@ description:
          ...
 
 Specification of Kubernetes Deployments (as Docker containers)
-================================
+==============================================================
 
 Under the node_templates section you can define one or more apps to create a Kubernetes Deployment (using Docker compose nomenclature) (see **YOUR_KUBERNETES_APP**). Each app within the Kubernetes deployment gets its own definition consisting of three main parts: type, properties and artifacts. The value of the **type** keyword for the Kubernetes Deployment of a Docker container must always be ``tosca.nodes.MiCADO.Container.Application.Docker``. The **properties** section will contain most of the setting of the app to be deployed using Kubernetes. Under the **artifacts** section the Docker image (see **YOUR_DOCKER_IMAGE**) must be defined.
 
