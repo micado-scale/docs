@@ -10,7 +10,7 @@ Application description has four main sections:
 * **tosca_definitions_version**: ``tosca_simple_yaml_1_0``.
 * **imports**: a list of urls pointing to custom TOSCA types. The default url points to the custom types defined for MiCADO. Please, do not modify this url.
 * **repositories**: docker repositories with their addresses.
-* **topology_template**: the main part of the application description to define 1) docker services, 2) virtual machine (under the **node_templates** section) and 3) the scaling policy under the **policies** subsection. These sections will be detailed in subsections below.
+* **topology_template**: the main part of the application description to define 1) kubernetes deployments (of docker containers), 2) virtual machine (under the **node_templates** section) and 3) the scaling policy under the **policies** subsection. These sections will be detailed in subsections below.
 
 Here is an overview example for the structure of the MiCADO application
 description:
@@ -27,22 +27,18 @@ description:
 
    topology_template:
      node_templates:
-       YOUR_DOCKER_SERVICE:
+       YOUR_KUBERNETES_APP:
          type: tosca.nodes.MiCADO.Container.Application.Docker
          properties:
            ...
          artifacts:
            ...
        ...
-       YOUR_OTHER_DOCKER_SERVICE:
+       YOUR_OTHER_KUBERNETES_APP:
          type: tosca.nodes.MiCADO.Container.Application.Docker
          properties:
            ...
          artifacts:
-           ...
-       YOUR_DOCKER_NETWORK:
-         type: tosca.nodes.MiCADO.network.Network.Docker
-         properties:
            ...
 
        YOUR_VIRTUAL_MACHINE:
@@ -64,25 +60,25 @@ description:
          ...
      - scalability:
        type: tosca.policies.Scaling.MiCADO
-       targets: [ YOUR_DOCKER_SERVICE ]
+       targets: [ YOUR_KUBERNETES_APP ]
        properties:
          ...
      - scalability:
        type: tosca.policies.Scaling.MiCADO
-       targets: [ YOUR_OTHER_DOCKER_SERVICE ]
+       targets: [ YOUR_OTHER_KUBERNETES_APP ]
        properties:
          ...
 
-Specification of Docker services
-================================
+Specification of Kubernetes Deployments (as Docker containers)
+==============================================================
 
-Under the node_templates section you can define any number of interconnected Docker service (see **YOUR_DOCKER_SERVICE**) similarly as in a docker-compose file. Each docker service definition consists of three main parts: type, properties and artifacts. The value of the **type** keyword for a Docker service must always be ``tosca.nodes.MiCADO.Container.Application.Docker``. The **properties** section will contain most of the setting of the Docker service. Under the **artifacts** section the Docker image (see **YOUR_DOCKER_IMAGE**) must be defined. Optionally, Docker networks can be defined in the same way as in a docker-compose file (see **YOUR_DOCKER_NETWORK**).
+Under the node_templates section you can define one or more apps to create a Kubernetes Deployment (using Docker compose nomenclature) (see **YOUR_KUBERNETES_APP**). Each app within the Kubernetes deployment gets its own definition consisting of three main parts: type, properties and artifacts. The value of the **type** keyword for the Kubernetes Deployment of a Docker container must always be ``tosca.nodes.MiCADO.Container.Application.Docker``. The **properties** section will contain most of the setting of the app to be deployed using Kubernetes. Under the **artifacts** section the Docker image (see **YOUR_DOCKER_IMAGE**) must be defined.
 
 ::
 
    topology_template:
      node_templates:
-       YOUR_DOCKER_SERVICE:
+       YOUR_KUBERNETES_APP:
          type: tosca.nodes.MiCADO.Container.Application.Docker
          properties:
             ...
@@ -91,44 +87,40 @@ Under the node_templates section you can define any number of interconnected Doc
             type: tosca.artifacts.Deployment.Image.Container.Docker
             file: YOUR_DOCKER_IMAGE
             repository: docker_hub
-       YOUR_DOCKER_NETWORK:
-         type: tosca.nodes.MiCADO.network.Network.Docker
-         properties:
-           ...
 
-The fields under the **properties** section of the Docker service are derived from the docker-compose file. Therefore, you can additional information about the properties in the `docker compose documentation <https://docs.docker.com/compose/compose-file/#service-configuration-reference>`__. The syntax of the property values is the same as in the docker-compose
-file.
+The fields under the **properties** section of the Kubernetes app are derived from a docker-compose file and converted using Kompose. You can find additional information about the properties in the `docker compose documentation <https://docs.docker.com/compose/compose-file/#service-configuration-reference>` and see what `Kompose supports here <http://kompose.io/conversion/>`. The syntax of the property values is currently the same as in docker-compose 
+file. The Compose properties will be translated into Kubernetes specs on deployment.
 
-Under the **properties** section of a Docker service (see **YOUR_DOCKER_SERVICE**) you can specify the following keywords:
+Under the **properties** section of an app (see **YOUR_KUBERNETES_APP**) you can specify the following keywords.:
 
 * **command**: command line expression to be executed by the container.
-* **deploy**: Swarm specific deployment options.
+* **deploy**: Orchestrated deployment options. CPU reservations should be set 0.1 lower than in Swarm (0.9 == 1.0)
 * **entrypoint**: override the default entrypoint of container.
 * **environment**: map of all required environment variables.
 * **expose**: expose ports without publishing them to the host machine.
-* **labels**: map of metadata like Docker labels.
-* **logging**: map of the logging configuration.
-* **networks**: list of connected networks for the service.
-* **volumes**: list of connected volumes for the service.
-* **ports**: list of published ports to the host machine.
-* **secrets**: list of per-service secrets to grant access for the service.
+* **volumes**: list of bind mount (host-container) volumes for the service in the format */source/etc/data:/target/etc/data*
+* **ports**: list of published ports to the host machine. **Unlike Docker** this does not make the container accessible from the outside.
+* **labels**: map of metadata like Docker labels and/or Kubernetes instructions (see NOTE).
+
+*NOTE*
+**labels** can also be used to pass instructions to Kubernetes (full list: http://kompose.io/user-guide/#labels)
+* **kompose.service.type: 'nodeport'** will make the container accessible at *<worker_node_ip>:port* where port can be found on the Kubernetes Dashboard under *Discovery and load balancing > Services > my_app > Internal endpoints*
 
 Under the **artifacts** section you can define the docker image for the
-docker service. Three fileds must be defined:
+kubernetes app. Three fields must be defined:
 
 * **type**: ``tosca.artifacts.Deployment.Image.Container.Docker``
-* **file**: docker image for the docker service(e.g. sztakilpds/cqueue_frontend:latest )
+* **file**: docker image for the kubernetes app (e.g. sztakilpds/cqueue_frontend:latest )
 * **repository**: name of the repository where the image is located. The name used here (e.g. docker_hub), must be defined at the top of the description under the **repositories** section.
 
-To define a Docker network (see **YOUR_DOCKER_NETWORK**) the following fields must be specified:
+Kubernetes networking is inherently different to the approach taken by Docker. This is a complex subject which is worth a read: https://kubernetes.io/docs/concepts/cluster-administration/networking/
 
-*  **attachable**: if set to true, then standalone containers can attach to this network, in addition to services
-*  **driver**: specify which driver should be used for this network. (overlay, bridge, etc.)
+Since every pod gets its own IP, which any pod can by default use to communicate with any other pod, this means there is no network to explicitly define. If **ports** is defined in the definition above, pods can reach each other over CoreDNS via their hostname (container name).
 
 Specification of the Virtual Machine
 ====================================
 
-The network of Docker services specified in the previous section is executed under Docker Swarm. This section introduces how the parameters of the virtual machine can be configured which will be hosts the Docker worker node. During operation MiCADO will instantiate as many virtual machines with the parameters defined here as required during scaling. MiCADO currently supports four different cloud interfaces: CloudSigma, CloudBroker, EC2, Nova. The following ports and protocols should be enabled on the virtual machine:
+The collection of docker containers (kubernetes applications) specified in the previous section is orchestrated by Kubernetes. This section introduces how the parameters of the virtual machine can be configured which will be hosts the Kubernetes worker node. During operation MiCADO will instantiate as many virtual machines with the parameters defined here as required during scaling. MiCADO currently supports four different cloud interfaces: CloudSigma, CloudBroker, EC2, Nova. The following ports and protocols should be enabled on the virtual machine:
 
 ::
 
@@ -195,7 +187,7 @@ To instantiate MiCADO workers on CloudBroker, please use the template below. MiC
 
 *  **deployment_id** is the id of a preregistered deployment in CloudBroker referring to a cloud, image, region, etc. Make sure the image contains a base OS (preferably Ubuntu) installation with cloud-init support! The id is the UUID of the deployment which can be seen in the address bar of your browser when inspecting the details of the deployment.
 *  **instance_type_id** is the id of a preregistered instance type in CloudBroker referring to the capacity of the virtual machine to be deployed. The id is the UUID of the instance type which can be seen in the address bar of your browser when inspecting the details of the instance type.
-*  **key_pair_id** is the id of a preregistered ssh public key in CloudBroker which will be deployed on the virtual machine. The id is the UUID of the key pair which can be seen in the address bar of your browser when inspecting the details of the key pair. 
+*  **key_pair_id** is the id of a preregistered ssh public key in CloudBroker which will be deployed on the virtual machine. The id is the UUID of the key pair which can be seen in the address bar of your browser when inspecting the details of the key pair.
 *  **opened_port** is one or more ports to be opened to the world. This is a string containing numbers separated by a comma.
 
 EC2
@@ -264,17 +256,17 @@ To instantiate MiCADO workers on a cloud through Nova interface, please use the 
 Description of the scaling policy
 =================================
 
-To utilize the autoscaling functionality of MiCADO, scaling policies can be defined on virtual machine and on docker service level. Scaling policies can be listed under the **policies** section. Each **scalability** subsection must have the **type** set to the value of ``tosca.policies.Scaling.MiCADO`` and must be linked to a node defined under **node_template**. The link can be implemented by specifying the name of the node under the **targets** subsection. The details of the scaling policy can be defined under the **properties** subsection. The structure of the **policies** section can be seen below.
+To utilize the autoscaling functionality of MiCADO, scaling policies can be defined on virtual machine and on the application level. Scaling policies can be listed under the **policies** section. Each **scalability** subsection must have the **type** set to the value of ``tosca.policies.Scaling.MiCADO`` and must be linked to a node defined under **node_template**. The link can be implemented by specifying the name of the node under the **targets** subsection. The details of the scaling policy can be defined under the **properties** subsection. The structure of the **policies** section can be seen below.
 
 ::
 
    topology_template:
      node_templates:
-       YOUR_DOCKER_SERVICE:
+       YOUR_KUBERNETES_APP:
          type: tosca.nodes.MiCADO.Container.Application.Docker
          ...
        ...
-       YOUR_OTHER_DOCKER_SERVICE:
+       YOUR_OTHER_KUBERNETES_APP:
          type: tosca.nodes.MiCADO.Container.Application.Docker
          ...
        YOUR_VIRTUAL_MACHINE:
@@ -289,16 +281,16 @@ To utilize the autoscaling functionality of MiCADO, scaling policies can be defi
          ...
      - scalability:
        type: tosca.policies.Scaling.MiCADO
-       targets: [ YOUR_DOCKER_SERVICE ]
+       targets: [ YOUR_KUBERNETES_APP ]
        properties:
          ...
      - scalability:
        type: tosca.policies.Scaling.MiCADO
-       targets: [ YOUR_OTHER_DOCKER_SERVICE ]
+       targets: [ YOUR_OTHER_KUBERNETES_APP ]
        properties:
          ...
 
-The scaling policies are evaluated periodically. In every turn, the virtual machine level scaling is evaluated, followed by the evaluation of each scaling policies belonging to Docker services.
+The scaling policies are evaluated periodically. In every turn, the virtual machine level scaling is evaluated, followed by the evaluation of each scaling policies belonging to kubernetes-deployed applications.
 
 The **properties** subsection defines the scaling policy itself. For monitoring purposes, MiCADO integrates the Prometheus monitoring tool with two built-in exporters on each worker node: Node exporter (to collect data on nodes) and CAdvisor (to collect data on containers). Based on Prometheus, any monitored information can be extracted using the Prometheus query language and the returned value can be associated to a user-defined variable. Once variables are updated, scaling rule is evaluated. It can be specified by a short Python code which can refer to the monitored information. The structure of the scaling policy can be seen below.
 
@@ -347,12 +339,12 @@ The subsections have the following roles:
   - Expression can be multiline
   - The following predefined variables can be referred; their values are defined and updated before the evaluation of the scaling rule
 
-    - m_nodes: python list of nodes belonging to the docker swarm cluster
+    - m_nodes: python list of nodes belonging to the kubernetes cluster
     - m_node_count: the target number of nodes
     - m_container_count: the target number of containers for the service the evaluation belongs to
     - m_time_since_node_count_changed: time in seconds elapsed since the number of nodes changed
 
   - In a scaling rule belonging to the virtual machine, the name of the variable to be updated is ``m_node_count``; as an effect the number stored in this variable will be set as target instance number for the virtual machines.
-  - In a scaling rule belonging to a docker service, the name of the variable to be set is ``m_container_count``; as an effect the number stored in this variable will be set as target instance number for the docker service.
+  - In a scaling rule belonging to a kubernetes deployment, the name of the variable to be set is ``m_container_count``; as an effect the number stored in this variable will be set as target instance number for the kubernetes service.
 
 For further examples, inspect the scaling policies of the demo examples detailed in the next section.
