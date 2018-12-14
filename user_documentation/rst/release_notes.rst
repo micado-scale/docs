@@ -1,6 +1,11 @@
 Release Notes
 *************
 
+**v0.7.0 (12 Dec 2018)**
+
+- Introduce Kubernetes as the primary container orchestration engine
+- Replace the swarm-visualiser with the Kubernetes Dashboard
+
 **v0.6.1 (15 Oct 2018)**
 
 - enable VM-only deployments

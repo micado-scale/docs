@@ -23,12 +23,12 @@ For cloud interfaces supported by MiCADO:
 For the MiCADO master:
 
 * Ubuntu 16.04
+* 2GHz CPU & 2GB RAM
 
 For the host where the Ansible playbook is executed (differs depending on local or remote):
 
 * Ansible 2.4 or greater
 * Git
-
 
 Ansible
 -------
@@ -127,7 +127,7 @@ Set the Docker login credentials of your private Docker registry in which your p
    cp sample-credentials-docker-registry.yml credentials-docker-registry.yml
    edit credentials-docker-registry.yml
 
-Edit credentials-docker-registry.yml and add username, password, and registry url. To login to the default docker_hub, leave DOCKER_REPO as is (a blank string).
+Edit credentials-docker-registry.yml and add username, password, and registry url. To login to the default docker_hub, leave DOCKER_REPO as is (https://index.docker.io/v1/).
 
 Optionally you may use the Ansible Vault mechanism as described in Step 2 to protect the confidentiality and integrity of this file as well.
 
@@ -142,8 +142,8 @@ This new VM will host the MiCADO core services.
 
 ::
 
-   TCP: 22,2377,7946,8300,8301,8302,8500,8600,[web_listening_port]
-   UDP: 4789,7946,8301,8302,8600
+   TCP: 22,2380,6443,8300,8301,8302,8500,8600,10252,[web_listening_port]
+   UDP: 2379,8301,8302,8472,8600,10250,10251
 
 **NOTE:** replace ``[web_listening_port]`` with the actual value specified in Step 4a.
 
@@ -202,8 +202,7 @@ You can SSH into MiCADO master and check the logs at any point after MiCADO is s
 Accessing user-defined service
 ==============================
 
-In case your application contains container exposing a service, you have two alternatives to access its endpoint:
+In case your application contains a container exposing a service, you will have to ensure the following to access it.
 
-* via MiCADO master: open up your service port number on the MiCADO master's internal firewall before deployment. To do that, extend the firewall configuration by editing the file(s) located at in the ``roles/micado-master/templates/iptables`` directory. Make sure you open up the cloud firewall as well for the MiCADO master!
-
-* via MiCADO worker: query the ip address of the worker nodes. You can do that through the Dashboard of MiCADO, the Dashboard of your cloud or the REST API of MiCADO. Make sure the port of your service is open up by the cloud firewall for the MiCADO workers!
+* First set **kompose.service.type: 'nodeport'** in the TOSCA description of your app. More information on this in the section of the documentation titled **application description**
+* The container will be accessible at *<IP>:<port>* . Both can be found on the Kubernetes Dashboard, with **IP** under *Nodes > my_micado_vm > Addresses* and with **port** under *Discovery and load balancing > Services > my_app > Internal endpoints*
