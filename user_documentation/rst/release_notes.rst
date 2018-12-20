@@ -5,6 +5,8 @@ Release Notes
 
 - Fix: Add SKIP back to Dashboard (defaults changed in v1.13.1)
 - Fix: Make sure worker node sets hostname correctly
+- Fix: Don't update Kubernetes if template not changed
+- Add Support for outputs via TOSCA ADT
 - Add Kubernetes service discovery support to Prometheus
 - Add new demo: nginx (HTTP request scaling)
 

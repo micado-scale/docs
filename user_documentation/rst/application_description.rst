@@ -51,6 +51,9 @@ description:
            host:
              properties:
                ...
+     outputs:
+       ports:
+         value: { get_attribute: [ YOUR_KUBERNETES_APP, port ]}
 
      policies:
      - scalability:
@@ -87,6 +90,9 @@ Under the node_templates section you can define one or more apps to create a Kub
             type: tosca.artifacts.Deployment.Image.Container.Docker
             file: YOUR_DOCKER_IMAGE
             repository: docker_hub
+     outputs:
+        ports:
+          value: { get_attribute: [ YOUR_KUBERNETES_APP, port ]}
 
 The fields under the **properties** section of the Kubernetes app are derived from a docker-compose file and converted using Kompose. You can find additional information about the properties in the `docker compose documentation <https://docs.docker.com/compose/compose-file/#service-configuration-reference>` and see what `Kompose supports here <http://kompose.io/conversion/>`. The syntax of the property values is currently the same as in docker-compose 
 file. The Compose properties will be translated into Kubernetes specs on deployment.
@@ -117,6 +123,9 @@ kubernetes app. Three fields must be defined:
 Kubernetes networking is inherently different to the approach taken by Docker. This is a complex subject which is worth a read: https://kubernetes.io/docs/concepts/cluster-administration/networking/
 
 Since every pod gets its own IP, which any pod can by default use to communicate with any other pod, this means there is no network to explicitly define. If **ports** is defined in the definition above, pods can reach each other over CoreDNS via their hostname (container name).
+
+Under the **outputs** section (this key is **NOT** nested within *node_templates*) 
+you can define an output to retrieve from Kubernetes via the adaptor. Currently, only port info is obtainable.
 
 Specification of the Virtual Machine
 ====================================
