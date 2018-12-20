@@ -48,3 +48,19 @@ This application demonstrates a deadline policy using CQueue. CQueue provides a 
 *  Step8c: run ``query-nodes.sh`` to see the details of docker nodes hosting your application
 *  Step9: Run ``./5-undeploy-cq-worker-from-micado.sh`` to remove your application from MiCADO when all items are consumed.
 *  Step10: You can have a look at the state ``./cqueue-get-job-status.sh <task_id>`` or stdout of container executions ``./cqueue-get-job-status.sh <task_id>`` using one of the task id values printed during Step 3.
+
+stressng
+========
+
+This application deploys a http server with nginx. The container features a built-in prometheus exporter for HTTP request metrics. The policy defined for this application scales up/down both nodes and the nginx service based on active http connections. wrk (apt-get install wrk | https://github.com/wg/wrk) is recommended for HTTP load testing.
+
+**Note:** make sure you have the ``jq`` tool and ``wrk`` benchmarking app installed as these are required by the helper scripts.
+
+*  Step1: make a copy of the TOSCA file which is appropriate for your cloud - ``nginx_<your_cloud>.yaml`` - and name it ``nginx.yaml``
+*  Step2: fill in the requested fields beginning with ``ADD_YOUR_...`` . These will differ depending on which cloud you are using.
+ * In CloudSigma, for example, the ``libdrive_id`` , ``public_key_id`` and ``firewall_policy`` fields must be completed. Without these, CloudSigma does not have enough information to launch your worker nodes. All information is found on the CloudSigma Web UI. ``libdrive_id`` is the long alphanumeric string in the URL when a drive is selected under “Storage/Library”. ``public_key_id`` is under the “Access & Security/Keys Management” menu as **Uuid**. ``firewall_policy`` can be found when selecting a rule defined under the “Networking/Policies” menu. The following ports must be opened for MiCADO workers: *all inbound connections from MiCADO master*
+*  Step3: Update the parameter file, called ``_settings``. You need the ip address for the MiCADO master and should name the deployment by setting the APP_ID. ***the application ID can not contain any underscores ( _ )** The APP_NAME must match the name given to the application in TOSCA (default: **nginxapp**)  You should also change the SSL user/password/port information if they are different from the default.
+*  Step4: run ``1-submit-tosca-nginx.sh`` to create the minimum number of MiCADO worker nodes and to deploy the Kubernetes Deployment including the nginx app defined in the ``nginx.yaml`` TOSCA description.
+*  Step4a: run ``2-list-apps.sh`` to see currently running applications and their IDs, as well as the ports forwarded to 8080 for accessing the HTTP service
+*  Step5: run ``3-generate-traffic.sh`` to generate some HTTP traffic. After thirty seconds or so, you will see the system respond by scaling up containers, and eventually virtual machines to the maximum specified.
+*  Step6: run ``4-undeploy-nginx.sh`` to remove the nginx deployment and all the MiCADO worker nodes
