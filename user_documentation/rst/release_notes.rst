@@ -1,6 +1,17 @@
 Release Notes
 *************
 
+**v0.7.1 (10 Jan 2018)**
+
+- Fix: Add SKIP back to Dashboard (defaults changed in v1.13.1)
+- Fix: URL not found for Kubernetes manifest files
+- Fix: Make sure worker node sets hostname correctly
+- Fix: Don't update Kubernetes if template not changed
+- Fix: Make playbook more idempotent
+- Add Support for outputs via TOSCA ADT
+- Add Kubernetes service discovery support to Prometheus
+- Add new demo: nginx (HTTP request scaling)
+
 **v0.7.0 (12 Dec 2018)**
 
 - Introduce Kubernetes as the primary container orchestration engine
