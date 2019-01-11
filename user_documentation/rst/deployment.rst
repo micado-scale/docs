@@ -28,7 +28,7 @@ For the MiCADO master:
 For the host where the Ansible playbook is executed (differs depending on local or remote):
 
 * Ansible 2.4 or greater
-* Git
+* curl
 
 Ansible
 -------
@@ -47,16 +47,16 @@ To install Ansible on Ubuntu 16.04, use these commands:
 
 To install Ansible on other operation systems follow the `official installation guide <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`__.
 
-Git
----
+curl
+----
 
-To install Git on Ubuntu, use this command:
+To install curl on Ubuntu, use this command:
 
 ::
 
-   sudo apt-get install git-all
+   sudo apt-get install curl
 
-To install Git on other operating systems follow the `official installation guide <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`__.
+To install curl on other operating systems follow the `official installation guide <https://curl.haxx.se/download.html>`__.
 
 Installation
 ============
@@ -68,7 +68,7 @@ Step 1: Download the ansible playbook.
 
 ::
 
-   wget https://github.com/micado-scale/ansible-micado/releases/download/v0.7.1/ansible-micado-0.7.1.tar.gz
+   curl --output ansible-micado-0.7.1.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.7.1/ansible-micado-0.7.1.tar.gz
    tar -zxvf ansible-micado-0.7.1.tar.gz
    cd ansible-micado-0.7.1/
 
