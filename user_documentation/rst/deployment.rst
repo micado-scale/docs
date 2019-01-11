@@ -68,9 +68,9 @@ Step 1: Download the ansible playbook.
 
 ::
 
-   git clone https://github.com/micado-scale/ansible-micado.git ansible-micado
-   cd ansible-micado
-   git checkout v0.7.0
+   wget https://github.com/micado-scale/ansible-micado/releases/download/v0.7.1/ansible-micado-0.7.1.tar.gz
+   tar -zxvf ansible-micado-0.7.1.tar.gz
+   cd ansible-micado-0.7.1/
 
 Step 2: Specify cloud credential for instantiating MiCADO workers.
 ------------------------------------------------------------------
@@ -134,9 +134,9 @@ Optionally you may use the Ansible Vault mechanism as described in Step 2 to pro
 Step 4: Launch an empty cloud VM instance for MiCADO master.
 ------------------------------------------------------------
 
-This new VM will host the MiCADO core services. 
+This new VM will host the MiCADO core services.
 
-**a)** Default port number for MiCADO service is ``443``. Optionally, you can modify the port number stored by the variable called ``web_listening_port`` defined in the ansible playbook file called ``micado-master.yml``. 
+**a)** Default port number for MiCADO service is ``443``. Optionally, you can modify the port number stored by the variable called ``web_listening_port`` defined in the ansible playbook file called ``micado-master.yml``.
 
 **b)** Configure a cloud firewall settings which opens the following ports on the MiCADO master virtual machine:
 
