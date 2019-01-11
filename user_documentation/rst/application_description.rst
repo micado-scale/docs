@@ -51,6 +51,9 @@ description:
            host:
              properties:
                ...
+     outputs:
+       ports:
+         value: { get_attribute: [ YOUR_KUBERNETES_APP, port ]}
 
      policies:
      - scalability:
@@ -87,6 +90,9 @@ Under the node_templates section you can define one or more apps to create a Kub
             type: tosca.artifacts.Deployment.Image.Container.Docker
             file: YOUR_DOCKER_IMAGE
             repository: docker_hub
+     outputs:
+        ports:
+          value: { get_attribute: [ YOUR_KUBERNETES_APP, port ]}
 
 The fields under the **properties** section of the Kubernetes app are derived from a docker-compose file and converted using Kompose. You can find additional information about the properties in the `docker compose documentation <https://docs.docker.com/compose/compose-file/#service-configuration-reference>` and see what `Kompose supports here <http://kompose.io/conversion/>`. The syntax of the property values is currently the same as in docker-compose 
 file. The Compose properties will be translated into Kubernetes specs on deployment.
@@ -103,8 +109,9 @@ Under the **properties** section of an app (see **YOUR_KUBERNETES_APP**) you can
 * **labels**: map of metadata like Docker labels and/or Kubernetes instructions (see NOTE).
 
 *NOTE*
-**labels** can also be used to pass instructions to Kubernetes (full list: http://kompose.io/user-guide/#labels)
-* **kompose.service.type: 'nodeport'** will make the container accessible at *<worker_node_ip>:port* where port can be found on the Kubernetes Dashboard under *Discovery and load balancing > Services > my_app > Internal endpoints*
+
+* **labels** can also be used to pass instructions to Kubernetes (full list: http://kompose.io/user-guide/#labels) 
+**kompose.service.type: 'nodeport'** will make the container accessible at *<worker_node_ip>:port* where port can be found on the Kubernetes Dashboard under *Discovery and load balancing > Services > my_app > Internal endpoints*
 
 Under the **artifacts** section you can define the docker image for the
 kubernetes app. Three fields must be defined:
@@ -116,6 +123,9 @@ kubernetes app. Three fields must be defined:
 Kubernetes networking is inherently different to the approach taken by Docker. This is a complex subject which is worth a read: https://kubernetes.io/docs/concepts/cluster-administration/networking/
 
 Since every pod gets its own IP, which any pod can by default use to communicate with any other pod, this means there is no network to explicitly define. If **ports** is defined in the definition above, pods can reach each other over CoreDNS via their hostname (container name).
+
+Under the **outputs** section (this key is **NOT** nested within *node_templates*) 
+you can define an output to retrieve from Kubernetes via the adaptor. Currently, only port info is obtainable.
 
 Specification of the Virtual Machine
 ====================================
@@ -324,7 +334,7 @@ The **properties** subsection defines the scaling policy itself. For monitoring 
 
 The subsections have the following roles:
 
-* **sources** supports the dynamic attachment of an external exporter by specifying a list endpoints of exporters (see example above). Each item found under this subsection is configured under Prometheus to start collecting the information provided/exported by the exporters. Once done, the values of the parameters provided by the exporters become available.
+* **sources** supports the dynamic attachment of an external exporter by specifying a list endpoints of exporters (see example above). Each item found under this subsection is configured under Prometheus to start collecting the information provided/exported by the exporters. Once done, the values of the parameters provided by the exporters become available. **NEW** MiCADO now supports Kubernetes service discovery - to define such a source, simply pass the name of the app as defined in TOSCA and do not specify any port number
 * **constants** subsection is used to predefined fixed parameters. Values associated to the parameters can be referred by the scaling rule as variable (see ``LOWER_THRESHOLD`` above) or in any other sections referred as Jinja2 variable (see ``MYEXPR`` above).
 * **queries** contains the list of Prometheus query expressions to be executed and their variable name associated (see ``THELOAD`` above)
 * **alerts** subsection enables the utilisation of the alerting system of Prometheus. Each alert defined here is registered under Prometheus and fired alerts are represented with a variable of their name set to True during the evaluation of the scaling rule (see ``myalert`` above).
