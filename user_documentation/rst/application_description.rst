@@ -134,7 +134,6 @@ The collection of docker containers (kubernetes applications) specified in the p
 
 ::
 
-   ICMP
    TCP: 22,2377,7946,8300,8301,8302,8500,8600,9100,9200
    UDP: 4789,7946,8301,8302,8600
 
