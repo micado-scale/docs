@@ -14,7 +14,9 @@ This application contains a single service, performing a constant CPU load. The 
 
 *  Step1: make a copy of the TOSCA file which is appropriate for your cloud - ``stressng_<your_cloud>.yaml`` - and name it ``stressng.yaml`` (ie. by issuing the command ``cp stressng_cloudsigma.yaml stressng.yaml``)
 *  Step2: fill in the requested fields beginning with ``ADD_YOUR_...`` . These will differ depending on which cloud you are using.
+
  * In CloudSigma, for example, the ``libdrive_id`` , ``public_key_id`` and ``firewall_policy`` fields must be completed. Without these, CloudSigma does not have enough information to launch your worker nodes. All information is found on the CloudSigma Web UI. ``libdrive_id`` is the long alphanumeric string in the URL when a drive is selected under “Storage/Library”. ``public_key_id`` is under the “Access & Security/Keys Management” menu as **Uuid**. ``firewall_policy`` can be found when selecting a rule defined under the “Networking/Policies” menu. The following ports must be opened for MiCADO workers: *all inbound connections from MiCADO master*
+
 *  Step3: Update the parameter file, called ``_settings``. You need the ip address for the MiCADO master and should name the application by setting the APP_ID  ***the application ID can not contain any underscores ( _ )** You should also change the SSL user/password/port information if they are different from the default.
 *  Step4: run ``1-submit-tosca-stressng.sh`` to create the minimum number of MiCADO worker nodes and to deploy the Kubernetes Deployment including the stressng app defined in the ``stressng.yaml`` TOSCA description.
 *  Step4a: run ``2-list-apps.sh`` to see currently running applications and their IDs
@@ -58,9 +60,34 @@ This application deploys a http server with nginx. The container features a buil
 
 *  Step1: make a copy of the TOSCA file which is appropriate for your cloud - ``nginx_<your_cloud>.yaml`` - and name it ``nginx.yaml``
 *  Step2: fill in the requested fields beginning with ``ADD_YOUR_...`` . These will differ depending on which cloud you are using.
+
  * In CloudSigma, for example, the ``libdrive_id`` , ``public_key_id`` and ``firewall_policy`` fields must be completed. Without these, CloudSigma does not have enough information to launch your worker nodes. All information is found on the CloudSigma Web UI. ``libdrive_id`` is the long alphanumeric string in the URL when a drive is selected under “Storage/Library”. ``public_key_id`` is under the “Access & Security/Keys Management” menu as **Uuid**. ``firewall_policy`` can be found when selecting a rule defined under the “Networking/Policies” menu. The following ports must be opened for MiCADO workers: *all inbound connections from MiCADO master*
+
 *  Step3: Update the parameter file, called ``_settings``. You need the ip address for the MiCADO master and should name the deployment by setting the APP_ID. ***the application ID can not contain any underscores ( _ )** The APP_NAME must match the name given to the application in TOSCA (default: **nginxapp**)  You should also change the SSL user/password/port information if they are different from the default.
 *  Step4: run ``1-submit-tosca-nginx.sh`` to create the minimum number of MiCADO worker nodes and to deploy the Kubernetes Deployment including the nginx app defined in the ``nginx.yaml`` TOSCA description.
 *  Step4a: run ``2-list-apps.sh`` to see currently running applications and their IDs, as well as the ports forwarded to 8080 for accessing the HTTP service
 *  Step5: run ``3-generate-traffic.sh`` to generate some HTTP traffic. After thirty seconds or so, you will see the system respond by scaling up containers, and eventually virtual machines to the maximum specified.
+*  Step5a: the load test will finish after 10 minutes and the infrastructure will scale back down
 *  Step6: run ``4-undeploy-nginx.sh`` to remove the nginx deployment and all the MiCADO worker nodes
+
+wordpress
+=========
+
+This application deploys a wordpress blog, complete with MySQL server and a Network File Share for peristent data storage. It is a proof-of-concept and is **NOT** production ready. 
+The policy defined for this application scales up/down both nodes and the wordpress frontend container based on network load. wrk (apt-get install wrk | https://github.com/wg/wrk) 
+is recommended for HTTP load testing, but you can use any load generator you wish.
+
+**Note:** make sure you have the ``jq`` tool and ``wrk`` benchmarking app installed as these are required by the helper scripts to force scaling. Best results for ``wrk`` are seen on multi-core systems.
+
+*  Step1: make a copy of the TOSCA file which is appropriate for your cloud - ``wordpress_<your_cloud>.yaml`` - and name it ``wordpress.yaml``
+*  Step2: fill in the requested fields beginning with ``ADD_YOUR_...`` . These will differ depending on which cloud you are using.
+
+ * In CloudSigma, for example, the ``libdrive_id`` , ``public_key_id`` and ``firewall_policy`` fields must be completed. Without these, CloudSigma does not have enough information to launch your worker nodes. All information is found on the CloudSigma Web UI. ``libdrive_id`` is the long alphanumeric string in the URL when a drive is selected under “Storage/Library”. ``public_key_id`` is under the “Access & Security/Keys Management” menu as **Uuid**. ``firewall_policy`` can be found when selecting a rule defined under the “Networking/Policies” menu. The following ports must be opened for MiCADO workers: *all inbound connections from MiCADO master*
+ 
+*  Step3: Update the parameter file, called ``_settings``. You need the ip address for the MiCADO master and should name the deployment by setting the APP_ID. ***the application ID can not contain any underscores ( _ )** The FRONTEND_NAME: must match the name given to the application in TOSCA (default: **wordpress**)  You should also change the SSL user/password/port information if they are different from the default.
+*  Step4: run ``1-submit-tosca-wordpress.sh`` to create the minimum number of MiCADO worker nodes and to deploy the Kubernetes Deployments for the NFS and MySQL servers and the Wordpress frontend.
+*  Step4a: run ``2-list-apps.sh`` to see currently running applications and their IDs, as well as the nodePort open on the host for accessing the HTTP service (defaults to 30010)
+*  Step5: navigate to your wordpress blog (generally at <master_node_ip>:30010) and go through the setup tasks until you can see the front page of your blog
+*  Step6: run ``3-generate-traffic.sh`` to generate some HTTP traffic. After thirty seconds or so, you will see the system respond by scaling up a VM and containers to the maximum specified.
+*  Step6a: the load test will stop after 10minutes and the infrastructure will scale back down
+*  Step7: run ``4-undeploy-wordpress.sh`` to remove the wordpress deployment and all the MiCADO worker nodes

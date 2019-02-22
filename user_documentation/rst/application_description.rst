@@ -20,40 +20,44 @@ description:
    tosca_definitions_version: tosca_simple_yaml_1_0
 
    imports:
-     - https://raw.githubusercontent.com/micado-scale/tosca/v0.6.0/micado_types.yaml
+     - https://raw.githubusercontent.com/micado-scale/tosca/v0.x.2/micado_types.yaml
 
    repositories:
      docker_hub: https://hub.docker.com/
 
    topology_template:
      node_templates:
-       YOUR_KUBERNETES_APP:
+       YOUR-KUBERNETES-APP:
          type: tosca.nodes.MiCADO.Container.Application.Docker
          properties:
            ...
          artifacts:
+           ...
+         interfaces:
            ...
        ...
-       YOUR_OTHER_KUBERNETES_APP:
+       YOUR-OTHER-KUBERNETES-APP:
          type: tosca.nodes.MiCADO.Container.Application.Docker
          properties:
            ...
          artifacts:
+           ...
+         interfaces:
            ...
 
        YOUR_VIRTUAL_MACHINE:
-         type: tosca.nodes.MiCADO.Occopus.<CLOUD_API_TYPE>.Compute
+         type: tosca.nodes.MiCADO.<CLOUD_API_TYPE>.Compute
          properties:
-           cloud:
-             interface_cloud: ...
-             endpoint_cloud: ...
+           ...
+         interfaces:
+           ...
          capabilities:
            host:
              properties:
                ...
      outputs:
        ports:
-         value: { get_attribute: [ YOUR_KUBERNETES_APP, port ]}
+         value: { get_attribute: [ YOUR-KUBERNETES-APP, port ]}
 
      policies:
      - scalability:
@@ -63,55 +67,88 @@ description:
          ...
      - scalability:
        type: tosca.policies.Scaling.MiCADO
-       targets: [ YOUR_KUBERNETES_APP ]
+       targets: [ YOUR-KUBERNETES-APP ]
        properties:
          ...
      - scalability:
        type: tosca.policies.Scaling.MiCADO
-       targets: [ YOUR_OTHER_KUBERNETES_APP ]
+       targets: [ YOUR-OTHER-KUBERNETES-APP ]
        properties:
          ...
 
-Specification of Kubernetes Deployments (as Docker containers)
-==============================================================
+Specification of Docker containers (to be orchestrated by Kubernetes)
+=====================================================================
 
-Under the node_templates section you can define one or more apps to create a Kubernetes Deployment (using Docker compose nomenclature) (see **YOUR_KUBERNETES_APP**). Each app within the Kubernetes deployment gets its own definition consisting of three main parts: type, properties and artifacts. The value of the **type** keyword for the Kubernetes Deployment of a Docker container must always be ``tosca.nodes.MiCADO.Container.Application.Docker``. The **properties** section will contain most of the setting of the app to be deployed using Kubernetes. Under the **artifacts** section the Docker image (see **YOUR_DOCKER_IMAGE**) must be defined.
+**NOTE** Kubernetes does not allow for underscores in any resource names (read: TOSCA node names). Names also must begin and end with an alphanumeric.
+
+Under the node_templates section you can define one or more Docker containers and choose to orchestrate them with Kubernetes 
+(see **YOUR-KUBERNETES-APP**). Each app is described as a separate node with its own definition consisting of 
+four main parts: type, properties, artifacts and interfaces.
+
+The **type** keyword for Docker containers must always be ``tosca.nodes.MiCADO.Container.Application.Docker``
+
+The **properties** section will contain the options specific to the Docker container runtime
+
+The **artifacts** section must define the Docker image (see **YOUR_DOCKER_IMAGE**)
+
+The **interfaces** section tells MiCADO how to orchestrate the container. 
+
+The *create* field *inputs* will override the **workload** metadata & spec of a bare Kubernetes Deployment manifest. 
+
+The *configure* field *inputs* will override the **pod** metadata & spec of that workload.
+
+**A stripped back definition of a node looks like this:**
 
 ::
 
    topology_template:
      node_templates:
-       YOUR_KUBERNETES_APP:
+       YOUR-KUBERNETES-APP:
          type: tosca.nodes.MiCADO.Container.Application.Docker
          properties:
-            ...
+           ...
          artifacts:
           image:
             type: tosca.artifacts.Deployment.Image.Container.Docker
             file: YOUR_DOCKER_IMAGE
             repository: docker_hub
+         interfaces:
+           Kubernetes:
+             create:
+               implementation: image
+               inputs:
+                 ...
+             configure:
+               inputs:
+                 ...
      outputs:
         ports:
-          value: { get_attribute: [ YOUR_KUBERNETES_APP, port ]}
+          value: { get_attribute: [ YOUR-KUBERNETES-APP, port ]}
 
-The fields under the **properties** section of the Kubernetes app are derived from a docker-compose file and converted using Kompose. You can find additional information about the properties in the `docker compose documentation <https://docs.docker.com/compose/compose-file/#service-configuration-reference>` and see what `Kompose supports here <http://kompose.io/conversion/>`. The syntax of the property values is currently the same as in docker-compose 
-file. The Compose properties will be translated into Kubernetes specs on deployment.
+The fields under the **properties** section of the Kubernetes app are a collection of options specific to all iterations
+of Docker containers. The translator understands both Docker-Compose style naming and Kubernetes style naming, though 
+the Kubernetes style is recommended. You can find additional information about properties in the
+`translator documentation <https://github.com/jaydesl/TOSCAKubed/blob/master/README.md>`__. These  properties will be translated 
+into Kubernetes manifests on deployment.
 
-Under the **properties** section of an app (see **YOUR_KUBERNETES_APP**) you can specify the following keywords.:
+Under the **properties** section of an app (see **YOUR-KUBERNETES-APP**) here are a few common keywords.:
 
-* **command**: command line expression to be executed by the container.
-* **deploy**: Orchestrated deployment options. CPU reservations should be set 0.1 lower than in Swarm (0.9 == 1.0)
-* **entrypoint**: override the default entrypoint of container.
-* **environment**: map of all required environment variables.
-* **expose**: expose ports without publishing them to the host machine.
-* **volumes**: list of bind mount (host-container) volumes for the service in the format */source/etc/data:/target/etc/data*
-* **ports**: list of published ports to the host machine. **Unlike Docker** this does not make the container accessible from the outside.
-* **labels**: map of metadata like Docker labels and/or Kubernetes instructions (see NOTE).
+* **name**: name for the container (defaults to the TOSCA node name)
+* **command**: override the default command line expression to be executed by the container.
+* **args**: override the default entrypoint of container.
+* **env**: list of *name:* & *value:* of all required environment variables.
+* **resource.requests.cpu**: CPU reservation, should be set 100m lower than max (900m == 1000m)
+* **ports**: list of published ports to the host machine, you can specify these keywords in the style of a `Kubernetes Service <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#service-v1-core>`__
 
-*NOTE*
+  * **targetPort**: the port to target (assumes port if not specified)
+  * **port**: the port to publish (assumes targetPort if not specified)
+  * **name**: the name of this port in the service (will be generated if not specified)
+  * **protocol**: the protocol for the port (defaults to: TCP)
+  * **nodePort**: the port (30000-32767) to expose on the host (this will create a nodePort Service unless type is explicitly set below)
+  * **type**: the type of service for this port (defaults to: ClusterIP except if nodePort is defined above) 
+  * **clusterIP**: the desired (internal) IP (10.0.0.0/24) for this service (defaults to next available)
+  * **metadata**: service metadata, giving the option to set a name for the service. Explicit naming can be used to group different ports together (default grouping is by type)
 
-* **labels** can also be used to pass instructions to Kubernetes (full list: http://kompose.io/user-guide/#labels) 
-**kompose.service.type: 'nodeport'** will make the container accessible at *<worker_node_ip>:port* where port can be found on the Kubernetes Dashboard under *Discovery and load balancing > Services > my_app > Internal endpoints*
 
 Under the **artifacts** section you can define the docker image for the
 kubernetes app. Three fields must be defined:
@@ -120,9 +157,28 @@ kubernetes app. Three fields must be defined:
 * **file**: docker image for the kubernetes app (e.g. sztakilpds/cqueue_frontend:latest )
 * **repository**: name of the repository where the image is located. The name used here (e.g. docker_hub), must be defined at the top of the description under the **repositories** section.
 
-Kubernetes networking is inherently different to the approach taken by Docker. This is a complex subject which is worth a read: https://kubernetes.io/docs/concepts/cluster-administration/networking/
+Under the **interfaces** section you can define orchestrator specific options, here we use the key **Kubernetes:**
 
-Since every pod gets its own IP, which any pod can by default use to communicate with any other pod, this means there is no network to explicitly define. If **ports** is defined in the definition above, pods can reach each other over CoreDNS via their hostname (container name).
+* **create**: *this key tells MiCADO to create a workload (Deployment/DaemonSet/Job/Pod etc...) for this container*
+
+  * **implementation**: this should always point to your image artifact
+  * **inputs**: top-level workload and workload spec options follow here... Some examples, see `translator documentation <https://github.com/jaydesl/TOSCAKubed/blob/master/README.md>`__
+  
+    * **kind:** overwrite the workload type (defaults to Deployment)
+    * **strategy.type:** change to Recreate to kill pods then update (defaults to RollingUpdate)
+
+* **configure**: *this key configures the Pod for this workload*
+
+  * **inputs**: `PodTemplateSpec <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podspec-v1-core>`__ options follow here... For example
+  
+    * **restartPolicy:** change the restart policy (defaults to Always)
+
+**A word on networking in Kubernetes**
+
+Kubernetes networking is inherently different to the approach taken by Docker/Swarm. 
+This is a complex subject which is worth a read: https://kubernetes.io/docs/concepts/cluster-administration/networking/ . 
+Since every pod gets its own IP, which any pod can by default use to communicate with any other pod, this means there 
+is no network to explicitly define. If **ports** is defined in the definition above, pods can reach each other over CoreDNS via their hostname (container name).
 
 Under the **outputs** section (this key is **NOT** nested within *node_templates*) 
 you can define an output to retrieve from Kubernetes via the adaptor. Currently, only port info is obtainable.
@@ -139,10 +195,32 @@ The collection of docker containers (kubernetes applications) specified in the p
 
 The following subsections details how to configure them.
 
+General
+-------
+
+The **capabilities** sections for all virtual machine definitions that follow are identical and are **ENTIRELY OPTIONAL**. They are filled with metadata to support human readability.:
+
+*  **num_cpus** under *host* is a readable string specifying clock speed of the instance type
+*  **mem_size** under *host* is a readable string specifying RAM of the instance type
+*  **type** under *os* is a readable string specifying the operating system type of the image
+*  **distribution** under *os* is a readable string specifying the OS distro of the image
+*  **version** under *os* is a readable string specifying the OS version of the image
+
+The **interfaces** section of all virtual machine definitions that follow are **REQUIRED**, and allow you to provide orchestrator specific inputs, in the examples below we use **Occopus:**.:
+
+* **create**: *this key tells MiCADO to create the VM using Occopus*
+
+  * **inputs**: Specific settings for Occopus follow here
+  
+    * **interface_cloud:** tells Occopus which cloud to interface with
+    * **endpoint_cloud:** tells Occopus the endpoint API of the cloud
+
+
+
 CloudSigma
 ----------
 
-To instantiate MiCADO workers on CloudSigma, please use the template below. MiCADO **requires** num_cpus, mem_size, vnc_password, libdrive_id and public_key_id to instantiate VM on *CloudSigma*.
+To instantiate MiCADO workers on CloudSigma, please use the template below. MiCADO **requires** num_cpus, mem_size, vnc_password, libdrive_id, public_key_id and firewall_policy to instantiate VM on *CloudSigma*.
 
 ::
 
@@ -150,26 +228,43 @@ To instantiate MiCADO workers on CloudSigma, please use the template below. MiCA
      node_templates:
        worker_node:
          type: tosca.nodes.MiCADO.Occopus.CloudSigma.Compute
-         properties:
-           cloud:
-             interface_cloud: cloudsigma
-             endpoint_cloud: ADD_YOUR_ENDPOINT (e.g for cloudsigma https://zrh.cloudsigma.com/api/2.0 )
-         capabilities:
-           host:
-             properties:
-               num_cpus: ADD_NUM_CPUS_FREQ (e.g. 4096)
-               mem_size: ADD_MEM_SIZE (e.g. 4294967296)
-               vnc_password: ADD_YOUR_PW (e.g. secret)
-               libdrive_id: ADD_YOUR_ID_HERE (eg. 87ce928e-e0bc-4cab-9502-514e523783e3)
-               public_key_id: ADD_YOUR_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
-               firewall_policy: ADD_YOUR_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
+           properties:
+             num_cpus: ADD_NUM_CPUS_FREQ (e.g. 4096)
+             mem_size: ADD_MEM_SIZE (e.g. 4294967296)
+             vnc_password: ADD_YOUR_PW (e.g. secret)
+             libdrive_id: ADD_YOUR_ID_HERE (eg. 87ce928e-e0bc-4cab-9502-514e523783e3)
+             public_key_id: ADD_YOUR_ID_HERE (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e)
+             nics:
+             - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
+               ip_v4_conf:
+                 conf: dhcp
+           capabilities:
+           # OPTIONAL METADATA
+             host:
+               properties:
+                 num_cpus: 2GHz
+                 mem_size: 2GB
+             os:
+               properties:
+                 type: linux
+                 distribution: ubuntu
+                 version: 16.04
+           interfaces:
+             Occopus:
+               create:
+                 inputs:
+                   interface_cloud: cloudsigma
+                   endpoint_cloud: ADD_YOUR_ENDPOINT (e.g for cloudsigma https://zrh.cloudsigma.com/api/2.0 )
 
-*  **num_cpu** is the speed of CPU (e.g. 4096) in terms of MHz of your VM to be instantiated. The CPU frequency required to be between 250 and 100000
+Under the **properties** section of a CloudSigma virtual machine definition these inputs are available.:
+
+*  **num_cpus** is the speed of CPU (e.g. 4096) in terms of MHz of your VM to be instantiated. The CPU frequency required to be between 250 and 100000
 *  **mem_size** is the amount of RAM (e.g. 4294967296) in terms of bytes to be allocated for your VM. The memory required to be between 268435456 and 137438953472
 *  **vnc_password** set the password for your VNC session (e.g. secret).
 *  **libdrive_id** is the image id (e.g. 87ce928e-e0bc-4cab-9502-514e523783e3) on your CloudSigma cloud. Select an image containing a base os installation with cloud-init support!
 *  **public_key_id** specifies the keypairs (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e) to be assigned to your VM.
-*  **firewall_policy** optionally specifies network policies (you can define multiple security groups in the form of a list, e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d) of your VM.
+*  **nics[.firewall_policy | .ip_v4_conf.conf]**  specifies network policies (you can define multiple security groups in the form of a list for your VM).
+
 
 CloudBroker
 -----------
@@ -182,17 +277,30 @@ To instantiate MiCADO workers on CloudBroker, please use the template below. MiC
      node_templates:
        worker_node:
          type: tosca.nodes.MiCADO.Occopus.CloudBroker.Compute
-         properties:
-           cloud:
-             interface_cloud: cloudbroker
-             endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://cola-prototype.cloudbroker.com )
-         capabilities:
-           host:
-             properties:
-               deployment_id: ADD_YOUR_ID_HERE (e.g. e7491688-599d-4344-95ef-aff79a60890e)
-               instance_type_id: ADD_YOUR_ID_HERE (e.g. 9b2028be-9287-4bf6-bbfe-bcbc92f065c0)
-               key_pair_id: ADD_YOUR_ID_HERE (e.g. d865f75f-d32b-4444-9fbb-3332bcedeb75)
-               opened_port: ADD_YOUR_PORTS_HERE (e.g. '22,2377,7946,8300,8301,8302,8500,8600,9100,9200,4789')
+           properties:
+             deployment_id: ADD_YOUR_ID_HERE (e.g. e7491688-599d-4344-95ef-aff79a60890e)
+             instance_type_id: ADD_YOUR_ID_HERE (e.g. 9b2028be-9287-4bf6-bbfe-bcbc92f065c0)
+             key_pair_id: ADD_YOUR_ID_HERE (e.g. d865f75f-d32b-4444-9fbb-3332bcedeb75)
+             opened_port: ADD_YOUR_PORTS_HERE (e.g. '22,2377,7946,8300,8301,8302,8500,8600,9100,9200,4789')
+           capabilities:
+           # OPTIONAL METADATA
+             host:
+               properties:
+                 num_cpus: 2GHz
+                 mem_size: 2GB
+             os:
+               properties:
+                 type: linux
+                 distribution: ubuntu
+                 version: 16.04
+           interfaces:
+             Occopus:
+               create:
+                 inputs:
+                   interface_cloud: cloudbroker
+                   endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://cola-prototype.cloudbroker.com )
+
+Under the **properties** section of a CloudBroker virtual machine definition these inputs are available.:
 
 *  **deployment_id** is the id of a preregistered deployment in CloudBroker referring to a cloud, image, region, etc. Make sure the image contains a base OS (preferably Ubuntu) installation with cloud-init support! The id is the UUID of the deployment which can be seen in the address bar of your browser when inspecting the details of the deployment.
 *  **instance_type_id** is the id of a preregistered instance type in CloudBroker referring to the capacity of the virtual machine to be deployed. The id is the UUID of the instance type which can be seen in the address bar of your browser when inspecting the details of the instance type.
@@ -211,15 +319,28 @@ To instantiate MiCADO workers on a cloud through EC2 interface, please use the t
        worker_node:
          type: tosca.nodes.MiCADO.Occopus.EC2.Compute
          properties:
-           cloud:
-             interface_cloud: ec2
-             endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com )
-         capabilities:
-           host:
-             properties:
                region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
                image_id: ADD_YOUR_ID_HERE (e.g. ami-12345678)
                instance_type: ADD_YOUR_INSTANCE_TYPE_HERE (e.g. t1.small)
+         capabilities:
+         # OPTIONAL METADATA
+           host:
+             properties:
+               num_cpus: 2GHz
+               mem_size: 2GB
+           os:
+             properties:
+               type: linux
+               distribution: ubuntu
+               version: 16.04
+         interfaces:
+           Occopus:
+             create:
+               inputs:
+                 interface_cloud: ec2
+                 endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com)
+
+Under the **properties** section of an EC2 virtual machine definition these inputs are available.:
 
 *  **region_name** is the region name within an EC2 cloud (e.g. eu-west-1).
 *  **image_id** is the image id (e.g. ami-12345678) on your EC2 cloud. Select an image containing a base os installation with cloud-init support!
@@ -240,12 +361,6 @@ To instantiate MiCADO workers on a cloud through Nova interface, please use the 
        worker_node:
          type: tosca.nodes.MiCADO.Occopus.Nova.Compute
          properties:
-           cloud:
-             interface_cloud: nova
-             endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
-         capabilities:
-           host:
-             properties:
                image_id: ADD_YOUR_ID_HERE (e.g. d4f4e496-031a-4f49-b034-f8dafe28e01c)
                flavor_name: ADD_YOUR_ID_HERE (e.g. 3)
                project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
@@ -253,6 +368,25 @@ To instantiate MiCADO workers on a cloud through Nova interface, please use the 
                key_name: ADD_YOUR_KEY_HERE (e.g. keyname)
                security_groups:
                  - ADD_YOUR_ID_HERE (e.g. d509348f-21f1-4723-9475-0cf749e05c33)
+         capabilities:
+         # OPTIONAL METADATA
+           host:
+             properties:
+               num_cpus: 2GHz
+               mem_size: 2GB
+           os:
+             properties:
+               type: linux
+               distribution: ubuntu
+               version: 16.04
+         interfaces:
+           Occopus:
+             create:
+               inputs:
+                 interface_cloud: nova
+                 endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
+
+Under the **properties** section of a Nova virtual machine definition these inputs are available.:
 
 *  **project_id** is the id of project you would like to use on your target Nova cloud.
 *  **image_id** is the image id on your Nova cloud. Select an image containing a base os installation with cloud-init support!
@@ -271,11 +405,11 @@ To utilize the autoscaling functionality of MiCADO, scaling policies can be defi
 
    topology_template:
      node_templates:
-       YOUR_KUBERNETES_APP:
+       YOUR-KUBERNETES-APP:
          type: tosca.nodes.MiCADO.Container.Application.Docker
          ...
        ...
-       YOUR_OTHER_KUBERNETES_APP:
+       YOUR-OTHER-KUBERNETES-APP:
          type: tosca.nodes.MiCADO.Container.Application.Docker
          ...
        YOUR_VIRTUAL_MACHINE:
@@ -290,12 +424,12 @@ To utilize the autoscaling functionality of MiCADO, scaling policies can be defi
          ...
      - scalability:
        type: tosca.policies.Scaling.MiCADO
-       targets: [ YOUR_KUBERNETES_APP ]
+       targets: [ YOUR-KUBERNETES-APP ]
        properties:
          ...
      - scalability:
        type: tosca.policies.Scaling.MiCADO
-       targets: [ YOUR_OTHER_KUBERNETES_APP ]
+       targets: [ YOUR-OTHER-KUBERNETES-APP ]
        properties:
          ...
 

@@ -23,12 +23,15 @@ For cloud interfaces supported by MiCADO:
 For the MiCADO master:
 
 * Ubuntu 16.04
-* 2GHz CPU & 2GB RAM
+* (Minimum) 2GHz CPU & 2GB RAM
+* (Recommended) 2GHz CPU & 4GB RAM
 
 For the host where the Ansible playbook is executed (differs depending on local or remote):
 
 * Ansible 2.4 or greater
 * curl
+* jq (to pretty-format API responses)
+* wrk (to load test nginx & wordpress demonstrators)
 
 Ansible
 -------
@@ -57,6 +60,28 @@ To install curl on Ubuntu, use this command:
    sudo apt-get install curl
 
 To install curl on other operating systems follow the `official installation guide <https://curl.haxx.se/download.html>`__.
+
+jq
+----
+
+To install jq on Ubuntu, use this command:
+
+::
+
+   sudo apt-get install jq
+
+To install jq on other operating systems follow the `official installation guide <https://stedolan.github.io/jq/download/>`__.
+
+wrk
+----
+
+To install wrk on Ubuntu, use this command:
+
+::
+
+   sudo apt-get install wrk
+
+To install wrk on other operating systems check the sidebar on the `github wiki <https://github.com/wg/wrk/wiki>`__.
 
 Installation
 ============
@@ -204,5 +229,5 @@ Accessing user-defined service
 
 In case your application contains a container exposing a service, you will have to ensure the following to access it.
 
-* First set **kompose.service.type: 'nodeport'** in the TOSCA description of your app. More information on this in the section of the documentation titled **application description**
-* The container will be accessible at *<IP>:<port>* . Both can be found on the Kubernetes Dashboard, with **IP** under *Nodes > my_micado_vm > Addresses* and with **port** under *Discovery and load balancing > Services > my_app > Internal endpoints*
+* First set **nodePort: xxxxx** (where xxxxx is a port in range 30000-32767) in the **properties: ports:** TOSCA description of your docker container. More information on this in the section of the documentation titled **application description**
+* The container will be accessible at *<IP>:<port>* . Both can be found on the Kubernetes Dashboard, with **IP** under *Nodes > my_micado_vm > Addresses* and with **port** (if you forget it) under *Discovery and load balancing > Services > my_app > Internal endpoints*
