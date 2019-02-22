@@ -3,7 +3,7 @@
 Tutorials
 *********
 
-You can find test application(s) under the subdirectories of the ‘testing’ directory. The current **stressng** test can be configured for use with CloudSigma, AWS EC2, OpenStack Nova and deployments via CloudBroker. The current **cqueue** test is configured for CloudSigma.
+You can find some demo applications under the subdirectories of the ‘testing’ directory in the downloaded (and unzipped) installation package of MiCADO. 
 
 stressng
 ========

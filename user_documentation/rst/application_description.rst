@@ -10,10 +10,9 @@ Application description has four main sections:
 * **tosca_definitions_version**: ``tosca_simple_yaml_1_0``.
 * **imports**: a list of urls pointing to custom TOSCA types. The default url points to the custom types defined for MiCADO. Please, do not modify this url.
 * **repositories**: docker repositories with their addresses.
-* **topology_template**: the main part of the application description to define 1) kubernetes deployments (of docker containers), 2) virtual machine (under the **node_templates** section) and 3) the scaling policy under the **policies** subsection. These sections will be detailed in subsections below.
+* **topology_template**: the goal of the application description is to define 1) kubernetes deployments (of docker containers), 2) virtual machine (under the **node_templates** section) and 3) the scaling policy under the **policies** subsection. These sections will be detailed in subsections below.
 
-Here is an overview example for the structure of the MiCADO application
-description:
+Here is an example for the structure of the MiCADO application description:
 
 ::
 
@@ -79,7 +78,7 @@ description:
 Specification of Docker containers (to be orchestrated by Kubernetes)
 =====================================================================
 
-**NOTE** Kubernetes does not allow for underscores in any resource names (read: TOSCA node names). Names also must begin and end with an alphanumeric.
+**NOTE** Kubernetes does not allow for underscores in any resource names (read: TOSCA node names). Names must also begin and end with an alphanumeric.
 
 Under the node_templates section you can define one or more Docker containers and choose to orchestrate them with Kubernetes 
 (see **YOUR-KUBERNETES-APP**). Each app is described as a separate node with its own definition consisting of 
@@ -97,7 +96,7 @@ The *create* field *inputs* will override the **workload** metadata & spec of a 
 
 The *configure* field *inputs* will override the **pod** metadata & spec of that workload.
 
-**A stripped back definition of a node looks like this:**
+**A stripped back definition of a node_template looks like this:**
 
 ::
 
@@ -106,6 +105,10 @@ The *configure* field *inputs* will override the **pod** metadata & spec of that
        YOUR-KUBERNETES-APP:
          type: tosca.nodes.MiCADO.Container.Application.Docker
          properties:
+           name: 
+           command:
+           args:
+           env:
            ...
          artifacts:
           image:
@@ -178,7 +181,7 @@ Under the **interfaces** section you can define orchestrator specific options, h
 Kubernetes networking is inherently different to the approach taken by Docker/Swarm. 
 This is a complex subject which is worth a read: https://kubernetes.io/docs/concepts/cluster-administration/networking/ . 
 Since every pod gets its own IP, which any pod can by default use to communicate with any other pod, this means there 
-is no network to explicitly define. If **ports** is defined in the definition above, pods can reach each other over CoreDNS via their hostname (container name).
+is no network to explicitly define. If the **ports** keyword is defined in the definition above, pods can reach each other over CoreDNS via their hostname (container name).
 
 Under the **outputs** section (this key is **NOT** nested within *node_templates*) 
 you can define an output to retrieve from Kubernetes via the adaptor. Currently, only port info is obtainable.
@@ -186,7 +189,7 @@ you can define an output to retrieve from Kubernetes via the adaptor. Currently,
 Specification of the Virtual Machine
 ====================================
 
-The collection of docker containers (kubernetes applications) specified in the previous section is orchestrated by Kubernetes. This section introduces how the parameters of the virtual machine can be configured which will be hosts the Kubernetes worker node. During operation MiCADO will instantiate as many virtual machines with the parameters defined here as required during scaling. MiCADO currently supports four different cloud interfaces: CloudSigma, CloudBroker, EC2, Nova. The following ports and protocols should be enabled on the virtual machine:
+The collection of docker containers (kubernetes applications) specified in the previous section is orchestrated by Kubernetes. This section introduces how the parameters of the virtual machine can be configured which will host the Kubernetes worker node. During operation MiCADO will instantiate as many virtual machines with the parameters defined here as required during scaling. MiCADO currently supports four different cloud interfaces: CloudSigma, CloudBroker, EC2, Nova. The following ports and protocols should be enabled on the virtual machine:
 
 ::
 
@@ -206,7 +209,7 @@ The **capabilities** sections for all virtual machine definitions that follow ar
 *  **distribution** under *os* is a readable string specifying the OS distro of the image
 *  **version** under *os* is a readable string specifying the OS version of the image
 
-The **interfaces** section of all virtual machine definitions that follow are **REQUIRED**, and allow you to provide orchestrator specific inputs, in the examples below we use **Occopus:**.:
+The **interfaces** section of all virtual machine definitions that follow are **REQUIRED**, and allow you to provide orchestrator specific inputs, in the examples below we use **Occopus**.
 
 * **create**: *this key tells MiCADO to create the VM using Occopus*
 
@@ -467,7 +470,7 @@ The **properties** subsection defines the scaling policy itself. For monitoring 
 
 The subsections have the following roles:
 
-* **sources** supports the dynamic attachment of an external exporter by specifying a list endpoints of exporters (see example above). Each item found under this subsection is configured under Prometheus to start collecting the information provided/exported by the exporters. Once done, the values of the parameters provided by the exporters become available. **NEW** MiCADO now supports Kubernetes service discovery - to define such a source, simply pass the name of the app as defined in TOSCA and do not specify any port number
+* **sources** supports the dynamic attachment of an external exporter by specifying a list endpoints of exporters (see example above). Each item found under this subsection is configured under Prometheus to start collecting the information provided/exported by the exporters. Once done, the values of the parameters provided by the exporters become available. MiCADO supports Kubernetes service discovery to define such a source, simply pass the name of the app as defined in TOSCA and do not specify any port number
 * **constants** subsection is used to predefined fixed parameters. Values associated to the parameters can be referred by the scaling rule as variable (see ``LOWER_THRESHOLD`` above) or in any other sections referred as Jinja2 variable (see ``MYEXPR`` above).
 * **queries** contains the list of Prometheus query expressions to be executed and their variable name associated (see ``THELOAD`` above)
 * **alerts** subsection enables the utilisation of the alerting system of Prometheus. Each alert defined here is registered under Prometheus and fired alerts are represented with a variable of their name set to True during the evaluation of the scaling rule (see ``myalert`` above).

@@ -1,7 +1,7 @@
 MiCADO - autoscaling framework for Kubernetes Deployments in the Cloud
-###########################################################
+######################################################################
 
-This software is developed by the `COLA project <https://project-cola.eu/>`__.
+This software is developed by the `COLA project <https://project-cola.eu/>`__ and is hosted at the `MiCADO-scale github repository <https://github.com/micado-scale>`__. Please, visit the `MiCADO homepage <https://www.micado-scale.eu/>`__ for general information about the product.
 
 Introduction
 ************
