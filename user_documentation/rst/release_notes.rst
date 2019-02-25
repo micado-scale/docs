@@ -1,7 +1,32 @@
 Release Notes
 *************
 
-**v0.7.1 (10 Jan 2018)**
+**v0.7.2 (25 Feb 2019)**
+
+- add checking for minimal memory on micado master at deployment
+- support private networks on cloudsigma
+- support user-defined contextualisation
+- support re-use across other container & cloud orchestrators in ADT
+- new TOSCA to Kubernetes Manifest Adaptor
+- add support for creating DaemonSets, Jobs, StatefulSets (with limited functionality) and standalone Pods
+- add support for creating PersistentVolumes & PVClaims
+- add support for specifying custom service details (NodePort, ClusterIP, etc.)
+- minor improvements to Grafana dashboard
+- support asynchronous calls through TOSCASubmitter API
+- fix kubectl error on MiCADO Master restart
+- fix TOSCASubmitter rollback on errors
+- fix TOSCASubmitter status & output display
+- add support for encrypting master-worker communication
+- automatically provision and revoke security credentials for worker nodes
+- update default MTU to 1400 to ensure compatibility with OpenStack and AWS
+- add Credential Store security enabler
+- add Security Policy Manager security enabler
+- add Image Integrity Verifier Security enabler
+- add Crypto Engine security enabler
+- add support for kubernetes secrets
+- reimplement Credential Manager using the flask-users library
+
+**v0.7.1 (10 Jan 2019)**
 
 - Fix: Add SKIP back to Dashboard (defaults changed in v1.13.1)
 - Fix: URL not found for Kubernetes manifest files
