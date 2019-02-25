@@ -23,12 +23,15 @@ For cloud interfaces supported by MiCADO:
 For the MiCADO master:
 
 * Ubuntu 16.04
-* 2GHz CPU & 2GB RAM
+* (Minimum) 2GHz CPU & 2GB RAM
+* (Recommended) 2GHz CPU & 4GB RAM
 
 For the host where the Ansible playbook is executed (differs depending on local or remote):
 
 * Ansible 2.4 or greater
 * curl
+* jq (to pretty-format API responses)
+* wrk (to load test nginx & wordpress demonstrators)
 
 Ansible
 -------
@@ -58,6 +61,28 @@ To install curl on Ubuntu, use this command:
 
 To install curl on other operating systems follow the `official installation guide <https://curl.haxx.se/download.html>`__.
 
+jq
+----
+
+To install jq on Ubuntu, use this command:
+
+::
+
+   sudo apt-get install jq
+
+To install jq on other operating systems follow the `official installation guide <https://stedolan.github.io/jq/download/>`__.
+
+wrk
+----
+
+To install wrk on Ubuntu, use this command:
+
+::
+
+   sudo apt-get install wrk
+
+To install wrk on other operating systems check the sidebar on the `github wiki <https://github.com/wg/wrk/wiki>`__.
+
 Installation
 ============
 
@@ -68,14 +93,14 @@ Step 1: Download the ansible playbook.
 
 ::
 
-   curl --output ansible-micado-0.7.1.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.7.1/ansible-micado-0.7.1.tar.gz
-   tar -zxvf ansible-micado-0.7.1.tar.gz
-   cd ansible-micado-0.7.1/
+   curl --output ansible-micado-0.7.2.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.7.2/ansible-micado-0.7.2.tar.gz
+   tar -zxvf ansible-micado-0.7.2.tar.gz
+   cd ansible-micado-0.7.2/
 
 Step 2: Specify cloud credential for instantiating MiCADO workers.
 ------------------------------------------------------------------
 
-MiCADO master will use this credential to start/stop VM instances (MiCADO workers) to host the application and to realize scaling. Credentials here should belong to the same cloud as where MiCADO master is running. We recommend making a copy of our predefined template and edit it. MiCADO expects the credential in a file, called credentials-cloud-api.yml before deployment. Please, do not modify the structure of the template!
+MiCADO master will use this credential against the cloud API to start/stop VM instances (MiCADO workers) to host the application and to realize scaling. Credentials here should belong to the same cloud as where MiCADO master is running. We recommend making a copy of our predefined template and edit it. MiCADO expects the credential in a file, called credentials-cloud-api.yml before deployment. Please, do not modify the structure of the template!
 
 ::
 
@@ -112,7 +137,7 @@ Specify the provisioning method for the x509 keypair used for TLS encryption of 
 * The 'self-signed' option generates a new keypair with the specified hostname as subject (or 'micado-master' if omitted).
 * The 'user-supplied' option lets the user add the keypair as plain multiline strings (in unencrypted format) in the ansible_user_data.yml file under the 'cert' and 'key' subkeys respectively.
 
-Specify the default username and password for the administrative we user in the the ``authentication`` subtree.
+Specify the default username and password for the administrative user in the ``authentication`` subtree.
 
 Optionally you may use the Ansible Vault mechanism as described in Step 2 to protect the confidentiality and integrity of this file as well.
 
@@ -163,7 +188,7 @@ We recommend making a copy of our predefined template and edit it. Use the templ
 
 Edit the ``hosts`` file to set ansible variables for MiCADO master machine. Update the following parameters:
 
-* **ansible_host**: specifies the publicly reachable ip address of MiCADO master. Set the public or floating ip of the master regardless the deployment method is remote or local. The ip specified here is used by the Dashboard for webpage redirection as well
+* **ansible_host**: specifies the publicly reachable ip address of MiCADO master. Set the public or floating ``IP`` of the master regardless the deployment method is remote or local. The ip specified here is used by the Dashboard for webpage redirection as well
 * **ansible_connection**: specifies how the target host can be reached. Use "ssh" for remote or "local" for local installation. In case of remote installation, make sure you can authenticate yourself against MiCADO master. We recommend to deploy your public ssh key on MiCADO master before starting the deployment
 * **ansible_user**: specifies the name of your sudoer account, defaults to "ubuntu"
 * **ansible_become**: specifies if account change is needed to become root, defaults to "True"
@@ -204,5 +229,6 @@ Accessing user-defined service
 
 In case your application contains a container exposing a service, you will have to ensure the following to access it.
 
-* First set **kompose.service.type: 'nodeport'** in the TOSCA description of your app. More information on this in the section of the documentation titled **application description**
-* The container will be accessible at *<IP>:<port>* . Both can be found on the Kubernetes Dashboard, with **IP** under *Nodes > my_micado_vm > Addresses* and with **port** under *Discovery and load balancing > Services > my_app > Internal endpoints*
+* First set **nodePort: xxxxx** (where xxxxx is a port in range 30000-32767) in the **properties: ports:** TOSCA description of your docker container. More information on this in the :ref:`applicationdescription` 
+* The container will be accessible at *<IP>:<port>* . Both, the IP and the port values can be extracted from the Kubernetes Dashboard (in case you forget it). The **IP** can be found under *Nodes > my_micado_vm > Addresses* menu, while the **port** can be found under *Discovery and load balancing > Services > my_app > Internal endpoints* menu.
+
