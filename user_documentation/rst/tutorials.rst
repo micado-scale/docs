@@ -15,6 +15,8 @@ This application contains a single service, performing a constant CPU load. The 
 *  Step1: make a copy of the TOSCA file which is appropriate for your cloud - ``stressng_<your_cloud>.yaml`` - and name it ``stressng.yaml`` (ie. by issuing the command ``cp stressng_cloudsigma.yaml stressng.yaml``)
 *  Step2: fill in the requested fields beginning with ``ADD_YOUR_...`` . These will differ depending on which cloud you are using.
 
+   **Important:** Make sure you create the appropriate firewall policy for the MiCADO workers as described :ref:`here <workerfirewallconfig>`!
+
  * In CloudSigma, for example, the ``libdrive_id`` , ``public_key_id`` and ``firewall_policy`` fields must be completed. Without these, CloudSigma does not have enough information to launch your worker nodes. All information is found on the CloudSigma Web UI. ``libdrive_id`` is the long alphanumeric string in the URL when a drive is selected under “Storage/Library”. ``public_key_id`` is under the “Access & Security/Keys Management” menu as **Uuid**. ``firewall_policy`` can be found when selecting a rule defined under the “Networking/Policies” menu. The following ports must be opened for MiCADO workers: *all inbound connections from MiCADO master*
 
 *  Step3: Update the parameter file, called ``_settings``. You need the ip address for the MiCADO master and should name the application by setting the APP_ID  ***the application ID can not contain any underscores ( _ )** You should also change the SSL user/password/port information if they are different from the default.
@@ -39,6 +41,8 @@ This application demonstrates a deadline policy using CQueue. CQueue provides a 
     -  Replace each ‘cqueue.server.ip.address’ string with the real ip of CQueue server.
     -  Update each ‘ADD_YOUR_ID_HERE’ string with the proper value retrieved under your CloudSigma account.
 
+   **Important:** Make sure you create the appropriate firewall policy for the MiCADO workers as described :ref:`here <workerfirewallconfig>`!
+
 *  Step5: Run ``./2-get_date_in_epoch_plus_seconds.sh 600`` to calculate the unix timestamp representing the deadline by which the items (containers) must be finished. Take the value from the last line of the output produced by the script. The value is 600 seconds from now.
 *  Step6: Edit the TOSCA description file, called ``micado-cqworker.yaml``.
 
@@ -61,6 +65,8 @@ This application deploys a http server with nginx. The container features a buil
 *  Step1: make a copy of the TOSCA file which is appropriate for your cloud - ``nginx_<your_cloud>.yaml`` - and name it ``nginx.yaml``
 *  Step2: fill in the requested fields beginning with ``ADD_YOUR_...`` . These will differ depending on which cloud you are using.
 
+   **Important:** Make sure you create the appropriate firewall policy for the MiCADO workers as described :ref:`here <workerfirewallconfig>`!
+
  * In CloudSigma, for example, the ``libdrive_id`` , ``public_key_id`` and ``firewall_policy`` fields must be completed. Without these, CloudSigma does not have enough information to launch your worker nodes. All information is found on the CloudSigma Web UI. ``libdrive_id`` is the long alphanumeric string in the URL when a drive is selected under “Storage/Library”. ``public_key_id`` is under the “Access & Security/Keys Management” menu as **Uuid**. ``firewall_policy`` can be found when selecting a rule defined under the “Networking/Policies” menu. The following ports must be opened for MiCADO workers: *all inbound connections from MiCADO master*
 
 *  Step3: Update the parameter file, called ``_settings``. You need the ip address for the MiCADO master and should name the deployment by setting the APP_ID. ***the application ID can not contain any underscores ( _ )** The APP_NAME must match the name given to the application in TOSCA (default: **nginxapp**)  You should also change the SSL user/password/port information if they are different from the default.
@@ -81,6 +87,8 @@ is recommended for HTTP load testing, but you can use any load generator you wis
 
 *  Step1: make a copy of the TOSCA file which is appropriate for your cloud - ``wordpress_<your_cloud>.yaml`` - and name it ``wordpress.yaml``
 *  Step2: fill in the requested fields beginning with ``ADD_YOUR_...`` . These will differ depending on which cloud you are using.
+
+   **Important:** Make sure you create the appropriate firewall policy for the MiCADO workers as described :ref:`here <workerfirewallconfig>`!
 
  * In CloudSigma, for example, the ``libdrive_id`` , ``public_key_id`` and ``firewall_policy`` fields must be completed. Without these, CloudSigma does not have enough information to launch your worker nodes. All information is found on the CloudSigma Web UI. ``libdrive_id`` is the long alphanumeric string in the URL when a drive is selected under “Storage/Library”. ``public_key_id`` is under the “Access & Security/Keys Management” menu as **Uuid**. ``firewall_policy`` can be found when selecting a rule defined under the “Networking/Policies” menu. The following ports must be opened for MiCADO workers: *all inbound connections from MiCADO master*
  
