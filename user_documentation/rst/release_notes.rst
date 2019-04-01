@@ -1,6 +1,10 @@
 Release Notes
 *************
 
+**v0.7.2-rev1 (01 Apr 2019)**
+
+- fix dependency issue for Kubernetes 1.13.1 (`kubernetes/kubernetes#75683 <https://github.com/kubernetes/kubernetes/issues/75683>`__)
+
 **v0.7.2 (25 Feb 2019)**
 
 - add checking for minimal memory on micado master at deployment
