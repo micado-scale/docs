@@ -23,8 +23,8 @@ For cloud interfaces supported by MiCADO:
 For the MiCADO master:
 
 * Ubuntu 16.04
-* (Minimum) 2GHz CPU & 2GB RAM
-* (Recommended) 2GHz CPU & 4GB RAM
+* (Minimum) 2GHz CPU & 3GB RAM & 15GB DISK
+* (Recommended) 2GHz CPU & 4GB RAM & 20GB DISK
 
 For the host where the Ansible playbook is executed (differs depending on local or remote):
 
