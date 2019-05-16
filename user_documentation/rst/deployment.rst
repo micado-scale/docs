@@ -167,8 +167,8 @@ This new VM will host the MiCADO core services.
 
 ::
 
-   TCP: 22,2380,6443,8300,8301,8302,8500,8600,10252,[web_listening_port]
-   UDP: 2379,8301,8302,8472,8600,10250,10251
+   TCP: 22, 2379, 2380, 6443, 8300, 8301, 8302, 8500, 8600, 10250, 10251, 10252, [web_listening_port]
+   UDP: 8285, 8301, 8302, 8472, 8600
 
 **NOTE:** replace ``[web_listening_port]`` with the actual value specified in Step 4a.
 

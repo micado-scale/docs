@@ -193,12 +193,12 @@ The collection of docker containers (kubernetes applications) specified in the p
 
 .. _workerfirewallconfig:
 
-The following ports and protocols should be enabled on the virtual machine acting as MiCADO worker:
+The following ports and protocols should be enabled on the virtual machine acting as MiCADO worker, replacing [exposed_application_ports] with ports you wish to expose on the host:
 
 ::
 
-   TCP: 22,2377,7946,8300,8301,8302,8500,8600,9100,9200
-   UDP: 4789,7946,8301,8302,8600
+   TCP: 22, 8300, 8301, 8302, 8500, 8600, 9100, 9200 , 10250, [exposed_application_ports]
+   UDP: 8285, 8301, 8302, 8472, 8600
 
 The following subsections details how to configure them.
 
