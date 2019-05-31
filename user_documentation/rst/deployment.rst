@@ -165,12 +165,18 @@ This new VM will host the MiCADO core services.
 
 **b)** Configure a cloud firewall settings which opens the following ports on the MiCADO master virtual machine:
 
-::
+========  =============  ====================
+Protocol  Port(s)        Service
+========  =============  ====================
+ TCP      443*           web listening port (configurable*)
+ TCP      22             SSH
+ TCP      2379-2380      etcd server
+ TCP      6443           kube-apiserver
+ TCP      10250-10252    kubelet, kube-controller, kube-scheduler
+ UDP      8285 & 8472    flannel overlay network
+========  =============  ====================
 
-   TCP: 22, 2379, 2380, 6443, 8300, 8301, 8302, 8500, 8600, 10250, 10251, 10252, [web_listening_port]
-   UDP: 8285, 8301, 8302, 8472, 8600
-
-**NOTE:** replace ``[web_listening_port]`` with the actual value specified in Step 4a.
+**NOTE:** ``[web_listening_port]`` should match with the actual value specified in Step 4a.
 
 **NOTE:** MiCADO master has built-in firewall, therefore you can leave all ports open at cloud level.
 
@@ -186,7 +192,7 @@ We recommend making a copy of our predefined template and edit it. Use the templ
    cp sample-hosts hosts
    edit hosts
 
-Edit the ``hosts`` file to set ansible variables for MiCADO master machine. Update the following parameters:
+Edit the ``hosts`` file to set ansible variables for MiCADO master machine. Update the following parameters on the line beginning **micado-master**:
 
 * **ansible_host**: specifies the publicly reachable ip address of MiCADO master. Set the public or floating ``IP`` of the master regardless the deployment method is remote or local. The ip specified here is used by the Dashboard for webpage redirection as well
 * **ansible_connection**: specifies how the target host can be reached. Use "ssh" for remote or "local" for local installation. In case of remote installation, make sure you can authenticate yourself against MiCADO master. We recommend to deploy your public ssh key on MiCADO master before starting the deployment
@@ -200,6 +206,8 @@ Please, revise all the parameters, however in most cases the default values are 
 Step 6: Start the installation of MiCADO master.
 ------------------------------------------------
 
+
+Run the following command to build and initalise a MiCADO master node on the empty VM you launched in Step 4 and pointed to in Step 5.
 ::
 
    ansible-playbook -i hosts micado-master.yml
@@ -208,6 +216,29 @@ If you have used Vault to encrypt your credentials, you have to add the path to 
 ::
 
     ansible-playbook -i hosts micado-master.yml --ask-vault-pass
+
+
+(Optional)
+**********
+You can now split the deployment of your MiCADO Master in two. The ``build`` tags prepare the node will all the necessary dependencies, libraries and images necessary for operation. The ``start`` tags intialise the cluster and all the MiCADO core components.
+
+You can clone the drive of a **"built"** MiCADO Master (or otherwise make an image from it) to be reused again and again. This will greatly speed up the deployment of future instances of MiCADO.
+
+Running the following command will ``build`` a MiCADO Master node on an empty Ubuntu 16.04 VM. 
+::
+
+   ansible-playbook -i hosts micado-master.yml --tags 'build'
+
+You can then run the following command to ``start`` any **"built"** MiCADO Master node which will initialise and launch the core components for operation.
+::
+
+   ansible-playbook -i hosts micado-master.yml --tags 'start'
+
+As a last measure of increasing efficiency, you can now also ``build`` a MiCADO Worker node. You can then clone/snapshot/image the drive of this VM and point to it in your ADT descriptions. Before running this operation, you must adjust the *hosts* file accordingly, as you did in Step 4, this time changing the values on the line beginning **micado-worker**. The following command will ``build`` a MiCADO Worker node on an empty Ubuntu 16.04 VM.
+::
+
+   ansible-playbook -i hosts build-micado-worker.yml
+
 
 After deployment
 ================
@@ -222,7 +253,8 @@ Once the deployment has successfully finished, you can proceed with
 Check the logs
 ==============
 
-You can SSH into MiCADO master and check the logs at any point after MiCADO is succesfully deployed. All logs are kept under ``/var/log/micado`` and are organised by components. Scaling decisions, for example, can be inspected under ``/var/log/micado/policykeeper``
+All logs are now available via the Kubernetes Dashboard on the MiCADO Dashboard. You can navigate to them by changing the **namespace** to ``micado-system`` or ``micado-worker`` and then accessing the logs in the **Pods** section
+You can also SSH into MiCADO master and check the logs at any point after MiCADO is succesfully deployed. All logs are kept under ``/var/log/micado`` and are organised by components. Scaling decisions, for example, can be inspected under ``/var/log/micado/policykeeper``
 
 Accessing user-defined service
 ==============================

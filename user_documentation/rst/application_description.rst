@@ -195,10 +195,14 @@ The collection of docker containers (kubernetes applications) specified in the p
 
 The following ports and protocols should be enabled on the virtual machine acting as MiCADO worker, replacing [exposed_application_ports] with ports you wish to expose on the host:
 
-::
-
-   TCP: 22, 8300, 8301, 8302, 8500, 8600, 9100, 9200 , 10250, [exposed_application_ports]
-   UDP: 8285, 8301, 8302, 8472, 8600
+========  =============  ====================
+Protocol  Port(s)        Service
+========  =============  ====================
+ TCP      30000-32767*   exposed application node ports (configurable*)
+ TCP      22             SSH
+ TCP      10250          kubelet
+ UDP      8285 & 8472    flannel overlay network
+========  =============  ====================
 
 The following subsections details how to configure them.
 
