@@ -3,7 +3,7 @@
 Tutorials
 *********
 
-You can find some demo applications under the subdirectories of the ‘testing’ directory in the downloaded (and unzipped) installation package of MiCADO. 
+You can find some demo applications under the subdirectories of the ‘testing’ directory in the downloaded (and unzipped) installation package of MiCADO.
 
 stressng
 ========
@@ -19,7 +19,7 @@ This application contains a single service, performing a constant CPU load. The 
 
  * In CloudSigma, for example, the ``libdrive_id`` , ``public_key_id`` and ``firewall_policy`` fields must be completed. Without these, CloudSigma does not have enough information to launch your worker nodes. All information is found on the CloudSigma Web UI. ``libdrive_id`` is the long alphanumeric string in the URL when a drive is selected under “Storage/Library”. ``public_key_id`` is under the “Access & Security/Keys Management” menu as **Uuid**. ``firewall_policy`` can be found when selecting a rule defined under the “Networking/Policies” menu. The following ports must be opened for MiCADO workers: *all inbound connections from MiCADO master*
 
-*  Step3: Update the parameter file, called ``_settings``. You need the ip address for the MiCADO master and should name the application by setting the APP_ID  ***the application ID can not contain any underscores ( _ )** You should also change the SSL user/password/port information if they are different from the default.
+*  Step3: Update the parameter file, called ``_settings``. You need the ip address for the MiCADO master and should name the application by setting the APP_ID ***the application ID can not contain any underscores ( _ )** You should also change the SSL user/password/port information if they are different from the default.
 *  Step4: run ``1-submit-tosca-stressng.sh`` to create the minimum number of MiCADO worker nodes and to deploy the Kubernetes Deployment including the stressng app defined in the ``stressng.yaml`` TOSCA description.
 *  Step4a: run ``2-list-apps.sh`` to see currently running applications and their IDs
 *  Step5: run ``3-stress-cpu-stressng.sh 85`` to stress the service and increase the CPU load. After a few minutes, you will see the system respond by scaling up virtual machines and containers to the maximum specified.
@@ -29,16 +29,9 @@ This application contains a single service, performing a constant CPU load. The 
 cqueue
 ======
 
-This application demonstrates a deadline policy with CQueue. CQueue provides a lightweight queueing service 
-for executing containers. The entire infrastructure will be deployed by a single ADT as a microservices
-architecture. CQueue server (implemented by RabbitMQ, Redis and a web-based frontend) will be run on a 
-static VM in the cluster. The server stores items in a queue where each item represents a container execution. 
-CQueue workers will run on a separate set of scalable VMs, and are responsible for fetching items and preforming 
-the execution of the container locally. The demonstration below shows that the items can be consumed before a 
-deadline using MiCADO for scaling the CQueue worker and its VM nodes.
+This application demonstrates a deadline policy with CQueue. CQueue provides a lightweight queueing service for executing containers. The entire infrastructure will be deployed by a single ADT as a microservices architecture. CQueue server (implemented by RabbitMQ, Redis and a web-based frontend) will be run on a static VM in the cluster. The server stores items in a queue where each item represents a container execution. CQueue workers will run on a separate set of scalable VMs, and are responsible for fetching items and preforming the execution of the container locally. The demonstration below shows that the items can be consumed before a deadline using MiCADO for scaling the CQueue worker and its VM nodes.
 
-If you prefer to launch your own cQueue server externally, use the docker-compose file ``docker-compose-cqueue-server.yaml`` 
-and edit the relevant shell scripts to point to your server and to launch ``micado-cqworker.yaml`` instead.
+If you prefer to launch your own cQueue server externally, use the docker-compose file ``docker-compose-cqueue-server.yaml`` and edit the relevant shell scripts to point to your server and to launch ``micado-cqworker.yaml`` instead.
 
 **Note:** make sure you have the ``jq`` tool installed required by the helper scripts.
 
@@ -73,7 +66,7 @@ This application deploys a http server with nginx. The container features a buil
 
  * In CloudSigma, for example, the ``libdrive_id`` , ``public_key_id`` and ``firewall_policy`` (port 30012 must be open) fields must be completed. Without these, CloudSigma does not have enough information to launch your worker nodes. All information is found on the CloudSigma Web UI. ``libdrive_id`` is the long alphanumeric string in the URL when a drive is selected under “Storage/Library”. ``public_key_id`` is under the “Access & Security/Keys Management” menu as **Uuid**. ``firewall_policy`` can be found when selecting a rule defined under the “Networking/Policies” menu. The following ports must be opened for MiCADO workers: *all inbound connections from MiCADO master*
 
-*  Step3: Update the parameter file, called ``_settings``. You need the ip address for the MiCADO master and should name the deployment by setting the APP_ID. ***the application ID can not contain any underscores ( _ )** The APP_NAME must match the name given to the application in TOSCA (default: **nginxapp**)  You should also change the SSL user/password/port information if they are different from the default.
+*  Step3: Update the parameter file, called ``_settings``. You need the ip address for the MiCADO master and should name the deployment by setting the APP_ID. ***the application ID can not contain any underscores ( _ )** The APP_NAME must match the name given to the application in TOSCA (default: **nginxapp**) You should also change the SSL user/password/port information if they are different from the default.
 *  Step4: run ``1-submit-tosca-nginx.sh`` to create the minimum number of MiCADO worker nodes and to deploy the Kubernetes Deployment including the nginx app defined in the ``nginx.yaml`` TOSCA description.
 *  Step4a: run ``2-list-apps.sh`` to see currently running applications and their IDs, as well as the ports forwarded to 8080 for accessing the HTTP service, which should now be accessible on <micado_worker_ip>:30012
 *  Step5: run ``3-generate-traffic.sh`` to generate some HTTP traffic. After thirty seconds or so, you will see the system respond by scaling up containers, and eventually virtual machines to the maximum specified.
@@ -83,9 +76,7 @@ This application deploys a http server with nginx. The container features a buil
 wordpress
 =========
 
-This application deploys a wordpress blog, complete with MySQL server and a Network File Share for peristent data storage. It is a proof-of-concept and is **NOT** production ready. 
-The policy defined for this application scales up/down both nodes and the wordpress frontend container based on network load. wrk (apt-get install wrk | https://github.com/wg/wrk) 
-is recommended for HTTP load testing, but you can use any load generator you wish.
+This application deploys a wordpress blog, complete with MySQL server and a Network File Share for peristent data storage. It is a proof-of-concept and is **NOT** production ready. The policy defined for this application scales up/down both nodes and the wordpress frontend container based on network load. wrk (apt-get install wrk | https://github.com/wg/wrk) is recommended for HTTP load testing, but you can use any load generator you wish.
 
 **Note:** make sure you have the ``jq`` tool and ``wrk`` benchmarking app installed as these are required by the helper scripts to force scaling. Best results for ``wrk`` are seen on multi-core systems.
 
@@ -95,8 +86,8 @@ is recommended for HTTP load testing, but you can use any load generator you wis
    **Important:** Make sure you create the appropriate firewall policy (port 30010 must be open) for the MiCADO workers as described :ref:`here <workerfirewallconfig>`!
 
  * In CloudSigma, for example, the ``libdrive_id`` , ``public_key_id`` and ``firewall_policy`` fields must be completed. Without these, CloudSigma does not have enough information to launch your worker nodes. All information is found on the CloudSigma Web UI. ``libdrive_id`` is the long alphanumeric string in the URL when a drive is selected under “Storage/Library”. ``public_key_id`` is under the “Access & Security/Keys Management” menu as **Uuid**. ``firewall_policy`` can be found when selecting a rule defined under the “Networking/Policies” menu. The following ports must be opened for MiCADO workers: *all inbound connections from MiCADO master*
- 
-*  Step3: Update the parameter file, called ``_settings``. You need the ip address for the MiCADO master and should name the deployment by setting the APP_ID. ***the application ID can not contain any underscores ( _ )** The FRONTEND_NAME: must match the name given to the application in TOSCA (default: **wordpress**)  You should also change the SSL user/password/port information if they are different from the default.
+
+*  Step3: Update the parameter file, called ``_settings``. You need the ip address for the MiCADO master and should name the deployment by setting the APP_ID. ***the application ID can not contain any underscores ( _ )** The FRONTEND_NAME: must match the name given to the application in TOSCA (default: **wordpress**) You should also change the SSL user/password/port information if they are different from the default.
 *  Step4: run ``1-submit-tosca-wordpress.sh`` to create the minimum number of MiCADO worker nodes and to deploy the Kubernetes Deployments for the NFS and MySQL servers and the Wordpress frontend.
 *  Step4a: run ``2-list-apps.sh`` to see currently running applications and their IDs, as well as the nodePort open on the host for accessing the HTTP service (defaults to 30010)
 *  Step5: navigate to your wordpress blog (generally at <worker_node_ip>:30010) and go through the setup tasks until you can see the front page of your blog

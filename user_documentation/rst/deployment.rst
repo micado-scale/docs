@@ -224,7 +224,7 @@ You can now split the deployment of your MiCADO Master in two. The ``build`` tag
 
 You can clone the drive of a **"built"** MiCADO Master (or otherwise make an image from it) to be reused again and again. This will greatly speed up the deployment of future instances of MiCADO.
 
-Running the following command will ``build`` a MiCADO Master node on an empty Ubuntu 16.04 VM. 
+Running the following command will ``build`` a MiCADO Master node on an empty Ubuntu 16.04 VM.
 ::
 
    ansible-playbook -i hosts micado-master.yml --tags 'build'
@@ -261,6 +261,6 @@ Accessing user-defined service
 
 In case your application contains a container exposing a service, you will have to ensure the following to access it.
 
-* First set **nodePort: xxxxx** (where xxxxx is a port in range 30000-32767) in the **properties: ports:** TOSCA description of your docker container. More information on this in the :ref:`applicationdescription` 
+* First set **nodePort: xxxxx** (where xxxxx is a port in range 30000-32767) in the **properties: ports:** TOSCA description of your docker container. More information on this in the :ref:`applicationdescription`
 * The container will be accessible at *<IP>:<port>* . Both, the IP and the port values can be extracted from the Kubernetes Dashboard (in case you forget it). The **IP** can be found under *Nodes > my_micado_vm > Addresses* menu, while the **port** can be found under *Discovery and load balancing > Services > my_app > Internal endpoints* menu.
 
