@@ -34,7 +34,9 @@ Here is an example for the structure of the MiCADO application description:
            ...
          interfaces:
            ...
-       ...
+         requirements:
+           ...
+       
        YOUR-OTHER-KUBERNETES-APP:
          type: tosca.nodes.MiCADO.Container.Application.Docker
          properties:
@@ -43,8 +45,17 @@ Here is an example for the structure of the MiCADO application description:
            ...
          interfaces:
            ...
+         requirements:
+           ...
+       
+       YOUR-VOLUME:
+         type: tosca.nodes.MiCADO.Container.Volume
+         properties:
+           ...
+         interfaces:
+           ...
 
-       YOUR_VIRTUAL_MACHINE:
+       YOUR-VIRTUAL-MACHINE:
          type: tosca.nodes.MiCADO.<CLOUD_API_TYPE>.Compute
          properties:
            ...
@@ -54,6 +65,18 @@ Here is an example for the structure of the MiCADO application description:
            host:
              properties:
                ...
+
+       YOUR-OTHER-VIRTUAL-MACHINE:
+         type: tosca.nodes.MiCADO.<CLOUD_API_TYPE>.Compute
+         properties:
+           ...
+         interfaces:
+           ...
+         capabilities:
+           host:
+             properties:
+               ...
+
      outputs:
        ports:
          value: { get_attribute: [ YOUR-KUBERNETES-APP, port ]}
@@ -61,7 +84,7 @@ Here is an example for the structure of the MiCADO application description:
      policies:
      - scalability:
        type: tosca.policies.Scaling.MiCADO
-       targets: [ YOUR_VIRTUAL_MACHINE ]
+       targets: [ YOUR-VIRTUAL-MACHINE ]
        properties:
          ...
      - scalability:
@@ -115,6 +138,9 @@ The *configure* field *inputs* will override the **pod** metadata & spec of that
             type: tosca.artifacts.Deployment.Image.Container.Docker
             file: YOUR_DOCKER_IMAGE
             repository: docker_hub
+         requirements:
+         - host:
+             node: YOUR-VIRTUAL-MACHINE
          interfaces:
            Kubernetes:
              create:
@@ -160,21 +186,43 @@ kubernetes app. Three fields must be defined:
 * **file**: docker image for the kubernetes app (e.g. sztakilpds/cqueue_frontend:latest )
 * **repository**: name of the repository where the image is located. The name used here (e.g. docker_hub), must be defined at the top of the description under the **repositories** section.
 
+Under the **requirements** section you can define the virtual machine you want to host this particular app, 
+restricting the container to run **only** on that VM. If you do not provide a host requirement, the container will 
+run on any possible virtual machine. You can also attach a volume to this app - the definition of volumes can be 
+found in the next section. Requirements takes a list of map objects:
+
+* **host:**
+    **node:** name of your virtual machine as defined under node_templates
+
+* **volume:**
+
+    **node:** name of your volume as defined under node_templates
+
+    **relationship:**
+
+        **type:** tosca.relationships.AttachesTo
+
+        **properties:**
+            **location:** path on container
+
 Under the **interfaces** section you can define orchestrator specific options, here we use the key **Kubernetes:**
 
 * **create**: *this key tells MiCADO to create a workload (Deployment/DaemonSet/Job/Pod etc...) for this container*
 
-  * **implementation**: this should always point to your image artifact
-  * **inputs**: top-level workload and workload spec options follow here... Some examples, see `translator documentation <https://github.com/jaydesl/TOSCAKubed/blob/master/README.md>`__
+
+    **implementation**: *this should always point to your image artifact*
+
+    **inputs**: *top-level workload and workload spec options follow here... Some examples, see* `translator documentation <https://github.com/jaydesl/TOSCAKubed/blob/master/README.md>`__
   
-    * **kind:** overwrite the workload type (defaults to Deployment)
-    * **strategy.type:** change to Recreate to kill pods then update (defaults to RollingUpdate)
+       **kind:** overwrite the workload type (defaults to Deployment)
+      
+       **strategy.type:** change to Recreate to kill pods then update (defaults to RollingUpdate)
 
 * **configure**: *this key configures the Pod for this workload*
 
-  * **inputs**: `PodTemplateSpec <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podspec-v1-core>`__ options follow here... For example
+    **inputs**: `PodTemplateSpec <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podspec-v1-core>`__ options follow here... For example
   
-    * **restartPolicy:** change the restart policy (defaults to Always)
+     **restartPolicy:** change the restart policy (defaults to Always)
 
 **A word on networking in Kubernetes**
 
@@ -186,10 +234,34 @@ is no network to explicitly define. If the **ports** keyword is defined in the d
 Under the **outputs** section (this key is **NOT** nested within *node_templates*) 
 you can define an output to retrieve from Kubernetes via the adaptor. Currently, only port info is obtainable.
 
+Specification of Volumes
+====================================
+Volumes are defined at the same level as virtual machines and containers, and are then connected to containers using the 
+**requirements** notation provided above in the container spec.
+
+Under the **properties** section of a volume (see **YOUR-VOLUME**) you should define a name.:
+* **name**: name for the volume
+
+Under the **interfaces** section you can define orchestrator specific options, here we use the key **Kubernetes:**
+
+* **create**: *this key tells MiCADO to create a persistent volume and claim*
+
+  * **inputs**: volume specific spec options go here... these are two popular examples, see `Kubernetes Documentation <https://kubernetes.io/docs/concepts/storage/volumes/>`__ for more
+   
+    * **nfs:**
+        **server:** IP of NFS server
+        
+        **path:** path on NFS share
+
+      **OR**
+
+    * **hostPath:**
+        **path:** path on host
+
 Specification of the Virtual Machine
 ====================================
 
-The collection of docker containers (kubernetes applications) specified in the previous section is orchestrated by Kubernetes. This section introduces how the parameters of the virtual machine can be configured which will host the Kubernetes worker node. During operation MiCADO will instantiate as many virtual machines with the parameters defined here as required during scaling. MiCADO currently supports four different cloud interfaces: CloudSigma, CloudBroker, EC2, Nova. 
+The collection of docker containers (kubernetes applications) specified in the previous section is orchestrated by Kubernetes. This section introduces how the parameters of the virtual machine can be configured which will host the Kubernetes worker node. During operation MiCADO will instantiate as many virtual machines with the parameters defined here as required during scaling. MiCADO currently supports four different cloud interfaces: CloudSigma, CloudBroker, EC2, Nova. MiCADO supports multiple virtual machine "sets" which can be restricted and host only specific containers (defined in the requirements section of the container specification). At the moment multi-cloud support is in alpha stage, so only certain combinations of different cloud service providers will work.
 
 .. _workerfirewallconfig:
 
@@ -410,7 +482,7 @@ Under the **properties** section of a Nova virtual machine definition these inpu
 Description of the scaling policy
 =================================
 
-To utilize the autoscaling functionality of MiCADO, scaling policies can be defined on virtual machine and on the application level. Scaling policies can be listed under the **policies** section. Each **scalability** subsection must have the **type** set to the value of ``tosca.policies.Scaling.MiCADO`` and must be linked to a node defined under **node_template**. The link can be implemented by specifying the name of the node under the **targets** subsection. The details of the scaling policy can be defined under the **properties** subsection. The structure of the **policies** section can be seen below.
+To utilize the autoscaling functionality of MiCADO, scaling policies can be defined on virtual machine and on the application level. Scaling policies can be listed under the **policies** section. Each **scalability** subsection must have the **type** set to the value of ``tosca.policies.Scaling.MiCADO`` and must be linked to a node defined under **node_template**. The link can be implemented by specifying the name of the node under the **targets** subsection. You can attach different policies to different containers or virtual machines, though a new policy should exist for each. The details of the scaling policy can be defined under the **properties** subsection. The structure of the **policies** section can be seen below.
 
 ::
 
@@ -423,14 +495,22 @@ To utilize the autoscaling functionality of MiCADO, scaling policies can be defi
        YOUR-OTHER-KUBERNETES-APP:
          type: tosca.nodes.MiCADO.Container.Application.Docker
          ...
-       YOUR_VIRTUAL_MACHINE:
+       YOUR-VIRTUAL-MACHINE:
+         type: tosca.nodes.MiCADO.Occopus.<CLOUD_API_TYPE>.Compute
+         ...
+       YOUR-OTHER-VIRTUAL-MACHINE:
          type: tosca.nodes.MiCADO.Occopus.<CLOUD_API_TYPE>.Compute
          ...
 
      policies:
      - scalability:
        type: tosca.policies.Scaling.MiCADO
-       targets: [ YOUR_VIRTUAL_MACHINE ]
+       targets: [ YOUR-VIRTUAL-MACHINE ]
+       properties:
+         ...
+     - scalability:
+       type: tosca.policies.Scaling.MiCADO
+       targets: [ YOUR-OTHER-VIRTUAL-MACHINE ]
        properties:
          ...
      - scalability:
