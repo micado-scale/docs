@@ -192,7 +192,7 @@ We recommend making a copy of our predefined template and edit it. Use the templ
    cp sample-hosts hosts
    edit hosts
 
-Edit the ``hosts`` file to set ansible variables for MiCADO master machine. Update the following parameters on the line beginning **micado-master**:
+Edit the ``hosts`` file to set ansible variables for MiCADO master machine. There are two lines in this file, one with the details of a desired **micado-master** and one with the details of a desired **micado-worker**. For this step, as we are deploying a master, update the following parameters on the line beginning **micado-master**:
 
 * **ansible_host**: specifies the publicly reachable ip address of MiCADO master. Set the public or floating ``IP`` of the master regardless the deployment method is remote or local. The ip specified here is used by the Dashboard for webpage redirection as well
 * **ansible_connection**: specifies how the target host can be reached. Use "ssh" for remote or "local" for local installation. In case of remote installation, make sure you can authenticate yourself against MiCADO master. We recommend to deploy your public ssh key on MiCADO master before starting the deployment
@@ -234,7 +234,7 @@ You can then run the following command to ``start`` any **"built"** MiCADO Maste
 
    ansible-playbook -i hosts micado-master.yml --tags 'start'
 
-As a last measure of increasing efficiency, you can now also ``build`` a MiCADO Worker node. You can then clone/snapshot/image the drive of this VM and point to it in your ADT descriptions. Before running this operation, you must adjust the *hosts* file accordingly, as you did in Step 4, this time changing the values on the line beginning **micado-worker**. The following command will ``build`` a MiCADO Worker node on an empty Ubuntu 16.04 VM.
+As a last measure of increasing efficiency, you can now also ``build`` a MiCADO Worker node. You can then clone/snapshot/image the drive of this VM and point to it in your ADT descriptions. Before running this operation, you must adjust the *hosts* file accordingly, as you did in Step 5, this time changing the values on the line beginning **micado-worker**. The following command will ``build`` a MiCADO Worker node on an empty Ubuntu 16.04 VM.
 ::
 
    ansible-playbook -i hosts build-micado-worker.yml
