@@ -47,7 +47,7 @@ and edit the relevant shell scripts to point to your server and to launch ``mica
     -  Update each ‘ADD_YOUR_ID_HERE’ string with the proper value retrieved under your CloudSigma account.
     -  Make sure port 30888 is open on the ``cq-server`` virtual machine set
 
-*  Step2: Update the parameter file, called ``_settings`` . You need the ip address for the MiCADO master and, once your worker nodes are running, you can enter the IP for the CQueue server which is about to be deployed.
+*  Step2: Update the parameter file, called ``_settings`` . You need the ip address for the MiCADO master and, once your worker nodes are running, you should enter the IP for the CQueue server which is about to be deployed. Setting the IP of the CQueue server is a required step if your MiCADO Master does not have the appropriate port open.
 *  Step3: Run ``./1-deploy-cq-microservices.sh`` to deploy the cQueue server and worker components to separate virtual machine nodes
 *  Step4: Use your Cloud WebUI and find the public IP of the VM hosting the cQueue server (in fact, this can be **any** VM in your cluster with port 30888 open)
 *  Step5: Run ``./3-get_date_in_epoch_plus_seconds.sh 600`` to calculate the unix timestamp representing the deadline by which the items (containers) must be finished. Take the value from the last line of the output produced by the script. The value is 600 seconds from now.
