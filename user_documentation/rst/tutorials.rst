@@ -40,7 +40,7 @@ If you prefer to launch your own cQueue server externally, use the docker-compos
     -  Update each ‘ADD_YOUR_ID_HERE’ string with the proper value retrieved under your CloudSigma account.
     -  Make sure port 30888 is open on the ``cq-server`` virtual machine set
 
-*  Step2: Update the parameter file, called ``_settings`` . You need the ip address for the MiCADO master and, once your worker nodes are running, you can enter the IP for the CQueue server which is about to be deployed.
+*  Step2: Update the parameter file, called ``_settings`` . You need the ip address for the MiCADO master and, once your worker nodes are running, you should enter the IP for the CQueue server which is about to be deployed. Setting the IP of the CQueue server is a required step if your MiCADO Master does not have the appropriate port open.
 *  Step3: Run ``./1-deploy-cq-microservices.sh`` to deploy the cQueue server and worker components to separate virtual machine nodes
 *  Step4: Use your Cloud WebUI and find the public IP of the VM hosting the cQueue server (in fact, this can be **any** VM in your cluster with port 30888 open)
 *  Step5: Run ``./3-get_date_in_epoch_plus_seconds.sh 600`` to calculate the unix timestamp representing the deadline by which the items (containers) must be finished. Take the value from the last line of the output produced by the script. The value is 600 seconds from now.
@@ -69,7 +69,7 @@ This application deploys a http server with nginx. The container features a buil
 *  Step3: Update the parameter file, called ``_settings``. You need the ip address for the MiCADO master and should name the deployment by setting the APP_ID. ***the application ID can not contain any underscores ( _ )** The APP_NAME must match the name given to the application in TOSCA (default: **nginxapp**) You should also change the SSL user/password/port information if they are different from the default.
 *  Step4: run ``1-submit-tosca-nginx.sh`` to create the minimum number of MiCADO worker nodes and to deploy the Kubernetes Deployment including the nginx app defined in the ``nginx.yaml`` TOSCA description.
 *  Step4a: run ``2-list-apps.sh`` to see currently running applications and their IDs, as well as the ports forwarded to 8080 for accessing the HTTP service, which should now be accessible on <micado_worker_ip>:30012
-*  Step5: run ``3-generate-traffic.sh`` to generate some HTTP traffic. After thirty seconds or so, you will see the system respond by scaling up containers, and eventually virtual machines to the maximum specified.
+*  Step5: run ``3-generate-traffic.sh`` to generate some HTTP traffic. After thirty seconds or so, you will see the system respond by scaling up containers, and eventually virtual machines to the maximum specified. **NOTE:** In some cases, depending on your cloud, the pre-configured load test may be too weak to trigger a scaling response from MiCADO. If this is the case, edit the file ``3-generate-traffic.sh`` and increase the load options in the command on the very last line, for example ``wrk -t4 -c40 -d8m http://.....`` On the other hand, a load test too powerful will be like launching a denial-of-service attack on yourself.
 *  Step5a: the load test will finish after 10 minutes and the infrastructure will scale back down
 *  Step6: run ``4-undeploy-nginx.sh`` to remove the nginx deployment and all the MiCADO worker nodes
 
@@ -91,6 +91,6 @@ This application deploys a wordpress blog, complete with MySQL server and a Netw
 *  Step4: run ``1-submit-tosca-wordpress.sh`` to create the minimum number of MiCADO worker nodes and to deploy the Kubernetes Deployments for the NFS and MySQL servers and the Wordpress frontend.
 *  Step4a: run ``2-list-apps.sh`` to see currently running applications and their IDs, as well as the nodePort open on the host for accessing the HTTP service (defaults to 30010)
 *  Step5: navigate to your wordpress blog (generally at <worker_node_ip>:30010) and go through the setup tasks until you can see the front page of your blog
-*  Step6: run ``3-generate-traffic.sh`` to generate some HTTP traffic. After thirty seconds or so, you will see the system respond by scaling up a VM and containers to the maximum specified.
+*  Step6: run ``3-generate-traffic.sh`` to generate some HTTP traffic. After thirty seconds or so, you will see the system respond by scaling up a VM and containers to the maximum specified. **NOTE:** In some cases, depending on your cloud, the pre-configured load test may be too weak to trigger a scaling response from MiCADO. If this is the case, edit the file ``3-generate-traffic.sh`` and increase the load options in the command on the very last line, for example ``wrk -t4 -c40 -d8m http://.....`` On the other hand, a load test too powerful will be like launching a denial-of-service attack on yourself.
 *  Step6a: the load test will stop after 10minutes and the infrastructure will scale back down
 *  Step7: run ``4-undeploy-wordpress.sh`` to remove the wordpress deployment and all the MiCADO worker nodes

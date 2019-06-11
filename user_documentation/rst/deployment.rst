@@ -185,14 +185,14 @@ Protocol  Port(s)        Service
 Step 5: Customize the inventory file for the MiCADO master.
 -----------------------------------------------------------
 
-We recommend making a copy of our predefined template and edit it. Use the template inventory file, called sample-hosts for customisation.
+We recommend making a copy of our predefined template and edit it. Use the template inventory file, called sample-hosts.yml for customisation.
 
 ::
 
-   cp sample-hosts hosts
-   edit hosts
+   cp sample-hosts.yml hosts.yml
+   edit hosts.yml
 
-Edit the ``hosts`` file to set ansible variables for MiCADO master machine. Update the following parameters on the line beginning **micado-master**:
+Edit the ``hosts.yml`` file to set ansible variables for the MiCADO master machine, and if you are preparing an image for one, the MiCADO worker machine. There are two entries in this file, one with the details of a desired **micado-master** and one with the details of a desired **micado-worker**. For this step, as we are deploying a master, update the following parameters under the key **micado-master**:
 
 * **ansible_host**: specifies the publicly reachable ip address of MiCADO master. Set the public or floating ``IP`` of the master regardless the deployment method is remote or local. The ip specified here is used by the Dashboard for webpage redirection as well
 * **ansible_connection**: specifies how the target host can be reached. Use "ssh" for remote or "local" for local installation. In case of remote installation, make sure you can authenticate yourself against MiCADO master. We recommend to deploy your public ssh key on MiCADO master before starting the deployment
@@ -210,12 +210,12 @@ Step 6: Start the installation of MiCADO master.
 Run the following command to build and initalise a MiCADO master node on the empty VM you launched in Step 4 and pointed to in Step 5.
 ::
 
-   ansible-playbook -i hosts micado-master.yml
+   ansible-playbook -i hosts.yml micado-master.yml
 
 If you have used Vault to encrypt your credentials, you have to add the path to your vault credentials to the command line as described in the `Ansible Vault documentation <https://docs.ansible.com/ansible/2.4/vault.html#providing-vault-passwords>`_ or provide it via command line using the command
 ::
 
-    ansible-playbook -i hosts micado-master.yml --ask-vault-pass
+    ansible-playbook -i hosts.yml micado-master.yml --ask-vault-pass
 
 
 (Optional)
@@ -227,17 +227,17 @@ You can clone the drive of a **"built"** MiCADO Master (or otherwise make an ima
 Running the following command will ``build`` a MiCADO Master node on an empty Ubuntu 16.04 VM.
 ::
 
-   ansible-playbook -i hosts micado-master.yml --tags 'build'
+   ansible-playbook -i hosts.yml micado-master.yml --tags 'build'
 
 You can then run the following command to ``start`` any **"built"** MiCADO Master node which will initialise and launch the core components for operation.
 ::
 
-   ansible-playbook -i hosts micado-master.yml --tags 'start'
+   ansible-playbook -i hosts.yml micado-master.yml --tags 'start'
 
-As a last measure of increasing efficiency, you can now also ``build`` a MiCADO Worker node. You can then clone/snapshot/image the drive of this VM and point to it in your ADT descriptions. Before running this operation, you must adjust the *hosts* file accordingly, as you did in Step 4, this time changing the values on the line beginning **micado-worker**. The following command will ``build`` a MiCADO Worker node on an empty Ubuntu 16.04 VM.
+As a last measure of increasing efficiency, you can now also ``build`` a MiCADO Worker node. You can then clone/snapshot/image the drive of this VM and point to it in your ADT descriptions. Before running this operation, you must adjust the *hosts.yml* file accordingly, as you did in Step 5, this time changing the values under the key **micado-worker**. The following command will ``build`` a MiCADO Worker node on an empty Ubuntu 16.04 VM.
 ::
 
-   ansible-playbook -i hosts build-micado-worker.yml
+   ansible-playbook -i hosts.yml build-micado-worker.yml
 
 
 After deployment
