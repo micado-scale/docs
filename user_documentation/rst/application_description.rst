@@ -10,7 +10,7 @@ Application description has four main sections:
 * **tosca_definitions_version**: ``tosca_simple_yaml_1_0``.
 * **imports**: a list of urls pointing to custom TOSCA types. The default url points to the custom types defined for MiCADO. Please, do not modify this url.
 * **repositories**: docker repositories with their addresses.
-* **topology_template**: the goal of the application description is to define 1) kubernetes deployments (of docker containers), 2) virtual machine (under the **node_templates** section) and 3) the scaling policy under the **policies** subsection. These sections will be detailed in subsections below.
+* **topology_template**: the goal of the application description is to define 1) kubernetes deployments (of docker containers), 2) virtual machines (under the **node_templates** section) and 3) the scaling policy under the **policies** subsection. These sections will be detailed in subsections below.
 
 Here is an example for the structure of the MiCADO application description:
 
@@ -134,10 +134,10 @@ The *configure* field *inputs* will override the **pod** metadata & spec of that
            env:
            ...
          artifacts:
-          image:
-            type: tosca.artifacts.Deployment.Image.Container.Docker
-            file: YOUR_DOCKER_IMAGE
-            repository: docker_hub
+           image:
+             type: tosca.artifacts.Deployment.Image.Container.Docker
+             file: YOUR_DOCKER_IMAGE
+             repository: docker_hub
          requirements:
          - host:
              node: YOUR-VIRTUAL-MACHINE
@@ -151,8 +151,8 @@ The *configure* field *inputs* will override the **pod** metadata & spec of that
                inputs:
                  ...
      outputs:
-        ports:
-          value: { get_attribute: [ YOUR-KUBERNETES-APP, port ]}
+       ports:
+         value: { get_attribute: [ YOUR-KUBERNETES-APP, port ]}
 
 The fields under the **properties** section of the Kubernetes app are a collection of options specific to all iterations
 of Docker containers. The translator understands both Docker-Compose style naming and Kubernetes style naming, though 
@@ -160,7 +160,7 @@ the Kubernetes style is recommended. You can find additional information about p
 `translator documentation <https://github.com/jaydesl/TOSCAKubed/blob/master/README.md>`__. These  properties will be translated 
 into Kubernetes manifests on deployment.
 
-Under the **properties** section of an app (see **YOUR-KUBERNETES-APP**) here are a few common keywords.:
+Under the **properties** section of an app (see **YOUR-KUBERNETES-APP**) here are a few common keywords:
 
 * **name**: name for the container (defaults to the TOSCA node name)
 * **command**: override the default command line expression to be executed by the container.
@@ -169,8 +169,8 @@ Under the **properties** section of an app (see **YOUR-KUBERNETES-APP**) here ar
 * **resource.requests.cpu**: CPU reservation, should be set 100m lower than max (900m == 1000m)
 * **ports**: list of published ports to the host machine, you can specify these keywords in the style of a `Kubernetes Service <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#service-v1-core>`__
 
-  * **targetPort**: the port to target (assumes port if not specified)
-  * **port**: the port to publish (assumes targetPort if not specified)
+  * **target**: the port to target (assumes port if not specified)
+  * **port**: the port to publish (assumes target if not specified)
   * **name**: the name of this port in the service (will be generated if not specified)
   * **protocol**: the protocol for the port (defaults to: TCP)
   * **nodePort**: the port (30000-32767) to expose on the host (this will create a nodePort Service unless type is explicitly set below)
@@ -295,7 +295,7 @@ The **interfaces** section of all virtual machine definitions that follow are **
 
   * **inputs**: Specific settings for Occopus follow here
   
-    * **interface_cloud:** tells Occopus which cloud to interface with
+    * **interface_cloud:** tells Occopus which cloud type to interface with
     * **endpoint_cloud:** tells Occopus the endpoint API of the cloud
 
 

@@ -5,8 +5,8 @@ REST API
 
 MiCADO has a TOSCA compliant submitter which enables submiting, updating, listing and removing MiCADO applications. MiCADO offers two modes for running applications:
 
-* **Normal mode**: This is the default mode for running a MiCADO application by executing all the adaptors. 
-* **Dryrun mode**: Launching a MiCADO application in *dryrun* mode tells MiCADO to simulate the execution of the adaptors without actually executing them. The *dryrun* mode is activated by setting the parameter **dryrun=True** when launching a new application.
+* **Normal mode**: The application is executed by MiCADO as described in the TOSCA ADT (default).
+* **Dryrun mode**: The application is not executed by MiCADO, submission is only simulated and tested. The *dryrun* mode is activated by setting the parameter **dryrun=True** when launching a new application.
 
 The submitter exposes the following REST API:
 ---------------------------------------------
