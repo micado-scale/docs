@@ -1,6 +1,33 @@
 Release Notes
 *************
 
+**v0.7.3 (14 Jun 2019)**
+
+- update MiCADO internal core services to run in Kubernetes pods
+- remove Consul and replace it with Prometheus’ Kubernetes Service Discovery
+- update cAdvisor and NodeExporter to run as Kubernetes DaemonSets
+- introduce the support for creating prepared image for the MiCADO master and the MiCADO worker
+- introduce the support for deploying unique “sets” of virtual machines scaling independently
+- update Grafana to track the independently scaling VMs from the drop-down Node ID
+- update scrape interval between Prometheus and cAdvisor to be less frequent
+- fix the Occopus Adaptor to correctly raise exceptions for the submitter
+- update Kubernetes Dashboard to improve RBAC permissions
+- update the Flannel Overlay deployment
+- update the Kubernetes eviction thresholds on the Master node to be lowered
+- remove Docker-Compose from Master & Workers
+- fix dependencies and vulnerabilities
+- add dry-run support for the Submitter upon launch of TOSCA ADT
+- add new api call for the Submitter to validate TOSCA template
+- improve Submitter logs
+- improve Submitter responses to users
+- improve handling of wrong template by Submitter
+- add support for hv_relaxed and hv_tsc CloudSigma specific properties
+- add support for tagging EC2 type resources
+- add disk and free space checking to the deployment playbook
+- update the Wordpress demo to demonstrate “virtual machine sets”
+- update the cQueue demo to demonstrate “virtual machine sets”
+- fix and improve the NGINX demo
+
 **v0.7.2-rev1 (01 Apr 2019)**
 
 - fix dependency issue for Kubernetes 1.13.1 (`kubernetes/kubernetes#75683 <https://github.com/kubernetes/kubernetes/issues/75683>`__)
