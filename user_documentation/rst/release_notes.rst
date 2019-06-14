@@ -1,7 +1,7 @@
 Release Notes
 *************
 
-**v0.7.3 (13 Jun 2019)**
+**v0.7.3 (14 Jun 2019)**
 
 - update MiCADO internal core services to run in Kubernetes pods
 - remove Consul and replace it with Prometheus’ Kubernetes Service Discovery
@@ -18,15 +18,15 @@ Release Notes
 - fix dependencies and vulnerabilities
 - add dry-run support for the Submitter upon launch of TOSCA ADT
 - add new api call for the Submitter to validate TOSCA template
-- improve Submitter logs 
-- improve Submitter responses to users 
+- improve Submitter logs
+- improve Submitter responses to users
 - improve handling of wrong template by Submitter
 - add support for hv_relaxed and hv_tsc CloudSigma specific properties
 - add support for tagging EC2 type resources
 - add disk and free space checking to the deployment playbook
 - update the Wordpress demo to demonstrate “virtual machine sets”
 - update the cQueue demo to demonstrate “virtual machine sets”
-- fix and improve the NGINX demo 
+- fix and improve the NGINX demo
 
 **v0.7.2-rev1 (01 Apr 2019)**
 
