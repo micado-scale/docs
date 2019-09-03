@@ -540,7 +540,8 @@ The **properties** subsection defines the scaling policy itself. For monitoring 
              UPPER_THRESHOLD: 90
              MYCONST: 'any string'
            queries:
-             THELOAD: 'Prometheus query expression'
+             THELOAD: 'Prometheus query expression returning a number'
+             MYLISTOFSTRING: ['Prometheus query returning a list of strings as tags','tagname as filter']
              MYEXPR: 'something refering to {{MYCONST}}'
            alerts:
              - alert: myalert
@@ -560,7 +561,7 @@ The subsections have the following roles:
 
 * **sources** supports the dynamic attachment of an external exporter by specifying a list endpoints of exporters (see example above). Each item found under this subsection is configured under Prometheus to start collecting the information provided/exported by the exporters. Once done, the values of the parameters provided by the exporters become available. MiCADO supports Kubernetes service discovery to define such a source, simply pass the name of the app as defined in TOSCA and do not specify any port number
 * **constants** subsection is used to predefined fixed parameters. Values associated to the parameters can be referred by the scaling rule as variable (see ``LOWER_THRESHOLD`` above) or in any other sections referred as Jinja2 variable (see ``MYEXPR`` above).
-* **queries** contains the list of Prometheus query expressions to be executed and their variable name associated (see ``THELOAD`` above)
+* **queries** contains the list of Prometheus query expressions to be executed and their variable name associated (see ``THELOAD`` or ``MYLISTOFSTRING`` above)
 * **alerts** subsection enables the utilization of the alerting system of Prometheus. Each alert defined here is registered under Prometheus and fired alerts are represented with a variable of their name set to True during the evaluation of the scaling rule (see ``myalert`` above).
 * **min_instances** keyword specifies the lowest number of instances valid for the node.
 * **max_instances** keyword specifies the highest number of instances valid for the node.
@@ -575,11 +576,19 @@ The subsections have the following roles:
 
     - m_nodes: python list of nodes belonging to the kubernetes cluster
     - m_node_count: the target number of nodes
+    - m_nodes_todrop: the ids or ip addresses of the nodes to be dropped in case of downscaling
     - m_container_count: the target number of containers for the service the evaluation belongs to
     - m_time_since_node_count_changed: time in seconds elapsed since the number of nodes changed
 
   - In a scaling rule belonging to the virtual machine, the name of the variable to be updated is ``m_node_count``; as an effect the number stored in this variable will be set as target instance number for the virtual machines.
+  - In a scaling rule belonging to the virtual machine, the name of the variable to be updated is ``m_nodes_todrop``;the variable must be filled with list of ids or ip addresses and as an effect the valid nodes will be dropped. The variable ``m_node_count`` should not be modified in case of node dropping, MiCADO will update it automatically.
   - In a scaling rule belonging to a kubernetes deployment, the name of the variable to be set is ``m_container_count``; as an effect the number stored in this variable will be set as target instance number for the kubernetes service.
+  
+For debugging purposes, the following support is provided:
+
+* ``m_dryrun`` can be specified in the **constant** as list of components towards which the communication is disabled. It has the following syntax: m_dryrun: ["prometheus","occopus","k8s","optimizer"] Use this feature with caution!
+
+* the standard output of the python code defined by the user under the scaling rule section is collected in a separate log file stored under the policy keeper log directory. It can also be used for debugging purposes.
 
 For further examples, inspect the scaling policies of the demo examples detailed in the next section.
 
