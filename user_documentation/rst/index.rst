@@ -8,11 +8,13 @@ Introduction
 
 MiCADO is an auto-scaling framework for Docker containers, orchestrated by Kubernetes. It supports autoscaling at two levels. At virtual machine (VM) level, a built-in Kubernetes cluster is dynamically extended or reduced by adding/removing cloud virtual machines. At Kubernetes level, the number of replicas tied to a specific Kubernetes Deployment can be increased/decreased.
 
-MiCADO requires a TOSCA based Application Description to be submitted containing three sections:
-1) the definition of the individual applications making up a Kubernetes Deployment,
-2) the specification of the virtual machine and
-3) the implementation of scaling policy for both scaling levels. The format of the Application Description for
-MiCADO is detailed later.
+MiCADO requires a TOSCA-based Application Description Template to be submitted containing three sections:
+
+1. the definition of the individual applications making up a Kubernetes Deployment,
+2. the specification of the virtual machine and
+3. the implementation of policies for scaling and monitoring both levels of the application.
+
+The format of the Application Description Template for MiCADO is detailed later.
 
 To use MiCADO, first the MiCADO core services must be deployed on a virtual machine (called MiCADO Master) by an Ansible playbook. MiCADO Master is configured as the Kubernetes Master Node and has installed the Docker Engine, Occopus (to scale VMs), Prometheus (for monitoring), Policy Keeper (to perform decision on scaling) and Submitter (to provide submission endpoint) microservices to realize the autoscaling control loops. During operation MiCADO workers (realised on new VMs) are instantiated on demand which deploy Prometheus Node Exporter and CAdvisor as Kubernetes DaemonSets and the Docker engine through contextualisation. The newly instantiated MiCADO workers join the Kubernetes cluster managed by the MiCADO Master.
 
