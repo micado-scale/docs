@@ -65,7 +65,7 @@ Example of the overall structure of an ADT
            ...
          requirements:
            ...
-       
+
        YOUR-VOLUME:
          type: tosca.nodes.MiCADO.Container.Volume
          properties:
@@ -131,10 +131,12 @@ here are a few common keywords:
 
   * **name:**
   * **value:**
+  * **valueFrom:** **!! see note below**
+* **envFrom**: **!! see note below**
 * **resource:**
 
   * **requests:**
-  
+
     * **cpu**: CPU reservation, core components usually require 100m so assume
       900m as a maximum
 * **ports**: list of published ports to the host machine, you can specify these
@@ -156,6 +158,25 @@ here are a few common keywords:
     service. Explicit naming can be used to group different ports together
     (default grouping is by type)
 
+**!! NEW in v0.8.0**
+
+Environment variables can be loaded in from configuration
+data in Kubernetes ConfigMaps. This can be accomplished by using **envFrom:**
+with a list of **configMapRef:** to load all data from a ConfigMap into
+environment variables as seen
+`here <https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables>`__
+, or by using **env:** and **valueFrom:**  with **configMapKeyRef:** to load
+specific values into environment variables as seen
+`here <https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data>`__
+.
+
+Alternatively, ConfigMaps can be mounted as volumes as discussed
+`here <https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#add-configmap-data-to-a-volume>`__
+, in the same way other volumes are attached to a container, using the
+**requirements:** notation below. Also see the examples in **Specification**
+**of Configuration Data** below.
+
+
 Artifacts
 ~~~~~~~~~
 Under the **artifacts** section you can define the docker image for the
@@ -173,20 +194,21 @@ Requirements
 Under the **requirements** section you can define the virtual machine
 you want to host this particular app, restricting the container to run
 **only** on that VM. If you do not provide a host requirement, the container
-will run on any possible virtual machine. You can also attach a volume to
-this app - the definition of volumes can be found in the next section.
-Requirements takes a list of map objects:
+will run on any possible virtual machine. You can also attach a volume or
+ConfigMap to this app - the definition of volumes can be found in the next
+section. Requirements takes a list of map objects:
 
 * **host:** name of your virtual machine as defined under node_templates
 * **volume:**
 
-  * **node:** name of your volume as defined under node_templates
+  * **node:** name of your volume (or ConfigMap) as defined under
+    node_templates
   * **relationship:** **!!**
 
     * **type:** ``tosca.relationships.AttachesTo``
     * **properties:**
 
-      * **location:** path on container
+      * **location:** path in container
 
 * **container:** name of a sidecar container defined as a
   ``tosca.nodes.MiCADO.Container.Application.Docker`` type under
@@ -196,7 +218,9 @@ Requirements takes a list of map objects:
 
 **!! (NEW in v0.8.0)** If a relationship is not defined for a volume the
 path on container will be the same as the path defined in the volume
-(see Specification of Volumes)
+(see Specification of Volumes). If no path is defined in the volume,
+the path defaults to */etc/micado/volumes* for a Volume or
+*/etc/micado/configs* for a ConfigMap
 
 Interfaces
 ~~~~~~~~~~
@@ -232,8 +256,11 @@ Types
 ~~~~~
 
 **NEW in v0.8.0** Through abstraction, it is possible to reference a
-pre-defined type and simplify the description of a container. Currently
-MiCADO supports these types, though more can be written:
+pre-defined parent type and simplify the description of a container. These
+parent types can hide or reduce the complexity of more complex TOSCA constructs
+such as **artifacts** and **interfaces** by enforcing defaults or moving them
+to a simpler construct such as **properties**. Currently MiCADO supports the
+following types:
 
 * **tosca.nodes.MiCADO.Container.Application.Docker** -
   The base and most common type for Docker containers in MiCADO. If the
@@ -393,7 +420,7 @@ options, here we again use the key **Kubernetes:**
 
       * **path:** path on host
 
-* **configure**: 
+* **configure**:
 
   * **inputs**: using this key, options can be overwritten in the claim
 
@@ -401,26 +428,29 @@ Types
 ~~~~~
 
 **NEW in v0.8.0** Through abstraction, it is possible to reference a
-pre-defined type and simplify the description of a volume. Currently
-MiCADO supports these types, though more can be written:
+pre-defined parent type and simplify the description of a volume. These
+parent types can hide or reduce the complexity of more complex TOSCA constructs
+such as  **interfaces** by enforcing defaults or moving them
+to a simpler construct such as **properties**. Currently MiCADO supports the
+following volume types:
 
 * **tosca.nodes.MiCADO.Container.Volume** -
-  The base and most common type for Docker volumes in MiCADO. It is
+  The base and most common type for volumes in MiCADO. It is
   necessary to define further fields under **interfaces:**
 * **tosca.nodes.MiCADO.Container.Volume.EmptyDir** -
   Creates a `EmptyDir <https://kubernetes.io/docs/concepts/storage/volumes/#emptydir>`__
-  persistent volume and claim in Kubernetes
+  persistent volume (PV) and claim (PVC) in Kubernetes
 * **tosca.nodes.MiCADO.Container.Volume.HostPath** -
   Creates a `HostPath <https://kubernetes.io/docs/concepts/storage/volumes/#hostpath>`__
-  volume. Define the path on host as **path:** under **properties:**
+  PV and PVC. Define the path on host as **path:** under **properties:**
 * **tosca.nodes.MiCADO.Container.Volume.NFS** -
   Creates an `NFS <https://kubernetes.io/docs/concepts/storage/volumes/#nfs>`__
-  volume. Define the path and server IP as **path:** and **server:**
+  PV and PVC. Define the path and server IP as **path:** and **server:**
   under **properties:**
 * **tosca.nodes.MiCADO.Container.Volume.GlusterFS** -
   Creates a `GlusterFS <https://kubernetes.io/docs/concepts/storage/volumes/#glusterfs>`__
-  volume. Define path, endpoint and readOnly flag as **path:**, **endpoints:**,
-  and **readOnly:** under **properties:**
+  PV and PVC. Define path, endpoint and readOnly flag as **path:**,
+  **endpoints:**, and **readOnly:** under **properties:**
 
 Examples of the definition of a basic volume
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -437,7 +467,6 @@ Examples of the definition of a basic volume
             nfs:
               path: /exports
               server: 10.96.0.1
-
 
   YOUR-KUBERNETES-APP:
     type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
@@ -515,6 +544,127 @@ Examples of the definition of a basic volume
           properties:
             location: /tmp/container/mount/point
 
+Specification of Configuration Data
+-----------------------------------
+**NEW in v0.8.0**
+Configuration data (a Kubernetes **ConfigMap**) are to be defined at the same
+level as virtual machines, containers and volumes and then loaded into
+environment variables, or mounted as volumes in the definition of containers
+as discussed in **Specification of the Application**.
+Some examples of using configurations will follow at the end of this section.
+
+Interfaces
+~~~~~~~~~~
+
+Currently MiCADO only supports the definition of configuration
+data as Kubernetes ConfigMaps. Under the
+**interfaces** section of this type use the key **Kubernetes:**
+to instruct MiCADO to create a ConfigMap.
+
+* **create**: *this key tells MiCADO to create a ConfigMap*
+
+  * **inputs**: ConfigMap fields to be overwritten, for more detail see
+    `ConfigMap <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.15/#configmap-v1-core>`__
+
+    * **data:** for UTF-8 byte values
+    * **binaryData:** for byte values outside of the UTF-8 range
+
+Types
+~~~~~
+
+Through abstraction, it is possible to reference a
+pre-defined parent type and simplify the description of a ConfigMap.
+These parent types can hide or reduce the complexity of more complex TOSCA
+constructs such as **interfaces** by enforcing defaults or moving them
+to a simpler construct such as **properties**. Currently MiCADO supports the
+following ConfigMap types:
+
+* **tosca.nodes.MiCADO.Container.Config** -
+  The base and most common type for configuration data in MiCADO. It is
+  necessary to define further fields under **interfaces:** as indicated above
+* **tosca.nodes.MiCADO.Container.Config.Kubernetes** -
+  Defaults to a Kubernetes interface and abstracts the inputs to properties.
+  Define the data or binary data fields as **data:** and **binaryData:**
+  under **properties:**
+
+Examples of the definition of a simple ConfigMap
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Single ENV var with** *tosca.nodes.MiCADO.Container.Config*
+
+  Here the environment variable MY_COLOUR is assigned a value
+  from the ConfigMap
+
+::
+
+  YOUR-CONFIG:
+    type: tosca.nodes.MiCADO.Container.Config
+    interfaces:
+      Kubernetes:
+        create:
+          inputs:
+            data:
+              color: purple
+              how: fairlyNice
+              textmode: "true"
+
+  YOUR-KUBERNETES-APP:
+    type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
+    properties:
+      env:
+      - name: MY_COLOUR
+        valueFrom:
+          configMapKeyRef:
+            name: YOUR-CONFIG
+            key: color
+
+**All ENV vars with** *tosca.nodes.MiCADO.Container.Config.Kubernetes*
+
+  Here an environment variable is created for each key (this becomes the
+  variable name) and value pair in the ConfigMap
+
+::
+
+  YOUR-CONFIG:
+    type: tosca.nodes.MiCADO.Container.Config.Kubernetes
+    properties:
+      data:
+        color: purple
+        how: fairlyNice
+        textmode: "true"
+
+  YOUR-KUBERNETES-APP:
+    type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
+    properties:
+      envFrom:
+      - configMapRef:
+            name: YOUR-CONFIG
+
+**A volume with** *tosca.nodes.MiCADO.Container.Config.Kubernetes*
+
+  Here a volume at /etc/config is populated with three files named
+  after the ConfigMap key names and containing the matching values
+
+::
+
+  YOUR-CONFIG:
+    type: tosca.nodes.MiCADO.Container.Config.Kubernetes
+    properties:
+      data:
+        color: purple
+        how: fairlyNice
+        textmode: "true"
+
+  YOUR-KUBERNETES-APP:
+    type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
+    requirements:
+    - volume:
+        node: YOUR-CONFIG
+        relationship:
+          type: tosca.relationships.AttachesTo
+          properties:
+            location: /etc/config
+
 Specification of the Virtual Machine
 ------------------------------------
 
@@ -535,7 +685,9 @@ service providers will work.
 
 .. _workerfirewallconfig:
 
-The following ports and protocols should be enabled on the virtual machine acting as MiCADO worker, replacing [exposed_application_ports] with ports you wish to expose on the host:
+The following ports and protocols should be enabled on the virtual machine
+acting as MiCADO worker, replacing [exposed_application_ports] with ports you
+wish to expose on the host:
 
 ========  =============  ====================
 Protocol  Port(s)        Service
@@ -551,20 +703,29 @@ The following subsections details how to configure them.
 General
 ~~~~~~~
 
-The **capabilities** sections for all virtual machine definitions that follow are identical and are **ENTIRELY OPTIONAL**. They are filled with metadata to support human readability.:
+The **capabilities** sections for all virtual machine definitions that follow
+are identical and are **ENTIRELY OPTIONAL**. They are filled with metadata to
+support human readability.:
 
-*  **num_cpus** under *host* is a readable string specifying clock speed of the instance type
-*  **mem_size** under *host* is a readable string specifying RAM of the instance type
-*  **type** under *os* is a readable string specifying the operating system type of the image
-*  **distribution** under *os* is a readable string specifying the OS distro of the image
-*  **version** under *os* is a readable string specifying the OS version of the image
+* **num_cpus** under *host* is a readable string specifying clock speed
+  of the instance type
+* **mem_size** under *host* is a readable string specifying RAM of the
+  instance type
+* **type** under *os* is a readable string specifying the operating system
+  type of the image
+* **distribution** under *os* is a readable string specifying the OS distro
+  of the image
+* **version** under *os* is a readable string specifying the OS version of
+  the image
 
-The **interfaces** section of all virtual machine definitions that follow are **REQUIRED**, and allow you to provide orchestrator specific inputs, in the examples below we use **Occopus**.
+The **interfaces** section of all virtual machine definitions that follow
+are **REQUIRED**, and allow you to provide orchestrator specific inputs, in
+the examples below we use **Occopus**.
 
 * **create**: *this key tells MiCADO to create the VM using Occopus*
 
   * **inputs**: Specific settings for Occopus follow here
-  
+
     * **interface_cloud:** tells Occopus which cloud type to interface with
     * **endpoint_cloud:** tells Occopus the endpoint API of the cloud
 
@@ -573,7 +734,9 @@ The **interfaces** section of all virtual machine definitions that follow are **
 CloudSigma
 ~~~~~~~~~~
 
-To instantiate MiCADO workers on CloudSigma, please use the template below. MiCADO **requires** num_cpus, mem_size, vnc_password, libdrive_id, public_key_id and firewall_policy to instantiate VM on *CloudSigma*.
+To instantiate MiCADO workers on CloudSigma, please use the template below.
+MiCADO **requires** num_cpus, mem_size, vnc_password, libdrive_id,
+public_key_id and firewall_policy to instantiate VM on *CloudSigma*.
 
 ::
 
@@ -607,20 +770,30 @@ To instantiate MiCADO workers on CloudSigma, please use the template below. MiCA
               interface_cloud: cloudsigma
               endpoint_cloud: ADD_YOUR_ENDPOINT (e.g for cloudsigma https://zrh.cloudsigma.com/api/2.0 )
 
-Under the **properties** section of a CloudSigma virtual machine definition these inputs are available.:
+Under the **properties** section of a CloudSigma virtual machine definition
+these inputs are available.:
 
-*  **num_cpus** is the speed of CPU (e.g. 4096) in terms of MHz of your VM to be instantiated. The CPU frequency required to be between 250 and 100000
-*  **mem_size** is the amount of RAM (e.g. 4294967296) in terms of bytes to be allocated for your VM. The memory required to be between 268435456 and 137438953472
-*  **vnc_password** set the password for your VNC session (e.g. secret).
-*  **libdrive_id** is the image id (e.g. 87ce928e-e0bc-4cab-9502-514e523783e3) on your CloudSigma cloud. Select an image containing a base os installation with cloud-init support!
-*  **public_key_id** specifies the keypairs (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e) to be assigned to your VM.
-*  **nics[.firewall_policy | .ip_v4_conf.conf]**  specifies network policies (you can define multiple security groups in the form of a list for your VM).
+* **num_cpus** is the speed of CPU (e.g. 4096) in terms of MHz of your VM
+  to be instantiated. The CPU frequency required to be between 250 and 100000
+* **mem_size** is the amount of RAM (e.g. 4294967296) in terms of bytes to be
+  allocated for your VM. The memory required to be between 268435456 and
+  137438953472
+* **vnc_password** set the password for your VNC session (e.g. secret).
+* **libdrive_id** is the image id (e.g. 87ce928e-e0bc-4cab-9502-514e523783e3)
+  on your CloudSigma cloud. Select an image containing a base os installation
+  with cloud-init support!
+* **public_key_id** specifies the keypairs
+  (e.g. d7c0f1ee-40df-4029-8d95-ec35b34dae1e) to be assigned to your VM.
+* **nics[.firewall_policy && .ip_v4_conf.conf]**  specifies network policies
+  (you can define multiple security groups in the form of a list for your VM).
 
 
 CloudBroker
 ~~~~~~~~~~~
 
-To instantiate MiCADO workers on CloudBroker, please use the template below. MiCADO **requires** deployment_id and instance_type_id to instantiate a VM on *CloudBroker*.
+To instantiate MiCADO workers on CloudBroker, please use the template below.
+MiCADO **requires** deployment_id and instance_type_id to instantiate a VM on
+*CloudBroker*.
 
 ::
 
@@ -649,17 +822,31 @@ To instantiate MiCADO workers on CloudBroker, please use the template below. MiC
               interface_cloud: cloudbroker
               endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://cola-prototype.cloudbroker.com )
 
-Under the **properties** section of a CloudBroker virtual machine definition these inputs are available.:
+Under the **properties** section of a CloudBroker virtual machine definition
+these inputs are available.:
 
-*  **deployment_id** is the id of a preregistered deployment in CloudBroker referring to a cloud, image, region, etc. Make sure the image contains a base OS (preferably Ubuntu) installation with cloud-init support! The id is the UUID of the deployment which can be seen in the address bar of your browser when inspecting the details of the deployment.
-*  **instance_type_id** is the id of a preregistered instance type in CloudBroker referring to the capacity of the virtual machine to be deployed. The id is the UUID of the instance type which can be seen in the address bar of your browser when inspecting the details of the instance type.
-*  **key_pair_id** is the id of a preregistered ssh public key in CloudBroker which will be deployed on the virtual machine. The id is the UUID of the key pair which can be seen in the address bar of your browser when inspecting the details of the key pair.
-*  **opened_port** is one or more ports to be opened to the world. This is a string containing numbers separated by a comma.
+* **deployment_id** is the id of a preregistered deployment in CloudBroker
+  referring to a cloud, image, region, etc. Make sure the image contains a
+  base OS (preferably Ubuntu) installation with cloud-init support! The id is
+  the UUID of the deployment which can be seen in the address bar of your
+  browser when inspecting the details of the deployment.
+* **instance_type_id** is the id of a preregistered instance type in
+  CloudBroker referring to the capacity of the virtual machine to be deployed.
+  The id is the UUID of the instance type which can be seen in the address bar
+  of your browser when inspecting the details of the instance type.
+* **key_pair_id** is the id of a preregistered ssh public key in CloudBroker
+  which will be deployed on the virtual machine. The id is the UUID of the key
+  pair which can be seen in the address bar of your browser when inspecting the
+  details of the key pair.
+* **opened_port** is one or more ports to be opened to the world. This is a
+  string containing numbers separated by a comma.
 
 EC2
 ~~~
 
-To instantiate MiCADO workers on a cloud through EC2 interface, please use the template below. MiCADO **requires** region_name, image_id and instance_type to instantiate a VM through *EC2*.
+To instantiate MiCADO workers on a cloud through EC2 interface, please use the
+template below. MiCADO **requires** region_name, image_id and instance_type to
+instantiate a VM through *EC2*.
 
 ::
 
@@ -687,19 +874,28 @@ To instantiate MiCADO workers on a cloud through EC2 interface, please use the t
             interface_cloud: ec2
             endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com)
 
-Under the **properties** section of an EC2 virtual machine definition these inputs are available.:
+Under the **properties** section of an EC2 virtual machine definition these
+inputs are available.:
 
-*  **region_name** is the region name within an EC2 cloud (e.g. eu-west-1).
-*  **image_id** is the image id (e.g. ami-12345678) on your EC2 cloud. Select an image containing a base os installation with cloud-init support!
-*  **instance_type** is the instance type (e.g. t1.small) of your VM to be instantiated.
-*  **key_name** optionally specifies the keypair (e.g. my_ssh_keypair) to be deployed on your VM.
-*  **security_group_ids** optionally specify security settings (you can define multiple security groups or just one, but this property must be formatted as a list, e.g. [sg-93d46bf7]) of your VM.
-*  **subnet_id** optionally specifies subnet identifier (e.g. subnet-644e1e13) to be attached to the VM.
+* **region_name** is the region name within an EC2 cloud (e.g. eu-west-1).
+* **image_id** is the image id (e.g. ami-12345678) on your EC2 cloud. Select an
+  image containing a base os installation with cloud-init support!
+* **instance_type** is the instance type (e.g. t1.small) of your VM to be
+  instantiated.
+* **key_name** optionally specifies the keypair (e.g. my_ssh_keypair) to be
+  deployed on your VM.
+* **security_group_ids** optionally specify security settings (you can define
+  multiple security groups or just one, but this property must be formatted as
+  a list, e.g. [sg-93d46bf7]) of your VM.
+* **subnet_id** optionally specifies subnet identifier (e.g. subnet-644e1e13)
+  to be attached to the VM.
 
 Nova
 ~~~~
 
-To instantiate MiCADO workers on a cloud through Nova interface, please use the template below. MiCADO **requires** image_id flavor_name, project_id and network_id to instantiate a VM through *Nova*.
+To instantiate MiCADO workers on a cloud through Nova interface, please use the
+template below. MiCADO **requires** image_id flavor_name, project_id and
+network_id to instantiate a VM through *Nova*.
 
 ::
 
@@ -731,15 +927,22 @@ To instantiate MiCADO workers on a cloud through Nova interface, please use the 
             interface_cloud: nova
             endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
 
-Under the **properties** section of a Nova virtual machine definition these inputs are available.:
+Under the **properties** section of a Nova virtual machine definition these
+inputs are available.:
 
-*  **project_id** is the id of project you would like to use on your target Nova cloud.
-*  **image_id** is the image id on your Nova cloud. Select an image containing a base os installation with cloud-init support!
-*  **flavor_name** is the name of flavor to be instantiated on your Nova cloud.
-*  **server_name** optionally defines the hostname of VM (e.g.:”helloworld”).
-*  **key_name** optionally sets the name of the keypair to be associated to the instance. Keypair name must be defined on the target nova cloud before launching the VM.
-*  **security_groups** optionally specify security settings (you can define multiple security groups in the form of a list) for your VM.
-*  **network_id** is the id of the network you would like to use on your target Nova cloud.
+* **project_id** is the id of project you would like to use on your target
+  Nova cloud.
+* **image_id** is the image id on your Nova cloud. Select an image containing
+  a base os installation with cloud-init support!
+* **flavor_name** is the name of flavor to be instantiated on your Nova cloud.
+* **server_name** optionally defines the hostname of VM (e.g.:”helloworld”).
+* **key_name** optionally sets the name of the keypair to be associated to the
+  instance. Keypair name must be defined on the target nova cloud before
+  launching the VM.
+* **security_groups** optionally specify security settings (you can define
+  multiple security groups in the form of a list) for your VM.
+* **network_id** is the id of the network you would like to use on your target
+  Nova cloud.
 
 Types
 ~~~~~
@@ -763,7 +966,7 @@ Example definition of a VM using abstraction
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **With** *tosca.nodes.MiCADO.CloudSigma.Compute.Occo.small*
-and omitting capabilities metadata
+**and omitting capabilities metadata**
 
 ::
 
