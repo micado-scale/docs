@@ -98,6 +98,13 @@ Example of the overall structure of an ADT
        targets: [ YOUR-OTHER-KUBERNETES-APP ]
        properties:
          ...
+     - network:
+       type: tosca.policies.Security.MiCADO.Network.HttpProxy
+       properties:
+         encryption: true
+         encryption_key: |
+           -----BEGIN PRIVATE KEY-----
+           ...
 
 Specification of the Application
 --------------------------------
@@ -1170,10 +1177,362 @@ Requesting scaling advice from the Optimizer
   - **reliability** represents the goodness of the advice with a number between 0 and 100. The bigger the number is the better/more reliable the advice is.
   - **error_msg** contains the error occured in the Optimiser. Filled when valid is False.
 
+Description of the network policy
+=================================
 
+There are six types of MiCADO network security policy.
 
+* tosca.policies.Security.MiCADO.Network.Passthrough: Pass through network policy. Specifies no additional filtering, no application-level firewall on the nodes.
 
-  
+* tosca.policies.Security.MiCADO.Network.L7Proxy: Apply application-level firewall; can provide TLS control. No protocol enforcement.
 
+::
 
+    properties:
+      encryption:
+        type: boolean
+        description: Specifies if encryption should be used
+        required: true
+      encryption_key:
+        type: string
+        description: The key file for TLS encryption as unencrypted .PEM
+        required: false
+      encryption_cert:
+        type: string
+        description: The cert file for TLS encryption as .PEM
+        required: false
+      encryption_offload:
+        type: string
+        description: Controls whether connection should be re-encrypted server side
+        required: false
+      encryption_cipher:
+        type: string
+        description: Specifies allowed ciphers client side during TLS handshake
+        required: false
 
+* tosca.policies.Security.MiCADO.Network.SmtpProxy: Enforce SMTP protocol, can provide TLS control.
+
+::
+
+    properties:
+      relay_check:
+        type: boolean
+        description: Toggle relay checking
+        required: true
+      permit_percent_hack:
+        type: boolean
+        description: Allow the % symbol in the local part of an email address
+        required: false
+      error_soft:
+        type: boolean
+        description: Return a soft error when recipient filter does not match
+        required: false
+      relay_domains:
+        type: list
+        description: Domain mails are accepted for use postfix style lists
+        required: false
+      permit_exclamation_mark:
+        type: boolean
+        description: Allow the ! symbol in the local part of an email address
+        required: false
+      relay_domains_matcher_whitelist:
+        type: list
+        description: Domains mails accepted based on list of regex (precedence)
+        required: false
+      relay_domains_matcher_blacklist:
+        type: list
+        description: Domain mails rejected based on list of regular expressions
+        required: false
+      sender_matcher_whitelist:
+        type: list
+        description: Sender addresses accepted based on list of regex (precedence)
+        required: false
+      sender_matcher_blacklist:
+        type: list
+        description: Sender addresses rejected based on list of regex
+        required: false
+      recipient_matcher_whitelist:
+        type: list
+        description: Recipient addresses accepted based on list of regex (precedence)
+        required: false
+      recipient_matcher_blacklist:
+        type: list
+        description: Recipient addresses rejected based on list of regex
+        required: false
+      autodetect_domain_from:
+        type: string
+        description: Let Zorp autodetect firewall domain name and write to received line
+        constraints:
+          - valid_values: ["mailname", "fqdn"]
+        required: false
+      append_domain:
+        type: string
+        description: Domain to append to email addresses which do not specify a domain
+        required: false
+      permit_omission_of_angle_brackets:
+        type: boolean
+        description: Permit MAIL From and RCPT To params without normally required brackets
+        required: false
+      interval_transfer_noop:
+        type: integer
+        description: Interval between two NOOP commands sent to server while waiting for stack proxy results
+        required: false
+      resolve_host:
+        type: boolean
+        description: Resolve client host from IP address and write to received line
+        required: false
+      permit_long_responses:
+        type: boolean
+        description: Permit overly long responses as some MTAs include variable parts in responses
+        required: false
+      max_auth_request_length:
+        type: integer
+        description: Maximum allowed length of a request during SASL style authentication
+        required: false
+      max_response_length:
+        type: integer
+        description: Maximum allowed line length of server response
+        required: false
+      unconnected_response_code:
+        type: integer
+        description: Error code sent to client if connecting to server fails
+        required: false
+      add_received_header:
+        type: boolean
+        description: Add a received header into the email messages transferred by proxy
+        required: false
+      domain_name:
+        type: string
+        description: Fix a domain name into added receive line. add_received_header must be true
+        required: false
+      tls_passthrough:
+        type: boolean
+        description: Change to passthrough mode
+        required: false
+      extensions:
+        type: list
+        description: Allowed ESMTP extensions, indexed by extension verb
+        required: false
+      require_crlf:
+        type: boolean
+        description: Specify whether proxy should enforce valid CRLF line terminations
+        required: false
+      timeout:
+        type: integer
+        description: Timeout in ms - if no packet arrives, connection is dropped
+        required: false
+      max_request_length:
+        type: integer
+        description: Maximum allowed line length of client requests
+        required: false
+      permit_unknown_command:
+        type: boolean
+        description: Enable unknown commands
+        required: false
+
+* tosca.policies.Security.MiCADO.Network.HttpProxy: Enforce HTTP protocol, can provide TLS control.
+
+::
+
+    properties:
+      max_keepalive_requests:
+        type: integer
+        description: Max number of requests allowed in a single session
+        required: false
+      permit_proxy_requests:
+        type: boolean
+        description: Allow proxy type requests in transparent mode
+        required: false
+      reset_on_close:
+        type: boolean
+        description: If connection is terminated without a proxy generated error, send an RST instead of a normal close
+        required: false
+      permit_unicode_url:
+        type: boolean
+        description: Allow unicode characters in URLs encoded as u'
+        required: false
+      permit_server_requests:
+        type: boolean
+        description: Allow server type requests in non transparent mode
+        required: false
+      max_hostname_length:
+        type: integer
+        description: Maximum allowed length of hostname field in URLs
+        required: false
+      parent_proxy:
+        type: string
+        description: Address or hostname of parent proxy to be connected
+        required: false
+      permit_ftp_over_http:
+        type: boolean
+        description: Allow processing FTP URLs in non transparent mode
+        required: false
+      parent_proxy_port:
+        type: integer
+        description: Port of parent proxy to be connected
+        required: false
+      permit_http09_responses:
+        type: boolean
+        description: Allow server responses to use limited HTTP 0 9 protocol
+        required: false
+      rewrite_host_header:
+        type: boolean
+        description: Rewrite host header in requests when URL redirection occurs
+        required: false
+      max_line_length:
+        type: integer
+        description: Maximum allowed length of lines in requests and responses
+        required: false
+      max_chunk_length:
+        type: integer
+        description: Maximum allowed length of a single chunk when using chunked transer encoding
+        required: false
+      strict_header_checking_action:
+        type: string
+        description: Specify Zorp action if non rfc or unknown header in communication
+        constraints:
+          - valid_values: ["accept", "drop", "abort"]
+        required: false
+      non_transparent_ports:
+        type: list
+        description: List of ports that non transparent requests may use
+        required: false
+      strict_header_checking:
+        type: boolean
+        description: Require RFC conformant HTTP headers
+        required: false
+      max_auth_time:
+        type: integer
+        description: Force new auth request from client browser after time in seconds
+        required: false
+      max_url_length:
+        type: integer
+        description: Maximum allowed length of URL in a request
+        required: false
+      timeout_request:
+        type: integer
+        description: Time to wait for a request to arrive from client
+        required: false
+      rerequest_attempts:
+        type: integer
+        description: Control number of attempts proxy takes to send request to server
+        required: false
+      error_status:
+        type: integer
+        description: On error, Zorp uses this as status code of HTTP response
+        required: false
+      keep_persistent:
+        type: boolean
+        description: Try to keep connection to client persistent, even if unsupported
+        required: false
+      error_files_directory:
+        type: string
+        description: Location of HTTP error messages
+        required: false
+      max_header_lines:
+        type: integer
+        description: Maximum number of eader lines allowed in requests and responses
+        required: false
+      use_canonicalized_urls:
+        type: boolean
+        description: Enable canonicalization - converts URLs to canonical form
+        required: false
+      max_body_length:
+        type: integer
+        description: Maximum allowed length of HTTP request or response body
+        required: false
+      require_host_header:
+        type: boolean
+        description: Require presence of host header
+        required: false
+      buffer_size:
+        type: integer
+        description: Size of I O buffer used to transfer entity bodies
+        required: false
+      permitted_responses:
+        type: list
+        description: Normative policy hash for HTTP responses indexed by HTTP method and response code
+        entry_schema:
+          description: dictionary (string/int)
+          type: map
+        required: false
+      transparent_mode:
+        type: boolean
+        description: Enable transparent mode for the proxy
+        required: false
+      permit_null_response:
+        type: boolean
+        description: Permit RFC incompliant responses with headers not terminated by CRLF, and not containing entity body
+        required: false
+      language:
+        type: string
+        description: Specify language of HTTP error pages displayed to client
+        required: false
+        default: English
+      error_silent:
+        type: boolean
+        description: Turns off verbose error reporting to HTTP client, making firewall fingerprinting more difficult
+        required: false
+      permitted_requests:
+        type: list
+        description: List of permitted HTTP methods indexed by verb
+        required: false
+      use_default_port_in_transparent_mode:
+        type: boolean
+        description: Enable use of default port in transparent mode
+        required: false
+      timeout_response:
+        type: integer
+        description: Time to wait for the HTTP status line to arrive from the server
+        required: false
+      permit_invalid_hex_escape:
+        type: boolean
+        description: Allow invalid hexadecimal escaping in URLs
+        required: false
+      auth_cache_time:
+        type: integer
+        description: Caching authentication information time in seconds
+        required: false
+      timeout:
+        type: integer
+        description: General I O timeout in ms
+        required: false
+      default_port:
+        type: integer
+        description: Used in non transparent mode when URL does not contain a port number
+        required: false
+        default: 80
+
+* tosca.policies.Security.MiCADO.Network.HttpURIFilterProxy: Enforce HTTP protocol with regex URL filtering capabilities
+
+::
+
+    properties:
+      matcher_whitelist:
+        type: list
+        description: List of regex determining permitted access to a URL (precedence)
+        required: true
+      matcher_blacklist:
+        type: list
+        description: List of regex determining prohibited access to a URL
+        required: true
+
+* tosca.policies.Security.MiCADO.Network.HttpWebdavProxy: Enforce HTTP protocol with request methods for WebDAV.
+
+This proxy has no additional properties.
+
+Description of the secret policy
+================================
+
+There is a way to define application-level secrets in the MiCADO application description. These secrets are distributed by kubernetes.
+
+::
+
+  tosca.policies.Security.MiCADO.Secret.KubernetesSecretDistribution:
+    derived_from: tosca.policies.Root
+    description: distributes secrets to services
+    properties:
+      file_secrets:
+        type: map
+      text_secrets:
+        type: map
