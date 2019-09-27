@@ -22,13 +22,13 @@ For cloud interfaces supported by MiCADO:
 
 For the MiCADO master:
 
-* Ubuntu 16.04
+* Ubuntu 16.04, 18.04 (the worker image **must be** the same)
 * (Minimum) 2GHz CPU & 3GB RAM & 15GB DISK
 * (Recommended) 2GHz CPU & 4GB RAM & 20GB DISK
 
 For the host where the Ansible playbook is executed (differs depending on local or remote):
 
-* Ansible 2.4 or greater
+* Ansible 2.8 or greater
 * curl
 * jq (to pretty-format API responses)
 * wrk (to load test nginx & wordpress demonstrators)
@@ -36,9 +36,9 @@ For the host where the Ansible playbook is executed (differs depending on local 
 Ansible
 -------
 
-Note: Ansible in the Ubuntu 16.04 APT repository is outdated and insufficient (at the time of writing this document)
+Note: Ansible in the Ubuntu APT repository is outdated and insufficient (at the time of writing this document)
 
-To install Ansible on Ubuntu 16.04, use these commands:
+To install Ansible on Ubuntu, use these commands:
 
 ::
 
