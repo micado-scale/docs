@@ -1141,7 +1141,7 @@ Optimiser can be utilised based on the following principles
   - When correlations are learnt, Optimiser turns to 'production' phase during which advice can be requested from the Optimiser. During this phase, Optimiser returns advice on request, where the advice contains the number of virtual machines (nodes) to be scaled to. During the production phase, the Optimiser continues its learning activity to adapt to the new situations.
 
 Activation of the Optimiser
-  Optimiser-related parameters must be inserted into the scaling policy to subsections "constants" and "queries". Each parameter relating to the Optimiser must start with the "m_opt\_" string. In case no variable name with this prefix is found in any sections, Optimiser is not activated.
+  Optimiser must be enabled at deployment time. By default it is disabled. Once it is enabled and deployed, it can be driven through the scaling policy in subsections "constants" and "queries". Each parameter relating to the Optimiser must start with the "m_opt\_" string. In case no variable name with this prefix is found in any sections, Optimiser is not activated.
 
 Initial settings for the Optimiser
   Parameters for initial settings are defined under the "constants" section and their name must start with the "m_opt_init\_" prefix. These parameters are as follows:
