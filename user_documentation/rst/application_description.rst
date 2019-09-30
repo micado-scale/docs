@@ -1,19 +1,19 @@
 .. _applicationdescription:
 
 
-Application Description Templates (ADT)
-=======================================
+Application Description Template (ADT)
+======================================
 
 Overview
 --------
 
-MiCADO executes applications described by an Application Description Template.
-ADTs follow the `TOSCA Specification
+MiCADO executes applications described by Application Description Template.
+The ADT follows the `TOSCA Specification
 <http://docs.oasis-open.org/tosca/TOSCA-Simple-Profile-YAML/v1.2/TOSCA-Simple-Profile-YAML-v1.2.pdf>`_
-and are described in detail in this section.
+and is described in detail in this section.
 
-The three main sections of an ADT
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Main sections of the ADT
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 **Top-level definitions**
 
@@ -110,8 +110,8 @@ Example of the overall structure of an ADT
          properties:
            ...
 
-Specification of the Application
---------------------------------
+Application
+-----------
 
 Under the node_templates section you can define one or more Docker containers
 and choose to orchestrate them with Kubernetes (see **YOUR-KUBERNETES-APP**).
@@ -169,8 +169,6 @@ here are a few common keywords:
     service. Explicit naming can be used to group different ports together
     (default grouping is by type)
 
-**!! NEW in v0.8.0**
-
 Environment variables can be loaded in from configuration
 data in Kubernetes ConfigMaps. This can be accomplished by using **envFrom:**
 with a list of **configMapRef:** to load all data from a ConfigMap into
@@ -225,9 +223,8 @@ section. Requirements takes a list of map objects:
   ``tosca.nodes.MiCADO.Container.Application.Docker`` type under
   node_templates. The sidecar will share the Kubernetes Pod with
   the main container (the sidecar should not be given an interface)
-  **(NEW in v0.8.0)**
 
-**!! (NEW in v0.8.0)** If a relationship is not defined for a volume the
+If a relationship is not defined for a volume the
 path on container will be the same as the path defined in the volume
 (see Specification of Volumes). If no path is defined in the volume,
 the path defaults to */etc/micado/volumes* for a Volume or
@@ -266,7 +263,7 @@ If **inputs:** is omitted a set of defaults will be used to create a Deployment
 Types
 ~~~~~
 
-**NEW in v0.8.0** Through abstraction, it is possible to reference a
+Through abstraction, it is possible to reference a
 pre-defined parent type and simplify the description of a container. These
 parent types can hide or reduce the complexity of more complex TOSCA constructs
 such as **artifacts** and **interfaces** by enforcing defaults or moving them
@@ -405,8 +402,8 @@ Currently, only port info is obtainable.
     ports:
       value: { get_attribute: [ YOUR-KUBERNETES-APP, port ]}
 
-Specification of Volumes
-------------------------
+Volume
+------
 Volumes are defined at the same level as virtual machines and containers,
 and are then connected to containers using the **requirements:** notation
 discussed above in the container spec. Some examples of attaching volumes
@@ -555,8 +552,8 @@ Examples of the definition of a basic volume
           properties:
             location: /tmp/container/mount/point
 
-Specification of Configuration Data
------------------------------------
+Configuration Data
+------------------
 **NEW in v0.8.0**
 Configuration data (a Kubernetes **ConfigMap**) are to be defined at the same
 level as virtual machines, containers and volumes and then loaded into
@@ -676,8 +673,8 @@ Examples of the definition of a simple ConfigMap
           properties:
             location: /etc/config
 
-Specification of the Virtual Machine
-------------------------------------
+Virtual Machine
+---------------
 
 The collection of docker containers (kubernetes applications) specified in the
 previous section is orchestrated by Kubernetes. This section introduces how the
@@ -992,11 +989,8 @@ Example definition of a VM using abstraction
           ip_v4_conf:
             conf: dhcp
 
-Specification of Policies
------------------------------------
-
-Monitoring Policies
-~~~~~~~~~~~~~~~~~~~
+Monitoring Policy
+-----------------
 
 **NEW in v0.8.0** Metric collection is now disabled by default. The basic
 exporters from previous MiCADO versions can be enabled through the monitoring
@@ -1013,8 +1007,11 @@ then the relevant metric collection will be disabled.
         enable_node_metrics: true
 
 
-Scaling Policies
-~~~~~~~~~~~~~~~~
+Scaling Policy
+--------------
+
+Basic scaling
+~~~~~~~~~~~~~
 
 To utilize the autoscaling functionality of MiCADO, scaling policies can be defined on virtual machine and on the application level. Scaling policies can be listed under the **policies** section. Each **scalability** subsection must have the **type** set to the value of ``tosca.policies.Scaling.MiCADO`` and must be linked to a node defined under **node_template**. The link can be implemented by specifying the name of the node under the **targets** subsection. You can attach different policies to different containers or virtual machines, though a new policy should exist for each. The details of the scaling policy can be defined under the **properties** subsection. The structure of the **policies** section can be seen below.
 
@@ -1125,8 +1122,8 @@ For debugging purposes, the following support is provided:
 
 For further examples, inspect the scaling policies of the demo examples detailed in the next section.
 
-Utilization of the Optimiser for scaling
-========================================
+Optimiser-based scaling
+~~~~~~~~~~~~~~~~~~~~~~~
 
 For implementing more advanced scaling policies, it is possible to utilize the built-in Optimiser in MiCADO. The role of the Optimiser is to support decision making in calculating the number of worker nodes (virtual machines) i.e. to scale the nodes to the optimal level. Optimiser is implemented using machine learning algorithm aiming to learn the relation between various metrics and the effect of scaling events. Based on this learning, the Optimiser is able to calculate and advise on the necessary number of virtual machines.
 
@@ -1181,8 +1178,8 @@ Requesting scaling advice from the Optimizer
   - **reliability** represents the goodness of the advice with a number between 0 and 100. The bigger the number is the better/more reliable the advice is.
   - **error_msg** contains the error occured in the Optimiser. Filled when valid is False.
 
-Description of the network policy
-=================================
+Network policy
+--------------
 
 There are six types of MiCADO network security policy.
 
@@ -1525,8 +1522,8 @@ There are six types of MiCADO network security policy.
 
 This proxy has no additional properties.
 
-Description of the secret policy
-================================
+Secret policy
+-------------
 
 There is a way to define application-level secrets in the MiCADO application description. These secrets are distributed by kubernetes.
 
