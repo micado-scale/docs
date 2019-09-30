@@ -83,27 +83,31 @@ Example of the overall structure of an ADT
            ...
 
      policies:
+     - monitoring:
+         type: tosca.policies.Monitoring.MiCADO
+         properties:
+           enable_container_metrics: true
+           enable_node_metrics: false
      - scalability:
-       type: tosca.policies.Scaling.MiCADO
-       targets: [ YOUR-VIRTUAL-MACHINE ]
-       properties:
-         ...
+         type: tosca.policies.Scaling.MiCADO
+         targets: [ YOUR-VIRTUAL-MACHINE ]
+         properties:
+           ...
      - scalability:
-       type: tosca.policies.Scaling.MiCADO
-       targets: [ YOUR-KUBERNETES-APP ]
-       properties:
-         ...
-     - scalability:
-       type: tosca.policies.Scaling.MiCADO
-       targets: [ YOUR-OTHER-KUBERNETES-APP ]
-       properties:
-         ...
+         type: tosca.policies.Scaling.MiCADO
+         targets: [ YOUR-KUBERNETES-APP ]
+         properties:
+           ...
      - network:
-       type: tosca.policies.Security.MiCADO.Network.HttpProxy
-       properties:
-         encryption: true
-         encryption_key: |
-           -----BEGIN PRIVATE KEY-----
+         type: tosca.policies.Security.MiCADO.Network.HttpProxy
+         properties:
+           encryption: true
+           encryption_key: |
+             -----BEGIN PRIVATE KEY-----
+             ...
+     - secret:
+         type: tosca.policies.Security.MiCADO.Secret.KubernetesSecretDistribution
+         properties:
            ...
 
 Specification of the Application
