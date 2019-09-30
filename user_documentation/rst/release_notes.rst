@@ -26,7 +26,7 @@ Release Notes
 - fix keypair distribution to worker nodes
 - update TOSCA template for Kubernetes application-level secret distribution
 - refactor Kubernetes translation
-- fix Policy Keeper Kubernetes node maintenance 
+- fix Policy Keeper Kubernetes node maintenance
 - propagate Kubelet configuration to woker nodes
 - support system cGroup driver by Docker & Kubernetes
 - fix Kubernetes node objects to be deleted on "undeploy"

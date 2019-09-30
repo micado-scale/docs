@@ -93,9 +93,9 @@ Step 1: Download the ansible playbook.
 
 ::
 
-   curl --output ansible-micado-0.7.3.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.7.3/ansible-micado-0.7.3.tar.gz
-   tar -zxvf ansible-micado-0.7.3.tar.gz
-   cd ansible-micado-0.7.3/
+   curl --output ansible-micado-0.8.0.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.8.0/ansible-micado-0.8.0.tar.gz
+   tar -zxvf ansible-micado-0.8.0.tar.gz
+   cd ansible-micado-0.8.0/
 
 Step 2: Specify cloud credential for instantiating MiCADO workers.
 ------------------------------------------------------------------
