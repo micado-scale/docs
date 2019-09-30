@@ -22,13 +22,13 @@ For cloud interfaces supported by MiCADO:
 
 For the MiCADO master:
 
-* Ubuntu 16.04
+* Ubuntu 16.04, 18.04 (the worker image **must be** the same)
 * (Minimum) 2GHz CPU & 3GB RAM & 15GB DISK
 * (Recommended) 2GHz CPU & 4GB RAM & 20GB DISK
 
 For the host where the Ansible playbook is executed (differs depending on local or remote):
 
-* Ansible 2.4 or greater
+* Ansible 2.8 or greater
 * curl
 * jq (to pretty-format API responses)
 * wrk (to load test nginx & wordpress demonstrators)
@@ -36,9 +36,9 @@ For the host where the Ansible playbook is executed (differs depending on local 
 Ansible
 -------
 
-Note: Ansible in the Ubuntu 16.04 APT repository is outdated and insufficient (at the time of writing this document)
+Note: Ansible in the Ubuntu APT repository is outdated and insufficient (at the time of writing this document)
 
-To install Ansible on Ubuntu 16.04, use these commands:
+To install Ansible on Ubuntu, use these commands:
 
 ::
 
@@ -93,9 +93,9 @@ Step 1: Download the ansible playbook.
 
 ::
 
-   curl --output ansible-micado-0.7.3.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.7.3/ansible-micado-0.7.3.tar.gz
-   tar -zxvf ansible-micado-0.7.3.tar.gz
-   cd ansible-micado-0.7.3/
+   curl --output ansible-micado-0.8.0.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.8.0/ansible-micado-0.8.0.tar.gz
+   tar -zxvf ansible-micado-0.8.0.tar.gz
+   cd ansible-micado-0.8.0/
 
 Step 2: Specify cloud credential for instantiating MiCADO workers.
 ------------------------------------------------------------------
@@ -192,9 +192,9 @@ We recommend making a copy of our predefined template and edit it. Use the templ
    cp sample-hosts.yml hosts.yml
    edit hosts.yml
 
-Edit the ``hosts.yml`` file to set the variables. For deploying the MiCADO master or for creating prepared image for the MiCADO master, set the variables under the **micado-master** section. For creating prepared image for the MiCADO workers, set the variables under the **micado-worker**. Depending on the activity (deployment or image creation) only the related settings are used, others are ignored. For deploying a master, the following parameters under the key **micado-master** can be updated:
+Edit the ``hosts.yml`` file to set the variables. The following parameters under the key **micado-target** can be updated:
 
-* **ansible_host**: specifies the publicly reachable ip address of MiCADO master. Set the public or floating ``IP`` of the master regardless the deployment method is remote or local. The ip specified here is used by the Dashboard for webpage redirection as well
+* **ansible_host**: specifies the publicly reachable ip address of the target machine where you intend to build/deploy a MiCADO Master or build a MiCADO Worker. Set the public or floating ``IP`` of the master regardless the deployment method is remote or local. The ip specified here is used by the Dashboard for webpage redirection as well
 * **ansible_connection**: specifies how the target host can be reached. Use "ssh" for remote or "local" for local installation. In case of remote installation, make sure you can authenticate yourself against MiCADO master. We recommend to deploy your public ssh key on MiCADO master before starting the deployment
 * **ansible_user**: specifies the name of your sudoer account, defaults to "ubuntu"
 * **ansible_become**: specifies if account change is needed to become root, defaults to "True"
@@ -203,11 +203,25 @@ Edit the ``hosts.yml`` file to set the variables. For deploying the MiCADO maste
 
 Please, revise all the parameters, however in most cases the default values are correct.
 
-Step 6: Start the installation of MiCADO master.
+Step 6: Customize the deployment
+--------------------------------
+
+A few parameters can be fine tuned before deployment. They are as follows:
+
+- **disable_optimizer**: Setting this parameter to False enables the deployment of the Optimizer module, to perform more advanced scaling. Default is True.
+
+- **disable_worker_updates**: Setting this parameter to False enables periodic software updates of the worker nodes. Default is True.
+
+- **grafana_admin_pwd**: The string defined here will be the password for Grafana administrator.
+
+- **web_listening_port**: Port number of the dasboard on MiCADO master. Default is 443.
+
+- **web_session_timeout**: Timeout value in seconds for the Dashboard. Default is 600.
+
+Step 7: Start the installation of MiCADO master.
 ------------------------------------------------
 
-
-Run the following command to build and initalise a MiCADO master node on the empty VM you launched in Step 4 and pointed to in Step 5.
+Run the following command to build and initalise a MiCADO master node on the empty VM you launched in Step 4 and pointed to in *hosts.yml* Step 5.
 
 ::
 
@@ -236,7 +250,7 @@ You can then run the following command to ``start`` any **"built"** MiCADO Maste
 
    ansible-playbook -i hosts.yml micado-master.yml --tags 'start'
 
-As a last measure of increasing efficiency, you can also ``build`` a MiCADO Worker node. You can then clone/snapshot/image the drive of this VM and point to it in your ADT descriptions. Before running this operation, you must adjust the *hosts.yml* file accordingly, as you did in Step 5, this time changing the values under the key **micado-worker**. The following command will ``build`` a MiCADO Worker node on an empty Ubuntu 16.04 VM.
+As a last measure of increasing efficiency, you can also ``build`` a MiCADO Worker node. You can then clone/snapshot/image the drive of this VM and point to it in your ADT descriptions. Before running this operation, Make sure the *hosts.yml* points to the empty VM where you intend to build the worker image. Adjust the values under the key **micado-target** as needed. The following command will ``build`` a MiCADO Worker node on an empty Ubuntu 16.04 VM.
 
 ::
 

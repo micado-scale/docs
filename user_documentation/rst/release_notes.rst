@@ -1,6 +1,42 @@
 Release Notes
 *************
 
+
+**v0.8.0 (30 September 2019)**
+
+- simplify ADTs by introducing pre-defined TOSCA node types
+- add support for Kubernetes ConfigMaps, Namespaces and multi-container Pods
+- metric collection (disabled by default) is now enabled with "monitoring" policy
+- upgrade all components (Docker, Kubernetes, Grafana, Prometheus, etc...)
+- introduce new Optimizer supported scaling
+- add MiCADO version on dashboard and Grafana
+- introduce log rotate for Docker and components
+- introduce node downscale mechanism with node selection
+- redirect stdout of scaling_rule usercode to different log file
+- add support of keystone V3 for OpenStack in Occopus
+- improve cloud API handling in Occopus
+- make the master node web authentication timeout configurable
+- make master-worker node VPN connection more restrictive
+- implement ADT-based application secret distribution
+- push cloud secrets to Credential Store at deploy time
+- implement Security Policy Manager adaptor in the TOSCA Submitter
+- add support for configuring application-level firewalling rules for the application through the ADT (FWaaS)
+- generate node certificate with the right common name for the master node
+- make the micadoctl command line utility to work after the transition to Kubernetes pods
+- fix keypair distribution to worker nodes
+- update TOSCA template for Kubernetes application-level secret distribution
+- refactor Kubernetes translation
+- fix Policy Keeper Kubernetes node maintenance
+- propagate Kubelet configuration to woker nodes
+- support system cGroup driver by Docker & Kubernetes
+- fix Kubernetes node objects to be deleted on "undeploy"
+- fix Occopus create & import actions to correctly raise exceptions
+- fix Occopus updates not to kill unrelated nodes
+- support updates of an ADT with no Occopus nodes
+- support updates of an ADT with no Kubernetes nodes
+- add a timeout to Kubernetes undeploy
+- simplify hosts.yml file
+
 **v0.7.3 (14 Jun 2019)**
 
 - update MiCADO internal core services to run in Kubernetes pods
