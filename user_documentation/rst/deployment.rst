@@ -203,9 +203,23 @@ Edit the ``hosts.yml`` file to set the variables. The following parameters under
 
 Please, revise all the parameters, however in most cases the default values are correct.
 
-Step 6: Start the installation of MiCADO master.
-------------------------------------------------
+Step 6: Customize the deployment
+--------------------------------
 
+A few parameters can be fine tuned before deployment. They are as follows:
+
+- **disable_optimizer**: Setting this parameter to False enables the deployment of the Optimizer module, to perform more advanced scaling. Default is True.
+
+- **disable_worker_updates**: Setting this parameter to False enables periodic software updates of the worker nodes. Default is True.
+
+- **grafana_admin_pwd**: The string defined here will be the password for Grafana administrator.
+
+- **web_listening_port**: Port number of the dasboard on MiCADO master. Default is 443.
+
+- **web_session_timeout**: Timeout value in seconds for the Dashboard. Default is 600.
+
+Step 7: Start the installation of MiCADO master.
+------------------------------------------------
 
 Run the following command to build and initalise a MiCADO master node on the empty VM you launched in Step 4 and pointed to in *hosts.yml* Step 5.
 
