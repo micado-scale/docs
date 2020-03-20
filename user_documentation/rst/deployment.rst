@@ -17,6 +17,8 @@ For cloud interfaces supported by MiCADO:
 
 * EC2 (tested on Amazon and OpenNebula)
 * Nova (tested on OpenStack)
+* Azure (tested on Microsoft Azure)
+* GCE (tested on Google Cloud)
 * CloudSigma
 * CloudBroker
 
@@ -280,4 +282,3 @@ In case your application contains a container exposing a service, you will have 
 
 * First set **nodePort: xxxxx** (where xxxxx is a port in range 30000-32767) in the **properties: ports:** TOSCA description of your docker container. More information on this in the :ref:`applicationdescription`
 * The container will be accessible at *<IP>:<port>* . Both, the IP and the port values can be extracted from the Kubernetes Dashboard (in case you forget it). The **IP** can be found under *Nodes > my_micado_vm > Addresses* menu, while the **port** can be found under *Discovery and load balancing > Services > my_app > Internal endpoints* menu.
-
