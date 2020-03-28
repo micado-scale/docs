@@ -959,8 +959,8 @@ inputs are available.:
 * **network_id** is the id of the network you would like to use on your target
   Nova cloud.
 
-  Azure
-  ~~~~~
+Azure
+~~~~~
 
   To instantiate MiCADO workers on a cloud through Azure interface, please use the
   template below. MiCADO **requires** resource_group, virtual_network and subnet to
@@ -1008,8 +1008,8 @@ inputs are available.:
   * **key_data** sets the public SSH key to be associated with the instance.
   * **public_ip** sets the public ip to be associated with the Windows VM.
 
-    GCE
-    ~~~
+GCE
+~~~
 
     To instantiate MiCADO workers on a cloud through Google interface, please use the
     template below. MiCADO **requires** region, zone, project, machine_type and
