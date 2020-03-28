@@ -681,8 +681,8 @@ previous section is orchestrated by Kubernetes. This section introduces how the
 parameters of the virtual machine can be configured which will host the
 Kubernetes worker node. During operation MiCADO will instantiate as many
 virtual machines with the parameters defined here as required during scaling.
-MiCADO currently supports four different cloud interfaces: CloudSigma,
-CloudBroker, EC2, Nova. MiCADO supports multiple virtual machine "sets"
+MiCADO currently supports six different cloud interfaces: CloudSigma,
+CloudBroker, EC2, Nova, Azure and GCE. MiCADO supports multiple virtual machine "sets"
 which can be restricted and host only specific containers (defined in the
 requirements section of the container specification). At the moment multi-cloud
 support is in alpha stage, so only certain combinations of different cloud
@@ -728,14 +728,15 @@ support human readability.:
 
 The **interfaces** section of all virtual machine definitions that follow
 are **REQUIRED**, and allow you to provide orchestrator specific inputs, in
-the examples below we use **Occopus**.
+the examples below we use either **Occopus** or **Terraform** based on suitability.
 
-* **create**: *this key tells MiCADO to create the VM using Occopus*
+* **create**: *this key tells MiCADO to create the VM using Occopus/Terraform*
 
-  * **inputs**: Specific settings for Occopus follow here
+  * **inputs**: Specific settings for Occopus/Terraform follow here
 
     * **interface_cloud:** tells Occopus which cloud type to interface with
     * **endpoint_cloud:** tells Occopus the endpoint API of the cloud
+    * **provider:** tells Terraform which cloud provider to interface with
 
 
 
@@ -902,7 +903,7 @@ Nova
 ~~~~
 
 To instantiate MiCADO workers on a cloud through Nova interface, please use the
-template below. MiCADO **requires** image_id flavor_name, project_id and
+template below. MiCADO **requires** image_id, flavor_name, project_id and
 network_id to instantiate a VM through *Nova*.
 
 ::
@@ -943,6 +944,12 @@ inputs are available.:
 * **image_id** is the image id on your Nova cloud. Select an image containing
   a base os installation with cloud-init support!
 * **flavor_name** is the name of flavor to be instantiated on your Nova cloud.
+* **flavor_id** is the id of the desired flavor for the VM.
+* **tenant_name** is the name of the Tenant or Project to login with.
+* **auth_url** is the Identity authentication URL.
+* **network_name** is the human-readable name of the network.
+* **user_domain_name** is the domain name where the user is located.
+* **availability_zone** is the availability zone in which to create the VM.
 * **server_name** optionally defines the hostname of VM (e.g.:”helloworld”).
 * **key_name** optionally sets the name of the keypair to be associated to the
   instance. Keypair name must be defined on the target nova cloud before
@@ -951,6 +958,115 @@ inputs are available.:
   multiple security groups in the form of a list) for your VM.
 * **network_id** is the id of the network you would like to use on your target
   Nova cloud.
+
+Azure
+~~~~~
+
+  To instantiate MiCADO workers on a cloud through Azure interface, please use the
+  template below. MiCADO **requires** resource_group, virtual_network and subnet to
+  instantiate a VM through *Azure*.
+
+  ::
+
+    YOUR-VIRTUAL-MACHINE:
+      type: tosca.nodes.MiCADO.Azure.Compute
+      properties:
+            resource_group: ADD_YOUR_ID_HERE (e.g. TRG)
+            virtual_network: ADD_YOUR_ID_HERE (e.g. TVN)
+            subnet: ADD_YOUR_ID_HERE (e.g. TS)
+            network_security_group: ADD_YOUR_ID_HERE (e.g. TNSG)
+            vm_size: ADD_YOUR_ID_HERE (e.g. Standard_DS1_v2)
+            image: ADD_YOUR_ID_HERE (e.g. 16.04.0-LTS)
+            key_data: ADD_YOUR_KEY_HERE
+
+      capabilities:
+      # OPTIONAL METADATA
+        host:
+          properties:
+            num_cpus: 2GHz
+            mem_size: 2GB
+        os:
+          properties:
+            type: linux
+            distribution: ubuntu
+            version: 16.04
+      interfaces:
+        Terraform:
+          create:
+            inputs:
+              provider: azure
+
+  Under the **properties** section of a Azure virtual machine definition these
+  inputs are available.:
+
+  * **resource_group** specifies the name of the resource group in which the VM should exist.
+  * **virtual_network** specifies the virtual network associated with the VM.
+  * **subnet** specifies the subnet associated with the VM.
+  * **network_security_group** specifies the security settings for the VM.
+  * **vm_size** specifies the size of the VM.
+  * **image** specifies the name of the image.
+  * **key_data** sets the public SSH key to be associated with the instance.
+  * **public_ip** sets the public ip to be associated with the Windows VM.
+
+GCE
+~~~
+
+    To instantiate MiCADO workers on a cloud through Google interface, please use the
+    template below. MiCADO **requires** region, zone, project, machine_type and
+    network to instantiate a VM through *GCE*.
+
+    ::
+
+      YOUR-VIRTUAL-MACHINE:
+        type: tosca.nodes.MiCADO.GCE.Compute
+        properties:
+              region: ADD_YOUR_ID_HERE (e.g. us-west1)
+              project: ADD_YOUR_ID_HERE (e.g. PGCE)
+              machine_type: ADD_YOUR_ID_HERE (e.g. n1-standard-2)
+              zone: ADD_YOUR_ID_HERE (e.g. us-west1-a)
+              image: ADD_YOUR_ID_HERE (e.g.  ubuntu-os-cloud/ubuntu-1604-lts)
+              network: ADD_YOUR_ID_HERE (e.g. default)
+              ssh-keys:ADD_YOUR_ID_HERE
+
+        capabilities:
+        # OPTIONAL METADATA
+          host:
+            properties:
+              num_cpus: 2GHz
+              mem_size: 2GB
+          os:
+            properties:
+              type: linux
+              distribution: ubuntu
+              version: 16.04
+        interfaces:
+          Terraform:
+            create:
+              inputs:
+                provider: gce
+
+    Under the **properties** section of a GCE virtual machine definition these
+    inputs are available.:
+
+    * **project** is the project to manage the resources in.
+    * **image** specifies the image from which to initialize the VM disk.
+    * **region** is the region that the resources should be created in.
+    * **machine_type** specifies the type of machine to create.
+    * **zone** is the zone that the machine should be created in.
+    * **network** is the network to attach to the instance.
+    * **ssh-keys** sets the public SSH key to be associated with the instance.
+
+    The authentication in GCE is done using a service account key file in JSON
+    format. You can manage the key files using the Cloud Console. The steps to
+    retrieve the key file is as follows :
+
+    * Open the **IAM & Admin** page in the Cloud Console.
+    * Click **Select a project**, choose a project, and click **Open**.
+    * In the left nav, click **Service accounts**.
+    * Find the row of the service account that you want to create a key for.
+      In that row, click the **More** button, and then click **Create key**.
+    * Select a **Key type** and click **Create**.
+
 
 Types
 ~~~~~
@@ -1113,7 +1229,7 @@ The subsections have the following roles:
   - In a scaling rule belonging to the virtual machine, the name of the variable to be updated is ``m_node_count``; as an effect the number stored in this variable will be set as target instance number for the virtual machines.
   - In a scaling rule belonging to the virtual machine, the name of the variable to be updated is ``m_nodes_todrop``;the variable must be filled with list of ids or ip addresses and as an effect the valid nodes will be dropped. The variable ``m_node_count`` should not be modified in case of node dropping, MiCADO will update it automatically.
   - In a scaling rule belonging to a kubernetes deployment, the name of the variable to be set is ``m_container_count``; as an effect the number stored in this variable will be set as target instance number for the kubernetes service.
-  
+
 For debugging purposes, the following support is provided:
 
 * ``m_dryrun`` can be specified in the **constant** as list of components towards which the communication is disabled. It has the following syntax: m_dryrun: ["prometheus","occopus","k8s","optimizer"] Use this feature with caution!
@@ -1129,10 +1245,10 @@ For implementing more advanced scaling policies, it is possible to utilize the b
 
 Current limitations
   - only web based applications are supported
-  - only one of the node sets can be supported 
+  - only one of the node sets can be supported
   - no container scaling is supported
 
-Optimiser can be utilised based on the following principles 
+Optimiser can be utilised based on the following principles
   - User specifies a so-called target metric with its associated minimum and maximum thresholds. The target metric is a monitored Prometheus expression for which the value is tried to be kept between the two thresholds by the Optimiser with scaling advices.
   - User specifies several so-called input metrics which represent the state of the system correlating to the target variable
   - User specifies several initial settings (see later) for the Optimiser
@@ -1166,7 +1282,7 @@ Definition of the target metric for the Optimizer
   - **m_opt_target_maxth_MYTARGET** specifies the value below which the target metric must be kept.
 
 Requesting scaling advice from the Optimizer
-  In order to receive a scaling advice from the Optimiser, the method **m_opt_advice()** must be invoked in the scaling_rule section of the node. 
+  In order to receive a scaling advice from the Optimiser, the method **m_opt_advice()** must be invoked in the scaling_rule section of the node.
 
   **IMPORTANT! Minimum and maximum one node must contain this method invocation in its scaling_rule section for proper operation!**
 
