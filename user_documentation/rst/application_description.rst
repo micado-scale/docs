@@ -47,7 +47,7 @@ Example of the overall structure of an ADT
    tosca_definitions_version: tosca_simple_yaml_1_0
 
    imports:
-     - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.0/micado_types.yaml
+     - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.1/micado_types.yaml
 
    repositories:
      docker_hub: https://hub.docker.com/
@@ -435,7 +435,7 @@ options, here we again use the key **Kubernetes:**
 Types
 ~~~~~
 
-**NEW in v0.8.0** Through abstraction, it is possible to reference a
+Through abstraction, it is possible to reference a
 pre-defined parent type and simplify the description of a volume. These
 parent types can hide or reduce the complexity of more complex TOSCA constructs
 such as  **interfaces** by enforcing defaults or moving them
@@ -554,7 +554,7 @@ Examples of the definition of a basic volume
 
 Configuration Data
 ------------------
-**NEW in v0.8.0**
+
 Configuration data (a Kubernetes **ConfigMap**) are to be defined at the same
 level as virtual machines, containers and volumes and then loaded into
 environment variables, or mounted as volumes in the definition of containers
@@ -682,8 +682,8 @@ parameters of the virtual machine can be configured which will host the
 Kubernetes worker node. During operation MiCADO will instantiate as many
 virtual machines with the parameters defined here as required during scaling.
 MiCADO currently supports six different cloud interfaces: CloudSigma,
-CloudBroker, EC2, Nova, Azure and GCE. MiCADO supports multiple virtual machine "sets"
-which can be restricted and host only specific containers (defined in the
+CloudBroker, EC2, Nova, Azure and GCE. MiCADO supports multiple virtual machine
+"sets" which can be restricted to host only specific containers (defined in the
 requirements section of the container specification). At the moment multi-cloud
 support is in alpha stage, so only certain combinations of different cloud
 service providers will work.
@@ -711,14 +711,45 @@ The following subsections details how to configure them.
 General
 ~~~~~~~
 
-The **capabilities** sections for all virtual machine definitions that follow
-are identical and are **ENTIRELY OPTIONAL**. They are filled with metadata to
-support human readability.:
+**Here is the basic look of a Virtual Machine node inside an ADT:**
 
-* **num_cpus** under *host* is a readable string specifying clock speed
-  of the instance type
-* **mem_size** under *host* is a readable string specifying RAM of the
-  instance type
+::
+
+  SAMPLE-VIRTUAL-MACHINE:
+    type: tosca.nodes.MiCADO...Compute
+      properties:
+        <CLOUD-SPECIFIC VM PROPERTIES>
+
+      capabilities:
+        host:
+          properties:
+            num_cpus: 2
+            mem_size: 4 GB
+        os:
+          properties:
+            type: linux
+            distribution: ubuntu
+            version: 18.04
+
+      interfaces:
+        Occopus:
+          create:
+            inputs:
+              endpoint: https://mycloud/api/v1
+
+The **properties** section is **REQUIRED** and contains the necessary
+properties to provision the virtual machine and vary from cloud to cloud.
+Properties for each cloud are detailed further below.
+
+The **capabilities** sections for all virtual machine definitions that follow
+are identical and are **ENTIRELY OPTIONAL**. They are ommited in the
+cloud-specific examples below. They are filled with the following metadata to
+support human readability:
+
+* **num_cpus** under *host* is an integer specifying number of CPUs for
+  the instance type
+* **mem_size** under *host* is a readable string with unit specifying RAM of
+  the instance type
 * **type** under *os* is a readable string specifying the operating system
   type of the image
 * **distribution** under *os* is a readable string specifying the OS distro
@@ -728,16 +759,14 @@ support human readability.:
 
 The **interfaces** section of all virtual machine definitions that follow
 are **REQUIRED**, and allow you to provide orchestrator specific inputs, in
-the examples below we use either **Occopus** or **Terraform** based on suitability.
+the examples we use either **Occopus** or **Terraform** based on suitability.
 
 * **create**: *this key tells MiCADO to create the VM using Occopus/Terraform*
 
-  * **inputs**: Specific settings for Occopus/Terraform follow here
+  * **inputs**: Extra settings to pass to Occopus or Terraform
 
-    * **interface_cloud:** tells Occopus which cloud type to interface with
-    * **endpoint_cloud:** tells Occopus the endpoint API of the cloud
-    * **provider:** tells Terraform which cloud provider to interface with
-
+    * **endpoint:** the endpoint API of the cloud (always required for
+      Occopus, sometimes required for Terraform)
 
 
 CloudSigma
@@ -746,6 +775,10 @@ CloudSigma
 To instantiate MiCADO workers on CloudSigma, please use the template below.
 MiCADO **requires** num_cpus, mem_size, vnc_password, libdrive_id,
 public_key_id and firewall_policy to instantiate VM on *CloudSigma*.
+
+Currently, only **Occopus** has support for CloudSigma, so Occopus must be
+enabled as in :ref:`customize`, and the interface must be set to Occopus as
+in the example below.
 
 ::
 
@@ -761,23 +794,12 @@ public_key_id and firewall_policy to instantiate VM on *CloudSigma*.
         - firewall_policy: ADD_YOUR_FIREWALL_POLICY_ID_HERE (e.g. fd97e326-83c8-44d8-90f7-0a19110f3c9d)
           ip_v4_conf:
             conf: dhcp
-      capabilities:
-      # OPTIONAL METADATA
-        host:
-          properties:
-            num_cpus: 2GHz
-            mem_size: 2GB
-        os:
-          properties:
-            type: linux
-            distribution: ubuntu
-            version: 16.04
+
       interfaces:
         Occopus:
           create:
             inputs:
-              interface_cloud: cloudsigma
-              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g for cloudsigma https://zrh.cloudsigma.com/api/2.0 )
+              endpoint: ADD_YOUR_ENDPOINT (e.g for cloudsigma https://zrh.cloudsigma.com/api/2.0 )
 
 Under the **properties** section of a CloudSigma virtual machine definition
 these inputs are available.:
@@ -804,6 +826,10 @@ To instantiate MiCADO workers on CloudBroker, please use the template below.
 MiCADO **requires** deployment_id and instance_type_id to instantiate a VM on
 *CloudBroker*.
 
+Currently, only **Occopus** has support for CloudBroker, so Occopus must be
+enabled as in :ref:`customize` and the interface must be set to Occopus as
+in the example below.
+
 ::
 
   YOUR-VIRTUAL-MACHINE:
@@ -813,23 +839,12 @@ MiCADO **requires** deployment_id and instance_type_id to instantiate a VM on
         instance_type_id: ADD_YOUR_ID_HERE (e.g. 9b2028be-9287-4bf6-bbfe-bcbc92f065c0)
         key_pair_id: ADD_YOUR_ID_HERE (e.g. d865f75f-d32b-4444-9fbb-3332bcedeb75)
         opened_port: ADD_YOUR_PORTS_HERE (e.g. '22,2377,7946,8300,8301,8302,8500,8600,9100,9200,4789')
-      capabilities:
-      # OPTIONAL METADATA
-        host:
-          properties:
-            num_cpus: 2GHz
-            mem_size: 2GB
-        os:
-          properties:
-            type: linux
-            distribution: ubuntu
-            version: 16.04
+
       interfaces:
         Occopus:
           create:
             inputs:
-              interface_cloud: cloudbroker
-              endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://cola-prototype.cloudbroker.com )
+              endpoint: ADD_YOUR_ENDPOINT (e.g https://cola-prototype.cloudbroker.com )
 
 Under the **properties** section of a CloudBroker virtual machine definition
 these inputs are available.:
@@ -857,6 +872,10 @@ To instantiate MiCADO workers on a cloud through EC2 interface, please use the
 template below. MiCADO **requires** region_name, image_id and instance_type to
 instantiate a VM through *EC2*.
 
+Both **Occopus and Terraform** support EC2 provisioning. To use Terraform,
+enable it as described in :ref:`customize` and adjust the interfaces section
+accordingly.
+
 ::
 
   YOUR-VIRTUAL-MACHINE:
@@ -865,23 +884,12 @@ instantiate a VM through *EC2*.
           region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
           image_id: ADD_YOUR_ID_HERE (e.g. ami-12345678)
           instance_type: ADD_YOUR_INSTANCE_TYPE_HERE (e.g. t1.small)
-    capabilities:
-    # OPTIONAL METADATA
-      host:
-        properties:
-          num_cpus: 2GHz
-          mem_size: 2GB
-      os:
-        properties:
-          type: linux
-          distribution: ubuntu
-          version: 16.04
+
     interfaces:
       Occopus:
         create:
           inputs:
-            interface_cloud: ec2
-            endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com)
+            endpoint: ADD_YOUR_ENDPOINT (e.g https://ec2.eu-west-1.amazonaws.com)
 
 Under the **properties** section of an EC2 virtual machine definition these
 inputs are available.:
@@ -899,12 +907,32 @@ inputs are available.:
 * **subnet_id** optionally specifies subnet identifier (e.g. subnet-644e1e13)
   to be attached to the VM.
 
+Under the **interfaces** section of an EC2 virtual machine definition, the
+**endpoint** input is required by Occopus as seen in the example above.
+
+For Terraform the endpoint is discovered automatically based on region.
+To customise the endpoint (e.g. for OpenNebula) pass the **endpoint** input
+in interfaces.
+
+::
+
+  ...
+    interfaces:
+      Terraform:
+        create:
+          inputs:
+            endpoint: ADD_YOUR_ENDPOINT (e.g https://my-custom-endpoint/api)
+
 Nova
 ~~~~
 
 To instantiate MiCADO workers on a cloud through Nova interface, please use the
 template below. MiCADO **requires** image_id, flavor_name, project_id and
 network_id to instantiate a VM through *Nova*.
+
+Both **Occopus and Terraform** support Nova provisioning. To use Terraform,
+enable it as described in :ref:`customize` and adjust the interfaces section
+accordingly.
 
 ::
 
@@ -918,23 +946,12 @@ network_id to instantiate a VM through *Nova*.
           key_name: ADD_YOUR_KEY_HERE (e.g. keyname)
           security_groups:
             - ADD_YOUR_ID_HERE (e.g. d509348f-21f1-4723-9475-0cf749e05c33)
-    capabilities:
-    # OPTIONAL METADATA
-      host:
-        properties:
-          num_cpus: 2GHz
-          mem_size: 2GB
-      os:
-        properties:
-          type: linux
-          distribution: ubuntu
-          version: 16.04
+
     interfaces:
       Occopus:
         create:
           inputs:
-            interface_cloud: nova
-            endpoint_cloud: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
+            endpoint: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
 
 Under the **properties** section of a Nova virtual machine definition these
 inputs are available.:
@@ -943,11 +960,8 @@ inputs are available.:
   Nova cloud.
 * **image_id** is the image id on your Nova cloud. Select an image containing
   a base os installation with cloud-init support!
-* **flavor_name** is the name of flavor to be instantiated on your Nova cloud.
-* **flavor_id** is the id of the desired flavor for the VM.
+* **flavor_name** is the id of the desired flavor for the VM.
 * **tenant_name** is the name of the Tenant or Project to login with.
-* **auth_url** is the Identity authentication URL.
-* **network_name** is the human-readable name of the network.
 * **user_domain_name** is the domain name where the user is located.
 * **availability_zone** is the availability zone in which to create the VM.
 * **server_name** optionally defines the hostname of VM (e.g.:”helloworld”).
@@ -955,126 +969,149 @@ inputs are available.:
   instance. Keypair name must be defined on the target nova cloud before
   launching the VM.
 * **security_groups** optionally specify security settings (you can define
-  multiple security groups in the form of a list) for your VM.
+  multiple security groups in the form of a **list**) for your VM.
 * **network_id** is the id of the network you would like to use on your target
   Nova cloud.
+
+Under the **interfaces** section of a Nova virtual machine definition, the
+**endpoint** input (v3 Identity service) is required as seen in the
+example above.
+
+For Terraform the endpoint should also be passed as **endpoint**  in inputs.
+Depending on the configuration of the OpenStack cluster, it may be necessary
+to provide **network_name** in addition to the ID.
+
+::
+
+  ...
+    interfaces:
+      Terraform:
+        create:
+          inputs:
+            endpoint: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
+            network_name: ADD_YOUR_NETWORK_NAME (e.g mynet-default)
 
 Azure
 ~~~~~
 
-  To instantiate MiCADO workers on a cloud through Azure interface, please use the
-  template below. MiCADO **requires** resource_group, virtual_network and subnet to
-  instantiate a VM through *Azure*.
+To instantiate MiCADO workers on a cloud through Azure interface, please
+use the template below. Currently, only **Terraform** has support for Azure,
+so Terraform must be enabled as in :ref:`customize`, and the interface must
+be set to Terraform as in the example below.
 
-  ::
+MiCADO supports Windows VM provisioning in Azure. To force a Windows VM,
+simply **DO NOT** pass the **public_key** property and **set the image** to
+a desired WindowsServer Sku (2016-Datacenter). `Refer to this Sku list <https://docs.microsoft.com/en-us/azure/virtual-machines/windows/cli-ps-findimage#table-of-commonly-used-windows-images>`__
 
-    YOUR-VIRTUAL-MACHINE:
-      type: tosca.nodes.MiCADO.Azure.Compute
-      properties:
-            resource_group: ADD_YOUR_ID_HERE (e.g. TRG)
-            virtual_network: ADD_YOUR_ID_HERE (e.g. TVN)
-            subnet: ADD_YOUR_ID_HERE (e.g. TS)
-            network_security_group: ADD_YOUR_ID_HERE (e.g. TNSG)
-            vm_size: ADD_YOUR_ID_HERE (e.g. Standard_DS1_v2)
-            image: ADD_YOUR_ID_HERE (e.g. 16.04.0-LTS)
-            key_data: ADD_YOUR_KEY_HERE
+::
 
-      capabilities:
-      # OPTIONAL METADATA
-        host:
-          properties:
-            num_cpus: 2GHz
-            mem_size: 2GB
-        os:
-          properties:
-            type: linux
-            distribution: ubuntu
-            version: 16.04
-      interfaces:
-        Terraform:
-          create:
-            inputs:
-              provider: azure
+  YOUR-VIRTUAL-MACHINE:
+    type: tosca.nodes.MiCADO.Azure.Compute
+    properties:
+          resource_group: ADD_YOUR_RG_HERE (e.g. my-test)
+          virtual_network: ADD_YOUR_VNET_HERE (e.g. my-test-vnet)
+          subnet: ADD_YOUR_SUBNET_HERE (e.g. default)
+          network_security_group: ADD_YOUR_NSG_HERE (e.g. my-test-nsg)
+          size: ADD_YOUR_ID_HERE (e.g. Standard_B1ms)
+          image: ADD_YOUR_IMAGE_HERE (e.g. 18.04.0-LTS or 2016-Datacenter)
+          public_key: ADD_YOUR_MINIMUM_2048_KEY_HERE (e.g. ssh-rsa ASHFF...)
+          public_ip: [OPTIONAL] BOOLEAN_ENABLE_PUBLIC_IP (e.g. true)
 
-  Under the **properties** section of a Azure virtual machine definition these
-  inputs are available.:
+    interfaces:
+      Terraform:
+        create:
 
-  * **resource_group** specifies the name of the resource group in which the VM should exist.
-  * **virtual_network** specifies the virtual network associated with the VM.
-  * **subnet** specifies the subnet associated with the VM.
-  * **network_security_group** specifies the security settings for the VM.
-  * **vm_size** specifies the size of the VM.
-  * **image** specifies the name of the image.
-  * **key_data** sets the public SSH key to be associated with the instance.
-  * **public_ip** sets the public ip to be associated with the Windows VM.
+Under the **properties** section of a Azure virtual machine definition these
+inputs are available.:
+
+* **resource_group** specifies the name of the resource group in which
+  the VM should exist.
+* **virtual_network** specifies the virtual network associated with the VM.
+* **subnet** specifies the subnet associated with the VM.
+* **network_security_group** specifies the security settings for the VM.
+* **vm_size** specifies the size of the VM.
+* **image** specifies the name of the image.
+* **public_ip [OPTIONAL]** Associate a public IP with the VM.
+* **key_data** The public SSH key (minimum 2048-bit) to be associated with
+  the instance.
+  **Defining this property forces creation of a Linux VM. If it is not**
+  **defined, a Windows VM will be created**
+
+Under the **interfaces** section of a Azure virtual machine definition no
+specific inputs are required, but **Terraform: create:** should be present
+
+**Authentication** in Azure is supported by MiCADO in two ways:
+
+  The first is by setting up a `Service Principal <https://www.terraform.io/docs/providers/azurerm/guides/service_principal_client_secret.html>`__
+  and providing the required fields in *credentials-cloud-api.yml* during
+  :ref:`cloud-credentials`
+
+  The other option is by enabling a `System-Assigned Managed Identity <https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/qs-configure-portal-windows-vm#enable-system-assigned-managed-identity-during-creation-of-a-vm>`__
+  on the **MiCADO Master VM** and then `modify access control <https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/howto-assign-access-portal#use-rbac-to-assign-a-managed-identity-access-to-another-resource>`__
+  of the **current subscription** to assign the role of **Contributor** to
+  the **MiCADO Master VM**
 
 GCE
 ~~~
 
-    To instantiate MiCADO workers on a cloud through Google interface, please use the
-    template below. MiCADO **requires** region, zone, project, machine_type and
-    network to instantiate a VM through *GCE*.
+To instantiate MiCADO workers on a cloud through Google interface, please use
+the template below. Currently, only **Terraform** has support for Azure,
+so Terraform must be enabled as in :ref:`customize`, and the interface must
+be set to Terraform as in the example below.
 
-    ::
+::
 
-      YOUR-VIRTUAL-MACHINE:
-        type: tosca.nodes.MiCADO.GCE.Compute
-        properties:
-              region: ADD_YOUR_ID_HERE (e.g. us-west1)
-              project: ADD_YOUR_ID_HERE (e.g. PGCE)
-              machine_type: ADD_YOUR_ID_HERE (e.g. n1-standard-2)
-              zone: ADD_YOUR_ID_HERE (e.g. us-west1-a)
-              image: ADD_YOUR_ID_HERE (e.g.  ubuntu-os-cloud/ubuntu-1604-lts)
-              network: ADD_YOUR_ID_HERE (e.g. default)
-              ssh-keys:ADD_YOUR_ID_HERE
+  YOUR-VIRTUAL-MACHINE:
+    type: tosca.nodes.MiCADO.GCE.Compute
+    properties:
+          region: ADD_YOUR_ID_HERE (e.g. us-west1)
+          zone: ADD_YOUR_ID_HERE (e.g. us-west1-a)
+          project: ADD_YOUR_ID_HERE (e.g. PGCE)
+          machine_type: ADD_YOUR_ID_HERE (e.g. n1-standard-2)
+          image: ADD_YOUR_ID_HERE (e.g.  ubuntu-os-cloud/ubuntu-1804-lts)
+          network: ADD_YOUR_ID_HERE (e.g. default)
+          ssh-keys: ADD_YOUR_ID_HERE (e.g. ssh-rsa AAAB3N...)
 
-        capabilities:
-        # OPTIONAL METADATA
-          host:
-            properties:
-              num_cpus: 2GHz
-              mem_size: 2GB
-          os:
-            properties:
-              type: linux
-              distribution: ubuntu
-              version: 16.04
-        interfaces:
-          Terraform:
-            create:
-              inputs:
-                provider: gce
+    interfaces:
+      Terraform:
+        create:
 
-    Under the **properties** section of a GCE virtual machine definition these
-    inputs are available.:
+Under the **properties** section of a GCE virtual machine definition these
+inputs are available.:
 
-    * **project** is the project to manage the resources in.
-    * **image** specifies the image from which to initialize the VM disk.
-    * **region** is the region that the resources should be created in.
-    * **machine_type** specifies the type of machine to create.
-    * **zone** is the zone that the machine should be created in.
-    * **network** is the network to attach to the instance.
-    * **ssh-keys** sets the public SSH key to be associated with the instance.
+* **project** is the project to manage the resources in.
+* **image** specifies the image from which to initialize the VM disk.
+* **region** is the region that the resources should be created in.
+* **machine_type** specifies the type of machine to create.
+* **zone** is the zone that the machine should be created in.
+* **network** is the network to attach to the instance.
+* **ssh-keys** sets the public SSH key to be associated with the instance.
 
-    The authentication in GCE is done using a service account key file in JSON
-    format. You can manage the key files using the Cloud Console. The steps to
-    retrieve the key file is as follows :
+Under the **interfaces** section of a GCE virtual machine definition no
+specific inputs are required, but **Terraform: create:** should be present
 
-    * Open the **IAM & Admin** page in the Cloud Console.
-    * Click **Select a project**, choose a project, and click **Open**.
-    * In the left nav, click **Service accounts**.
-    * Find the row of the service account that you want to create a key for.
-      In that row, click the **More** button, and then click **Create key**.
-    * Select a **Key type** and click **Create**.
+**Authentication** in GCE is done using a service account key file in JSON
+format. You can manage the key files using the Cloud Console. The steps to
+retrieve the key file is as follows :
+
+  * Open the **IAM & Admin** page in the Cloud Console.
+  * Click **Select a project**, choose a project, and click **Open**.
+  * In the left nav, click **Service accounts**.
+  * Find the row of the service account that you want to create a key for.
+    In that row, click the **More** button, and then click **Create key**.
+  * Select a **Key type** and click **Create**.
 
 
 Types
 ~~~~~
 
-**NEW in v0.8.0** Through abstraction, it is possible to reference a
+Through abstraction, it is possible to reference a
 pre-defined type and simplify the description of a virtual machine. Currently
 MiCADO supports these additional types for CloudSigma, but more can be written:
 
+* **tosca.nodes.MiCADO.EC2.Compute.Terra** -
+  Orchestrates with Terraform on eu-west-2, overwrite region_name
+  under **properties** to change region
 * **tosca.nodes.MiCADO.CloudSigma.Compute.Occo** -
   Automatically orchestrates on Zurich with Occopus. There is no need to
   define further fields under **interfaces:** but Zurich can be changed
@@ -1108,7 +1145,7 @@ Example definition of a VM using abstraction
 Monitoring Policy
 -----------------
 
-**NEW in v0.8.0** Metric collection is now disabled by default. The basic
+Metric collection is now disabled by default. The basic
 exporters from previous MiCADO versions can be enabled through the monitoring
 policy below. If the policy is omitted, or if one property is left undefined,
 then the relevant metric collection will be disabled.
