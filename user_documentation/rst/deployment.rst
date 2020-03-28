@@ -24,7 +24,7 @@ For cloud interfaces supported by MiCADO:
 
 For the MiCADO master:
 
-* Ubuntu 16.04, 18.04 (the worker image **must be** the same)
+* Ubuntu 16.04 or 18.04
 * (Minimum) 2GHz CPU & 3GB RAM & 15GB DISK
 * (Recommended) 2GHz CPU & 4GB RAM & 20GB DISK
 
@@ -77,13 +77,13 @@ To install jq on other operating systems follow the `official installation guide
 wrk
 ----
 
-To install wrk on Ubuntu, use this command:
+To install wrk on Ubuntu 16.04, use this command:
 
 ::
 
    sudo apt-get install wrk
 
-To install wrk on other operating systems check the sidebar on the `github wiki <https://github.com/wg/wrk/wiki>`__.
+To install wrk on other operating versions/systems check the sidebar on the `github wiki <https://github.com/wg/wrk/wiki>`__.
 
 Installation
 ============
@@ -95,9 +95,11 @@ Step 1: Download the ansible playbook.
 
 ::
 
-   curl --output ansible-micado-0.8.0.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.8.0/ansible-micado-0.8.0.tar.gz
-   tar -zxvf ansible-micado-0.8.0.tar.gz
-   cd ansible-micado-0.8.0/
+   curl --output ansible-micado-0.8.1.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.8.1/ansible-micado-0.8.1.tar.gz
+   tar -zxvf ansible-micado-0.8.1.tar.gz
+   cd ansible-micado-0.8.1/
+
+.. _cloud-credentials:
 
 Step 2: Specify cloud credential for instantiating MiCADO workers.
 ------------------------------------------------------------------
@@ -108,6 +110,13 @@ MiCADO master will use this credential against the cloud API to start/stop VM in
 
    cp sample-credentials-cloud-api.yml credentials-cloud-api.yml
    edit credentials-cloud-api.yml
+
+**NOTE** If you are using Google Cloud, you must replace or fill the credentials-gce.json with your downloaded service account key file.
+
+::
+
+   cp sample-credentials-gce.json credentials-gce.json
+   edit credentials-gce.json
 
 Edit credentials-cloud-api.yml to add cloud credentials. You will find predefined sections in the template for each cloud interface type MiCADO supports. Fill only the section belonging to your target cloud.
 
@@ -205,6 +214,8 @@ Edit the ``hosts.yml`` file to set the variables. The following parameters under
 
 Please, revise all the parameters, however in most cases the default values are correct.
 
+.. _customize:
+
 Step 6: Customize the deployment
 --------------------------------
 
@@ -219,6 +230,12 @@ A few parameters can be fine tuned before deployment. They are as follows:
 - **web_listening_port**: Port number of the dasboard on MiCADO master. Default is 443.
 
 - **web_session_timeout**: Timeout value in seconds for the Dashboard. Default is 600.
+
+- **enable_occopus**: Install and enable Occopus for cloud orchestration. Default is True.
+
+- **enable_terraform**: Install and enable Terraform for cloud orchestration. Default is False.
+
+*Note. MiCADO supports running both Occopus & Terraform on the same Master, if desired*
 
 Step 7: Start the installation of MiCADO master.
 ------------------------------------------------
@@ -240,7 +257,7 @@ Optionally, you can split the deployment of your MiCADO Master in two. The ``bui
 
 You can clone the drive of a **"built"** MiCADO Master (or otherwise make an image from it) to be reused again and again. This will greatly speed up the deployment of future instances of MiCADO.
 
-Running the following command will ``build`` a MiCADO Master node on an empty Ubuntu 16.04 VM.
+Running the following command will ``build`` a MiCADO Master node on an empty Ubuntu VM.
 
 ::
 
@@ -252,7 +269,7 @@ You can then run the following command to ``start`` any **"built"** MiCADO Maste
 
    ansible-playbook -i hosts.yml micado-master.yml --tags 'start'
 
-As a last measure of increasing efficiency, you can also ``build`` a MiCADO Worker node. You can then clone/snapshot/image the drive of this VM and point to it in your ADT descriptions. Before running this operation, Make sure the *hosts.yml* points to the empty VM where you intend to build the worker image. Adjust the values under the key **micado-target** as needed. The following command will ``build`` a MiCADO Worker node on an empty Ubuntu 16.04 VM.
+As a last measure of increasing efficiency, you can also ``build`` a MiCADO Worker node. You can then clone/snapshot/image the drive of this VM and point to it in your ADT descriptions. Before running this operation, Make sure the *hosts.yml* points to the empty VM where you intend to build the worker image. Adjust the values under the key **micado-target** as needed. The following command will ``build`` a MiCADO Worker node on an empty Ubuntu VM.
 
 ::
 
