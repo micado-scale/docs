@@ -991,6 +991,19 @@ to provide **network_name** in addition to the ID.
             endpoint: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
             network_name: ADD_YOUR_NETWORK_NAME (e.g mynet-default)
 
+**Authentication** in OpenStack is supported by MiCADO in two ways:
+
+  The default method is authenticating with the same credentials
+  used to access the OpenStack WebUI by providing
+  the **username** and **password** fields in *credentials-cloud-api.yml*
+  during :ref:`cloud-credentials`
+
+  The other option is with `Application Credentials <https://docs.openstack.org/keystone/queens/user/application_credentials.html>`__
+  For this method, provide **application_credential_id** and
+  **applicaiton_credential_secret** in *credentials-cloud-api.yml*.
+  If these fields are filled, **username** and **password** will be
+  ignored.
+
 Azure
 ~~~~~
 
