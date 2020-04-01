@@ -13,7 +13,7 @@ We recommend to perform the installation remotely as all your configuration file
 Prerequisites
 =============
 
-For cloud interfaces supported by MiCADO:
+**A cloud interface supported by MiCADO**
 
 * EC2 (tested on Amazon and OpenNebula)
 * Nova (tested on OpenStack)
@@ -22,13 +22,14 @@ For cloud interfaces supported by MiCADO:
 * CloudSigma
 * CloudBroker
 
-For the MiCADO master:
+**MiCADO master (a virtual machine on a supported cloud)**
 
 * Ubuntu 16.04 or 18.04
 * (Minimum) 2GHz CPU & 3GB RAM & 15GB DISK
 * (Recommended) 2GHz CPU & 4GB RAM & 20GB DISK
 
-For the host where the Ansible playbook is executed (differs depending on local or remote):
+| **Ansible Remote (the host where the Ansible Playbook is executed)**
+| *this could be the MiCADO Master itself, for a "local" execution of the playbook*
 
 * Ansible 2.8 or greater
 * curl
@@ -104,34 +105,58 @@ Step 1: Download the ansible playbook.
 Step 2: Specify cloud credential for instantiating MiCADO workers.
 ------------------------------------------------------------------
 
-MiCADO master will use this credential against the cloud API to start/stop VM instances (MiCADO workers) to host the application and to realize scaling. Credentials here should belong to the same cloud as where MiCADO master is running. We recommend making a copy of our predefined template and edit it. MiCADO expects the credential in a file, called credentials-cloud-api.yml before deployment. Please, do not modify the structure of the template!
+MiCADO master will use the credentials against the cloud API to start/stop VM
+instances (MiCADO workers) to host the application and to realize scaling.
+Credentials here should belong to the same cloud as where MiCADO master
+is running. We recommend making a copy of our predefined template and edit it.
+MiCADO expects the credential in a file, called *credentials-cloud-api.yml*
+before deployment. Please, do not modify the structure of the template!
 
 ::
 
    cp sample-credentials-cloud-api.yml credentials-cloud-api.yml
    edit credentials-cloud-api.yml
 
-**NOTE** If you are using Google Cloud, you must replace or fill the credentials-gce.json with your downloaded service account key file.
+
+Edit **credentials-cloud-api.yml** to add cloud credentials. You will find
+predefined sections in the template for each cloud interface type MiCADO
+supports. It is recommended to fill only the section belonging to your
+target cloud.
+
+**NOTE** If you are using Google Cloud, you must replace or fill the
+*credentials-gce.json* with your downloaded service account key file.
 
 ::
 
    cp sample-credentials-gce.json credentials-gce.json
    edit credentials-gce.json
 
-Edit credentials-cloud-api.yml to add cloud credentials. You will find predefined sections in the template for each cloud interface type MiCADO supports. Fill only the section belonging to your target cloud.
+It is possible to modify cloud credentials after MiCADO has been deployed,
+see the section titled **Update Cloud Credentials** further down this page
 
-Optionally you can use the `Ansible Vault <https://docs.ansible.com/ansible/2.4/vault.html>`_ mechanism to keep the credential data in an encrypted format. To achieve this, create the above file using Vault with the command
+Optional: Added security
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-::
+   Credentials are stored in Kubernetes Secrets on the MiCADO Master. If
+   you wish to keep the credential data in an secure format on the Ansible
+   Remote as well, you can use the `Ansible Vault <https://docs.ansible.com/ansible/2.4/vault.html>`_
+   mechanism to to achieve this. Simply create the above file using Vault with the
+   following command
 
-    ansible-vault create credentials-cloud-api.yml
+   ::
+
+      ansible-vault create credentials-cloud-api.yml
 
 
-This will launch the editor defined in the ``$EDITOR`` environment variable to make changes to the file. If you wish to make any changes to the previously encrypted file, you can use the command
+   This will launch the editor defined in the ``$EDITOR`` environment variable to make changes to
+   the file. If you wish to make any changes to the previously encrypted file, you can use the command
 
-::
+   ::
 
-    ansible-vault edit credentials-cloud-api.yml
+      ansible-vault edit credentials-cloud-api.yml
+
+   Be sure to see the note about deploying a playbook with vault encrypted files
+   in **Step 7**
 
 Step 3a: Specify security settings and credentials to access MiCADO.
 --------------------------------------------------------------------
@@ -252,28 +277,30 @@ If you have used Vault to encrypt your credentials, you have to add the path to 
 
    ansible-playbook -i hosts.yml micado-master.yml --ask-vault-pass
 
+Optional: Build & Start Roles
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Optionally, you can split the deployment of your MiCADO Master in two. The ``build`` tags prepare the node will all the necessary dependencies, libraries and images necessary for operation. The ``start`` tags intialise the cluster and all the MiCADO core components.
+   Optionally, you can split the deployment of your MiCADO Master in two. The ``build`` tags prepare the node will all the necessary dependencies, libraries and images necessary for operation. The ``start`` tags intialise the cluster and all the MiCADO core components.
 
-You can clone the drive of a **"built"** MiCADO Master (or otherwise make an image from it) to be reused again and again. This will greatly speed up the deployment of future instances of MiCADO.
+   You can clone the drive of a **"built"** MiCADO Master (or otherwise make an image from it) to be reused again and again. This will greatly speed up the deployment of future instances of MiCADO.
 
-Running the following command will ``build`` a MiCADO Master node on an empty Ubuntu VM.
+   Running the following command will ``build`` a MiCADO Master node on an empty Ubuntu VM.
 
-::
+   ::
 
-   ansible-playbook -i hosts.yml micado-master.yml --tags 'build'
+      ansible-playbook -i hosts.yml micado-master.yml --tags 'build'
 
-You can then run the following command to ``start`` any **"built"** MiCADO Master node which will initialise and launch the core components for operation.
+   You can then run the following command to ``start`` any **"built"** MiCADO Master node which will initialise and launch the core components for operation.
 
-::
+   ::
 
-   ansible-playbook -i hosts.yml micado-master.yml --tags 'start'
+      ansible-playbook -i hosts.yml micado-master.yml --tags 'start'
 
-As a last measure of increasing efficiency, you can also ``build`` a MiCADO Worker node. You can then clone/snapshot/image the drive of this VM and point to it in your ADT descriptions. Before running this operation, Make sure the *hosts.yml* points to the empty VM where you intend to build the worker image. Adjust the values under the key **micado-target** as needed. The following command will ``build`` a MiCADO Worker node on an empty Ubuntu VM.
+   As a last measure of increasing efficiency, you can also ``build`` a MiCADO Worker node. You can then clone/snapshot/image the drive of this VM and point to it in your ADT descriptions. Before running this operation, Make sure the *hosts.yml* points to the empty VM where you intend to build the worker image. Adjust the values under the key **micado-target** as needed. The following command will ``build`` a MiCADO Worker node on an empty Ubuntu VM.
 
-::
+   ::
 
-   ansible-playbook -i hosts.yml build-micado-worker.yml
+      ansible-playbook -i hosts.yml build-micado-worker.yml
 
 
 After deployment
@@ -285,6 +312,20 @@ Once the deployment has successfully finished, you can proceed with
 * using the :ref:`restapi`
 * playing with the :ref:`tutorials`
 * creating your :ref:`applicationdescription`
+
+
+Update Cloud Credentials
+========================
+
+It is possible to modify cloud credentials on an already deployed MiCADO
+Master. Simply make the necessary changes to the appropriate credentials
+file (using *ansible-vault* if desired) and then run the following playbook
+command:
+
+::
+
+   ansible-playbook -i hosts.yml micado-master.yml --tags update-auth
+
 
 Check the logs
 ==============

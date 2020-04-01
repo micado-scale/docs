@@ -719,6 +719,11 @@ General
     type: tosca.nodes.MiCADO...Compute
       properties:
         <CLOUD-SPECIFIC VM PROPERTIES>
+      context:
+        insert: true
+        cloud_config: |
+          runcmd:
+          - <some_command_here>
 
       capabilities:
         host:
@@ -740,6 +745,28 @@ General
 The **properties** section is **REQUIRED** and contains the necessary
 properties to provision the virtual machine and vary from cloud to cloud.
 Properties for each cloud are detailed further below.
+
+**Cloud Contextualisation**
+
+  It is possible to provide custom configuration of the deployed nodes via
+  `cloud-init scripts <https://cloudinit.readthedocs.io/en/latest/topics/examples.html>`__
+  . MiCADO relies on a cloud-init config to join nodes as  workers to the
+  cluster, so it is recommended to only add to the default config, except
+  for certain cases.
+
+  The **context** key is supported by all the cloud compute node definitions
+  below. New cloud-init configurations should be defined in **cloud_config**
+  and one of **append** or **insert** should be set to *true* to avoid
+  overwriting the default cloud-init config for MiCADO.
+
+  - Setting **append** to true will add the newly defined configurations
+    to the end of the default cloud-init config
+  - Setting **insert** to true will add the newly defined configurations
+    to the start of the default cloud-init config, before the MiCADO Worker
+    is fully initialised
+  
+
+
 
 The **capabilities** sections for all virtual machine definitions that follow
 are identical and are **ENTIRELY OPTIONAL**. They are ommited in the
@@ -990,6 +1017,19 @@ to provide **network_name** in addition to the ID.
           inputs:
             endpoint: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
             network_name: ADD_YOUR_NETWORK_NAME (e.g mynet-default)
+
+**Authentication** in OpenStack is supported by MiCADO in two ways:
+
+  The default method is authenticating with the same credentials
+  used to access the OpenStack WebUI by providing
+  the **username** and **password** fields in *credentials-cloud-api.yml*
+  during :ref:`cloud-credentials`
+
+  The other option is with `Application Credentials <https://docs.openstack.org/keystone/queens/user/application_credentials.html>`__
+  For this method, provide **application_credential_id** and
+  **applicaiton_credential_secret** in *credentials-cloud-api.yml*.
+  If these fields are filled, **username** and **password** will be
+  ignored.
 
 Azure
 ~~~~~
