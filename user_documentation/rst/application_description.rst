@@ -1299,7 +1299,7 @@ The subsections have the following roles:
 
     - m_nodes: python list of nodes belonging to the kubernetes cluster
     - m_node_count: the target number of nodes
-    - m_nodes_todrop: the ids or ip addresses of the nodes to be dropped in case of downscaling
+    - m_nodes_todrop: the ids or ip addresses of the nodes to be dropped in case of downscaling **NOTE MiCADO-Terraform supports private IPs on Azure or AWS EC2 only**
     - m_container_count: the target number of containers for the service the evaluation belongs to
     - m_time_since_node_count_changed: time in seconds elapsed since the number of nodes changed
 
