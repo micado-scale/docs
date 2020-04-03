@@ -899,9 +899,9 @@ To instantiate MiCADO workers on a cloud through EC2 interface, please use the
 template below. MiCADO **requires** region_name, image_id and instance_type to
 instantiate a VM through *EC2*.
 
-Both **Occopus and Terraform** support EC2 provisioning. To use Terraform,
-enable it as described in :ref:`customize` and adjust the interfaces section
-accordingly.
+**Terraform** supports provisioning on AWS EC2, and **Occopus** supports
+both AWS EC2 and OpenNebula EC2. To use Terraform, enable it as described
+in :ref:`customize` and adjust the interfaces section accordingly.
 
 ::
 
@@ -938,8 +938,7 @@ Under the **interfaces** section of an EC2 virtual machine definition, the
 **endpoint** input is required by Occopus as seen in the example above.
 
 For Terraform the endpoint is discovered automatically based on region.
-To customise the endpoint (e.g. for OpenNebula) pass the **endpoint** input
-in interfaces.
+To customise the endpoint pass the **endpoint** input in interfaces.
 
 ::
 
