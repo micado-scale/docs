@@ -47,7 +47,7 @@ Example of the overall structure of an ADT
    tosca_definitions_version: tosca_simple_yaml_1_0
 
    imports:
-     - https://raw.githubusercontent.com/micado-scale/tosca/v0.8.1/micado_types.yaml
+     - https://raw.githubusercontent.com/micado-scale/tosca/v0.9.0/micado_types.yaml
 
    repositories:
      docker_hub: https://hub.docker.com/
