@@ -3,7 +3,7 @@ Release Notes
 
 **Changelog since v0.5.x of MiCADO**
 
-v0.8.1 (April 2020)
+v0.9.0 (April 2020)
 ===================
 
 What's New
