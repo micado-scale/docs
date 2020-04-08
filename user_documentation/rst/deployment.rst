@@ -13,20 +13,23 @@ We recommend to perform the installation remotely as all your configuration file
 Prerequisites
 =============
 
-For cloud interfaces supported by MiCADO:
+**A cloud interface supported by MiCADO**
 
 * EC2 (tested on Amazon and OpenNebula)
 * Nova (tested on OpenStack)
+* Azure (tested on Microsoft Azure)
+* GCE (tested on Google Cloud)
 * CloudSigma
 * CloudBroker
 
-For the MiCADO master:
+**MiCADO master (a virtual machine on a supported cloud)**
 
-* Ubuntu 16.04, 18.04 (the worker image **must be** the same)
+* Ubuntu 16.04 or 18.04
 * (Minimum) 2GHz CPU & 3GB RAM & 15GB DISK
 * (Recommended) 2GHz CPU & 4GB RAM & 20GB DISK
 
-For the host where the Ansible playbook is executed (differs depending on local or remote):
+| **Ansible Remote (the host where the Ansible Playbook is executed)**
+| *this could be the MiCADO Master itself, for a "local" execution of the playbook*
 
 * Ansible 2.8 or greater
 * curl
@@ -75,13 +78,13 @@ To install jq on other operating systems follow the `official installation guide
 wrk
 ----
 
-To install wrk on Ubuntu, use this command:
+To install wrk on Ubuntu 16.04, use this command:
 
 ::
 
    sudo apt-get install wrk
 
-To install wrk on other operating systems check the sidebar on the `github wiki <https://github.com/wg/wrk/wiki>`__.
+To install wrk on other operating versions/systems check the sidebar on the `github wiki <https://github.com/wg/wrk/wiki>`__.
 
 Installation
 ============
@@ -93,34 +96,67 @@ Step 1: Download the ansible playbook.
 
 ::
 
-   curl --output ansible-micado-0.8.0.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.8.0/ansible-micado-0.8.0.tar.gz
-   tar -zxvf ansible-micado-0.8.0.tar.gz
-   cd ansible-micado-0.8.0/
+   curl --output ansible-micado-0.9.0.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.9.0/ansible-micado-0.9.0.tar.gz
+   tar -zxvf ansible-micado-0.9.0.tar.gz
+   cd ansible-micado-0.9.0/
+
+.. _cloud-credentials:
 
 Step 2: Specify cloud credential for instantiating MiCADO workers.
 ------------------------------------------------------------------
 
-MiCADO master will use this credential against the cloud API to start/stop VM instances (MiCADO workers) to host the application and to realize scaling. Credentials here should belong to the same cloud as where MiCADO master is running. We recommend making a copy of our predefined template and edit it. MiCADO expects the credential in a file, called credentials-cloud-api.yml before deployment. Please, do not modify the structure of the template!
+MiCADO master will use the credentials against the cloud API to start/stop VM
+instances (MiCADO workers) to host the application and to realize scaling.
+Credentials here should belong to the same cloud as where MiCADO master
+is running. We recommend making a copy of our predefined template and edit it.
+MiCADO expects the credential in a file, called *credentials-cloud-api.yml*
+before deployment. Please, do not modify the structure of the template!
 
 ::
 
    cp sample-credentials-cloud-api.yml credentials-cloud-api.yml
    edit credentials-cloud-api.yml
 
-Edit credentials-cloud-api.yml to add cloud credentials. You will find predefined sections in the template for each cloud interface type MiCADO supports. Fill only the section belonging to your target cloud.
 
-Optionally you can use the `Ansible Vault <https://docs.ansible.com/ansible/2.4/vault.html>`_ mechanism to keep the credential data in an encrypted format. To achieve this, create the above file using Vault with the command
+Edit **credentials-cloud-api.yml** to add cloud credentials. You will find
+predefined sections in the template for each cloud interface type MiCADO
+supports. It is recommended to fill only the section belonging to your
+target cloud.
 
-::
-
-    ansible-vault create credentials-cloud-api.yml
-
-
-This will launch the editor defined in the ``$EDITOR`` environment variable to make changes to the file. If you wish to make any changes to the previously encrypted file, you can use the command
+**NOTE** If you are using Google Cloud, you must replace or fill the
+*credentials-gce.json* with your downloaded service account key file.
 
 ::
 
-    ansible-vault edit credentials-cloud-api.yml
+   cp sample-credentials-gce.json credentials-gce.json
+   edit credentials-gce.json
+
+It is possible to modify cloud credentials after MiCADO has been deployed,
+see the section titled **Update Cloud Credentials** further down this page
+
+Optional: Added security
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Credentials are stored in Kubernetes Secrets on the MiCADO Master. If
+   you wish to keep the credential data in an secure format on the Ansible
+   Remote as well, you can use the `Ansible Vault <https://docs.ansible.com/ansible/2.4/vault.html>`_
+   mechanism to to achieve this. Simply create the above file using Vault with the
+   following command
+
+   ::
+
+      ansible-vault create credentials-cloud-api.yml
+
+
+   This will launch the editor defined in the ``$EDITOR`` environment variable to make changes to
+   the file. If you wish to make any changes to the previously encrypted file, you can use the command
+
+   ::
+
+      ansible-vault edit credentials-cloud-api.yml
+
+   Be sure to see the note about deploying a playbook with vault encrypted files
+   in **Step 7**
 
 Step 3a: Specify security settings and credentials to access MiCADO.
 --------------------------------------------------------------------
@@ -174,11 +210,21 @@ Protocol  Port(s)        Service
  TCP      6443           kube-apiserver
  TCP      10250-10252    kubelet, kube-controller, kube-scheduler
  UDP      8285 & 8472    flannel overlay network
+ UDP      500 & 4500     IPSec
 ========  =============  ====================
 
-**NOTE:** ``[web_listening_port]`` should match with the actual value specified in Step 4a.
+   **NOTE:** ``[web_listening_port]`` should match with the actual value specified in Step 4a.
 
-**NOTE:** MiCADO master has built-in firewall, therefore you can leave all ports open at cloud level.
+   **NOTE:** MiCADO master has built-in firewall, therefore you can leave all ports open at cloud level.
+
+   **NOTE:** On some network configurations, for example where IPSec
+   protocols **ESP (50)** and **AH (51)** are blocked, important network
+   packets can get dropped in Master-Worker communications. This might be
+   seen as Prometheus scrapes failing with the error
+   **context deadline exceeded**, or Workers failing to join the Kubernetes
+   cluster. To disable the IPSec tunnel securing Master-Worker communications,
+   it can be stopped by appending **ipsec stop** to **runcmd** in the default
+   worker node *cloud-init #cloud-config*.
 
 **c)** Finally, launch the virtual machine with the proper settings (capacity, ssh keys, firewall): use any of aws, ec2, nova, etc command-line tools or web interface of your target cloud to launch a new VM. We recommend a VM with 2 cores, 4GB RAM, 20GB disk. Make sure you can ssh to it (password-free i.e. ssh public key is deployed) and your user is able to sudo (to install MiCADO as root). Store its IP address which will be referred as ``IP`` in the following steps.
 
@@ -203,6 +249,8 @@ Edit the ``hosts.yml`` file to set the variables. The following parameters under
 
 Please, revise all the parameters, however in most cases the default values are correct.
 
+.. _customize:
+
 Step 6: Customize the deployment
 --------------------------------
 
@@ -217,6 +265,12 @@ A few parameters can be fine tuned before deployment. They are as follows:
 - **web_listening_port**: Port number of the dasboard on MiCADO master. Default is 443.
 
 - **web_session_timeout**: Timeout value in seconds for the Dashboard. Default is 600.
+
+- **enable_occopus**: Install and enable Occopus for cloud orchestration. Default is True.
+
+- **enable_terraform**: Install and enable Terraform for cloud orchestration. Default is False.
+
+*Note. MiCADO supports running both Occopus & Terraform on the same Master, if desired*
 
 Step 7: Start the installation of MiCADO master.
 ------------------------------------------------
@@ -233,28 +287,30 @@ If you have used Vault to encrypt your credentials, you have to add the path to 
 
    ansible-playbook -i hosts.yml micado-master.yml --ask-vault-pass
 
+Optional: Build & Start Roles
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Optionally, you can split the deployment of your MiCADO Master in two. The ``build`` tags prepare the node will all the necessary dependencies, libraries and images necessary for operation. The ``start`` tags intialise the cluster and all the MiCADO core components.
+   Optionally, you can split the deployment of your MiCADO Master in two. The ``build`` tags prepare the node will all the necessary dependencies, libraries and images necessary for operation. The ``start`` tags intialise the cluster and all the MiCADO core components.
 
-You can clone the drive of a **"built"** MiCADO Master (or otherwise make an image from it) to be reused again and again. This will greatly speed up the deployment of future instances of MiCADO.
+   You can clone the drive of a **"built"** MiCADO Master (or otherwise make an image from it) to be reused again and again. This will greatly speed up the deployment of future instances of MiCADO.
 
-Running the following command will ``build`` a MiCADO Master node on an empty Ubuntu 16.04 VM.
+   Running the following command will ``build`` a MiCADO Master node on an empty Ubuntu VM.
 
-::
+   ::
 
-   ansible-playbook -i hosts.yml micado-master.yml --tags 'build'
+      ansible-playbook -i hosts.yml micado-master.yml --tags 'build'
 
-You can then run the following command to ``start`` any **"built"** MiCADO Master node which will initialise and launch the core components for operation.
+   You can then run the following command to ``start`` any **"built"** MiCADO Master node which will initialise and launch the core components for operation.
 
-::
+   ::
 
-   ansible-playbook -i hosts.yml micado-master.yml --tags 'start'
+      ansible-playbook -i hosts.yml micado-master.yml --tags 'start'
 
-As a last measure of increasing efficiency, you can also ``build`` a MiCADO Worker node. You can then clone/snapshot/image the drive of this VM and point to it in your ADT descriptions. Before running this operation, Make sure the *hosts.yml* points to the empty VM where you intend to build the worker image. Adjust the values under the key **micado-target** as needed. The following command will ``build`` a MiCADO Worker node on an empty Ubuntu 16.04 VM.
+   As a last measure of increasing efficiency, you can also ``build`` a MiCADO Worker node. You can then clone/snapshot/image the drive of this VM and point to it in your ADT descriptions. Before running this operation, Make sure the *hosts.yml* points to the empty VM where you intend to build the worker image. Adjust the values under the key **micado-target** as needed. The following command will ``build`` a MiCADO Worker node on an empty Ubuntu VM.
 
-::
+   ::
 
-   ansible-playbook -i hosts.yml build-micado-worker.yml
+      ansible-playbook -i hosts.yml build-micado-worker.yml
 
 
 After deployment
@@ -266,6 +322,20 @@ Once the deployment has successfully finished, you can proceed with
 * using the :ref:`restapi`
 * playing with the :ref:`tutorials`
 * creating your :ref:`applicationdescription`
+
+
+Update Cloud Credentials
+========================
+
+It is possible to modify cloud credentials on an already deployed MiCADO
+Master. Simply make the necessary changes to the appropriate credentials
+file (using *ansible-vault* if desired) and then run the following playbook
+command:
+
+::
+
+   ansible-playbook -i hosts.yml micado-master.yml --tags update-auth
+
 
 Check the logs
 ==============
@@ -280,4 +350,3 @@ In case your application contains a container exposing a service, you will have 
 
 * First set **nodePort: xxxxx** (where xxxxx is a port in range 30000-32767) in the **properties: ports:** TOSCA description of your docker container. More information on this in the :ref:`applicationdescription`
 * The container will be accessible at *<IP>:<port>* . Both, the IP and the port values can be extracted from the Kubernetes Dashboard (in case you forget it). The **IP** can be found under *Nodes > my_micado_vm > Addresses* menu, while the **port** can be found under *Discovery and load balancing > Services > my_app > Internal endpoints* menu.
-
