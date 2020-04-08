@@ -210,11 +210,21 @@ Protocol  Port(s)        Service
  TCP      6443           kube-apiserver
  TCP      10250-10252    kubelet, kube-controller, kube-scheduler
  UDP      8285 & 8472    flannel overlay network
+ UDP      500 & 4500     IPSec
 ========  =============  ====================
 
-**NOTE:** ``[web_listening_port]`` should match with the actual value specified in Step 4a.
+   **NOTE:** ``[web_listening_port]`` should match with the actual value specified in Step 4a.
 
-**NOTE:** MiCADO master has built-in firewall, therefore you can leave all ports open at cloud level.
+   **NOTE:** MiCADO master has built-in firewall, therefore you can leave all ports open at cloud level.
+
+   **NOTE:** On some network configurations, for example where IPSec
+   protocols **ESP (50)** and **AH (51)** are blocked, important network
+   packets can get dropped in Master-Worker communications. This might be
+   seen as Prometheus scrapes failing with the error
+   **context deadline exceeded**, or Workers failing to join the Kubernetes
+   cluster. To disable the IPSec tunnel securing Master-Worker communications,
+   it can be stopped by appending **ipsec stop** to **runcmd** in the default
+   worker node *cloud-init #cloud-config*.
 
 **c)** Finally, launch the virtual machine with the proper settings (capacity, ssh keys, firewall): use any of aws, ec2, nova, etc command-line tools or web interface of your target cloud to launch a new VM. We recommend a VM with 2 cores, 4GB RAM, 20GB disk. Make sure you can ssh to it (password-free i.e. ssh public key is deployed) and your user is able to sudo (to install MiCADO as root). Store its IP address which will be referred as ``IP`` in the following steps.
 

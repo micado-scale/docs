@@ -63,14 +63,17 @@ MiCADO cluster. This has now been resolved.
 Known Issues & Deprecations
 ---------------------------
 
-Prometheus Fails to Scrape Targets
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+IPSec and Dropped Network Packets
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Rarely, on some configrations of Ubuntu, IPSec drops Prometheus scrapes of
-certain Prometheus Exporters deployed on worker nodes, causing the scrape to
-fail with the error **context deadline exceeded**. As a temporary workaround,
-the IPSec tunnel securing Master-Worker communications can be stopped by
-appending **ipsec stop** to the default worker node *cloud-init #cloud-config*.
+On some network configurations, for example where IPSec protocols ESP (50) and
+AH (51) are blocked, important network packets can get dropped in
+Master-Worker communications. This might be seen as Prometheus scrapes
+failing with the error **context deadline exceeded**, or Workers failing
+to join the Kubernetes cluster. To disable the IPSec tunnel securing
+Master-Worker communications, it can be stopped by appending
+**ipsec stop** to **runcmd** in the default worker node
+*cloud-init #cloud-config*.
 
 Compute Node Inputs in ADTs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
