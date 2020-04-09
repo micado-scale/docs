@@ -1,9 +1,47 @@
 Release Notes
 *************
 
+| **Changelog since v0.5.x of MiCADO**
+| See more detailed notes about upgrading in :ref:`whatsnew`
 
-**v0.8.0 (30 September 2019)**
+v0.9.0 (9 April 2020)
+=====================
 
+- Refactor playbook tasks to be more component-specific
+- Add playbook tasks for configuring and installing Terraform
+- Use the Ansible *k8s module* for managing Kubernetes resources
+- Optimise cloud-init scripts by reducing *apt-get update*
+- Fix Master-Worker Ubuntu mismatch bug
+- Handle undefined credential file path
+- Store credential data in Kubernetes Secrets
+- Support updates of credentials on a deployed MiCADO Master
+- Add demo ADTs for Azure & GCE
+- Update QuickStart docs in README
+- Bump Grafana to v6.6.2
+- Bump Prometheus to v2.16.0
+- Bump Kubernetes-Dashboard to v2.0.0 (rc7)
+- Hide Kubernetes Secrets on Kubernetes-Dashboard
+- Refactor PK main loop to support multiple cloud orchestrators
+- Add Terraform handler to PK for scaling (up/down and dropping specific nodes)
+- Switch to the *pykube* package in PK instead of *kubernetes*
+- Add the TerraformAdaptor to the TOSCASubmitter
+- Bump TOSCASubmitter package versions
+- Discover cloud from TOSCA ADT type and deprecate *interface_cloud*
+- Rename ADT compute property *endpoint_cloud* to *endpoint*
+- Support *insert* in ADT to modify cloud-init cloud-config
+- Support authentication with OpenStack application credential
+- Pass orchestrator info to PK during PKAdaptor translation
+- Lower reserved CPU and Memory for Zorp Ingress on workers
+- Only deploy Zorp Ingress to workers with matching ADT policy
+- Bump Kubernetes to v1.18
+- Bump Flannel to v0.12
+- Bump containerd.io to v.1.2.13
+- Bump Occopus to v1.7 (rc6)
+- Bump cAdvisor to v0.34.0
+- Bump AlertManager to v0.20.0
+
+v0.8.0 (30 September 2019)
+==========================
 - simplify ADTs by introducing pre-defined TOSCA node types
 - add support for Kubernetes ConfigMaps, Namespaces and multi-container Pods
 - metric collection (disabled by default) is now enabled with "monitoring" policy
@@ -37,7 +75,8 @@ Release Notes
 - add a timeout to Kubernetes undeploy
 - simplify hosts.yml file
 
-**v0.7.3 (14 Jun 2019)**
+v0.7.3 (14 Jun 2019)
+====================
 
 - update MiCADO internal core services to run in Kubernetes pods
 - remove Consul and replace it with Prometheus’ Kubernetes Service Discovery
@@ -64,11 +103,13 @@ Release Notes
 - update the cQueue demo to demonstrate “virtual machine sets”
 - fix and improve the NGINX demo
 
-**v0.7.2-rev1 (01 Apr 2019)**
+v0.7.2-rev1 (01 Apr 2019)
+=========================
 
 - fix dependency issue for Kubernetes 1.13.1 (`kubernetes/kubernetes#75683 <https://github.com/kubernetes/kubernetes/issues/75683>`__)
 
-**v0.7.2 (25 Feb 2019)**
+v0.7.2 (25 Feb 2019)
+====================
 
 - add checking for minimal memory on micado master at deployment
 - support private networks on cloudsigma
@@ -93,7 +134,8 @@ Release Notes
 - add support for kubernetes secrets
 - reimplement Credential Manager using the flask-users library
 
-**v0.7.1 (10 Jan 2019)**
+v0.7.1 (10 Jan 2019)
+====================
 
 - Fix: Add SKIP back to Dashboard (defaults changed in v1.13.1)
 - Fix: URL not found for Kubernetes manifest files
@@ -104,10 +146,13 @@ Release Notes
 - Add Kubernetes service discovery support to Prometheus
 - Add new demo: nginx (HTTP request scaling)
 
-**v0.7.0 (12 Dec 2018)**
-
+v0.7.0 (12 Dec 2018)
+====================
 - Introduce Kubernetes as the primary container orchestration engine
 - Replace the swarm-visualiser with the Kubernetes Dashboard
+
+Older MiCADO Versions
+=====================
 
 **v0.6.1 (15 Oct 2018)**
 
