@@ -30,3 +30,4 @@ In the current release, the status of the system can be inspected through the fo
    application_description
    tutorials
    release_notes
+   whats_new
