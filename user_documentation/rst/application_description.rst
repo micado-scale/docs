@@ -681,12 +681,12 @@ previous section is orchestrated by Kubernetes. This section introduces how the
 parameters of the virtual machine can be configured which will host the
 Kubernetes worker node. During operation MiCADO will instantiate as many
 virtual machines with the parameters defined here as required during scaling.
-MiCADO currently supports six different cloud interfaces: CloudSigma,
-CloudBroker, EC2, Nova, Azure and GCE. MiCADO supports multiple virtual machine
-"sets" which can be restricted to host only specific containers (defined in the
-requirements section of the container specification). At the moment multi-cloud
-support is in alpha stage, so only certain combinations of different cloud
-service providers will work.
+MiCADO currently supports seven different cloud interfaces: CloudSigma,
+CloudBroker, EC2, Nova, Azure, OCI and GCE. MiCADO supports multiple virtual
+machine "sets" which can be restricted to host only specific containers
+(defined in the requirements section of the container specification). At the
+moment multi-cloud support is in alpha stage, so only certain combinations of
+different cloud service providers will work.
 
 **NOTE** Underscores are not permitted in virtual machine names
 (ie TOSCA node names). Names should also begin and end with an alphanumeric.
@@ -764,7 +764,7 @@ Properties for each cloud are detailed further below.
   - Setting **insert** to true will add the newly defined configurations
     to the start of the default cloud-init config, before the MiCADO Worker
     is fully initialised
-  
+
 
 
 
@@ -1139,6 +1139,59 @@ retrieve the key file is as follows :
   * Find the row of the service account that you want to create a key for.
     In that row, click the **More** button, and then click **Create key**.
   * Select a **Key type** and click **Create**.
+
+OCI
+~~~
+
+To instantiate MiCADO workers on a cloud through Oracle interface, please use
+the template below. Currently, only **Terraform** has support for Oracle,
+so Terraform must be enabled as in :ref:`customize`, and the interface must
+be set to Terraform as in the example below.
+
+::
+
+  YOUR-VIRTUAL-MACHINE:
+    type: tosca.nodes.MiCADO.OCI.Compute
+    properties:
+          region: <REGION_NAME> (e.g. uk-london-1)
+          availability_domain: <AVAILABILITY_DOMAIN> (e.g. lVvK:UK-LONDON-1-AD-1)
+          compartment_id: <COMPARTMENT_OCID> (e.g ocid1.tenancy.oc1..aaa)
+          shape: <VM_TYPE_NAME> (e.g. VM.Standard.E2.1)
+          source_id: <VM_IMAGE_OCID> (e.g ocid1.image.oc1.uk-london-1.aaa)
+          subnet_id: <SUBNET_OCID> (e.g ocid1.subnet.oc1.uk-london-1.aaa)
+          network_security_group: <NETWORK_SECURITY_GROUP_OCID> (e.g ocid1.networksecuritygroup.oc1.uk-london-1.aaa)
+          ssh-keys: ADD_YOUR_ID_HERE (e.g. ssh-rsa AAAB3N...)
+
+    interfaces:
+      Terraform:
+        create:
+
+Under the **properties** section of a OCI virtual machine definition these
+inputs are available.:
+
+* **availability_domain** is the availability domain of the instance.
+* **source_id** specifies the OCID of an image from which to initialize the
+  VM disk.
+* **region** is the region that the resources should be created in.
+* **shape** specifies the type of machine to create.
+* **compartment_id** is the OCID of the compartment.
+* **subnet_id** is the OCID of the subnet to create the VNIC in.
+* **network_security_group** specifies the OCID of the network security
+  settings for the VM.
+* **ssh-keys** sets the public SSH key to be associated with the instance.
+
+Under the **interfaces** section of a GCE virtual machine definition no
+specific inputs are required, but **Terraform: create:** should be present.
+
+**Authentication** in OCI is supported by MiCADO in two ways:
+
+  The first is by setting up an `Instance Principal <https://www.terraform.io/docs/providers/oci/index.html>`__
+  based authentication on the **MiCADO Master VM** by creating suitable 'Dynamic Group and Policies <https://docs.cloud.oracle.com/en-us/iaas/Content/Identity/Tasks/callingservicesfrominstances.htm>`__
+  associated with it.
+
+  The other option is by enabling an `API Key  <https://docs.cloud.oracle.com/en-us/iaas/Content/API/Concepts/apisigningkey.htm#five>`__
+  based authentication on the **MiCADO Master VM** and providing the required
+  fields in *credentials-cloud-api.yml* during :ref:`cloud-credentials`
 
 
 Types
