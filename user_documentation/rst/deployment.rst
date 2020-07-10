@@ -254,7 +254,7 @@ Please, revise all the parameters, however in most cases the default values are 
 Step 6: Customize the deployment
 --------------------------------
 
-A few parameters can be fine tuned before deployment. They are as follows:
+A few parameters in *micado-master.yml* can be fine tuned before deployment. They are as follows:
 
 - **disable_optimizer**: Setting this parameter to False enables the deployment of the Optimizer module, to perform more advanced scaling. Default is True.
 
