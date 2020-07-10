@@ -719,11 +719,11 @@ General
     type: tosca.nodes.MiCADO...Compute
       properties:
         <CLOUD-SPECIFIC VM PROPERTIES>
-      context:
-        insert: true
-        cloud_config: |
-          runcmd:
-          - <some_command_here>
+        context:
+          insert: true
+          cloud_config: |
+            runcmd:
+            - <some_command_here>
 
       capabilities:
         host:
@@ -908,9 +908,9 @@ in :ref:`customize` and adjust the interfaces section accordingly.
   YOUR-VIRTUAL-MACHINE:
     type: tosca.nodes.MiCADO.EC2.Compute
     properties:
-          region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
-          image_id: ADD_YOUR_ID_HERE (e.g. ami-12345678)
-          instance_type: ADD_YOUR_INSTANCE_TYPE_HERE (e.g. t1.small)
+      region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
+      image_id: ADD_YOUR_ID_HERE (e.g. ami-12345678)
+      instance_type: ADD_YOUR_INSTANCE_TYPE_HERE (e.g. t1.small)
 
     interfaces:
       Occopus:
@@ -965,13 +965,13 @@ accordingly.
   YOUR-VIRTUAL-MACHINE:
     type: tosca.nodes.MiCADO.Nova.Compute
     properties:
-          image_id: ADD_YOUR_ID_HERE (e.g. d4f4e496-031a-4f49-b034-f8dafe28e01c)
-          flavor_name: ADD_YOUR_ID_HERE (e.g. 3)
-          project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
-          network_id: ADD_YOUR_ID_HERE (e.g. 3fd4c62d-5fbe-4bd9-9a9f-c161dabeefde)
-          key_name: ADD_YOUR_KEY_HERE (e.g. keyname)
-          security_groups:
-            - ADD_YOUR_ID_HERE (e.g. d509348f-21f1-4723-9475-0cf749e05c33)
+      image_id: ADD_YOUR_ID_HERE (e.g. d4f4e496-031a-4f49-b034-f8dafe28e01c)
+      flavor_name: ADD_YOUR_ID_HERE (e.g. 3)
+      project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
+      network_id: ADD_YOUR_ID_HERE (e.g. 3fd4c62d-5fbe-4bd9-9a9f-c161dabeefde)
+      key_name: ADD_YOUR_KEY_HERE (e.g. keyname)
+      security_groups:
+        - ADD_YOUR_ID_HERE (e.g. d509348f-21f1-4723-9475-0cf749e05c33)
 
     interfaces:
       Occopus:
@@ -1047,14 +1047,14 @@ a desired WindowsServer Sku (2016-Datacenter). `Refer to this Sku list <https://
   YOUR-VIRTUAL-MACHINE:
     type: tosca.nodes.MiCADO.Azure.Compute
     properties:
-          resource_group: ADD_YOUR_RG_HERE (e.g. my-test)
-          virtual_network: ADD_YOUR_VNET_HERE (e.g. my-test-vnet)
-          subnet: ADD_YOUR_SUBNET_HERE (e.g. default)
-          network_security_group: ADD_YOUR_NSG_HERE (e.g. my-test-nsg)
-          size: ADD_YOUR_ID_HERE (e.g. Standard_B1ms)
-          image: ADD_YOUR_IMAGE_HERE (e.g. 18.04.0-LTS or 2016-Datacenter)
-          public_key: ADD_YOUR_MINIMUM_2048_KEY_HERE (e.g. ssh-rsa ASHFF...)
-          public_ip: [OPTIONAL] BOOLEAN_ENABLE_PUBLIC_IP (e.g. true)
+      resource_group: ADD_YOUR_RG_HERE (e.g. my-test)
+      virtual_network: ADD_YOUR_VNET_HERE (e.g. my-test-vnet)
+      subnet: ADD_YOUR_SUBNET_HERE (e.g. default)
+      network_security_group: ADD_YOUR_NSG_HERE (e.g. my-test-nsg)
+      size: ADD_YOUR_ID_HERE (e.g. Standard_B1ms)
+      image: ADD_YOUR_IMAGE_HERE (e.g. 18.04.0-LTS or 2016-Datacenter)
+      public_key: ADD_YOUR_MINIMUM_2048_KEY_HERE (e.g. ssh-rsa ASHFF...)
+      public_ip: [OPTIONAL] BOOLEAN_ENABLE_PUBLIC_IP (e.g. true)
 
     interfaces:
       Terraform:
@@ -1103,13 +1103,13 @@ be set to Terraform as in the example below.
   YOUR-VIRTUAL-MACHINE:
     type: tosca.nodes.MiCADO.GCE.Compute
     properties:
-          region: ADD_YOUR_ID_HERE (e.g. us-west1)
-          zone: ADD_YOUR_ID_HERE (e.g. us-west1-a)
-          project: ADD_YOUR_ID_HERE (e.g. PGCE)
-          machine_type: ADD_YOUR_ID_HERE (e.g. n1-standard-2)
-          image: ADD_YOUR_ID_HERE (e.g.  ubuntu-os-cloud/ubuntu-1804-lts)
-          network: ADD_YOUR_ID_HERE (e.g. default)
-          ssh-keys: ADD_YOUR_ID_HERE (e.g. ssh-rsa AAAB3N...)
+      region: ADD_YOUR_ID_HERE (e.g. us-west1)
+      zone: ADD_YOUR_ID_HERE (e.g. us-west1-a)
+      project: ADD_YOUR_ID_HERE (e.g. PGCE)
+      machine_type: ADD_YOUR_ID_HERE (e.g. n1-standard-2)
+      image: ADD_YOUR_ID_HERE (e.g.  ubuntu-os-cloud/ubuntu-1804-lts)
+      network: ADD_YOUR_ID_HERE (e.g. default)
+      ssh-keys: ADD_YOUR_ID_HERE (e.g. ssh-rsa AAAB3N...)
 
     interfaces:
       Terraform:
@@ -1153,14 +1153,14 @@ be set to Terraform as in the example below.
   YOUR-VIRTUAL-MACHINE:
     type: tosca.nodes.MiCADO.OCI.Compute
     properties:
-          region: <REGION_NAME> (e.g. uk-london-1)
-          availability_domain: <AVAILABILITY_DOMAIN> (e.g. lVvK:UK-LONDON-1-AD-1)
-          compartment_id: <COMPARTMENT_OCID> (e.g ocid1.tenancy.oc1..aaa)
-          shape: <VM_TYPE_NAME> (e.g. VM.Standard.E2.1)
-          source_id: <VM_IMAGE_OCID> (e.g ocid1.image.oc1.uk-london-1.aaa)
-          subnet_id: <SUBNET_OCID> (e.g ocid1.subnet.oc1.uk-london-1.aaa)
-          network_security_group: <NETWORK_SECURITY_GROUP_OCID> (e.g ocid1.networksecuritygroup.oc1.uk-london-1.aaa)
-          ssh-keys: ADD_YOUR_ID_HERE (e.g. ssh-rsa AAAB3N...)
+      region: <REGION_NAME> (e.g. uk-london-1)
+      availability_domain: <AVAILABILITY_DOMAIN> (e.g. lVvK:UK-LONDON-1-AD-1)
+      compartment_id: <COMPARTMENT_OCID> (e.g ocid1.tenancy.oc1..aaa)
+      shape: <VM_TYPE_NAME> (e.g. VM.Standard.E2.1)
+      source_id: <VM_IMAGE_OCID> (e.g ocid1.image.oc1.uk-london-1.aaa)
+      subnet_id: <SUBNET_OCID> (e.g ocid1.subnet.oc1.uk-london-1.aaa)
+      network_security_group: <NETWORK_SECURITY_GROUP_OCID> (e.g ocid1.networksecuritygroup.oc1.uk-london-1.aaa)
+      ssh-keys: ADD_YOUR_ID_HERE (e.g. ssh-rsa AAAB3N...)
 
     interfaces:
       Terraform:
