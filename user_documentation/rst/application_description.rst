@@ -17,7 +17,7 @@ Main sections of the ADT
 
 **Top-level definitions**
 
-* **tosca_definitions_version**: ``tosca_simple_yaml_1_0``.
+* **tosca_definitions_version**: ``tosca_simple_yaml_1_2``.
 * **imports**: List of urls pointing to custom TOSCA types.
   The default url points to the custom types defined for MiCADO.
   Please, do not modify this url.
@@ -44,10 +44,10 @@ Example of the overall structure of an ADT
 
 ::
 
-   tosca_definitions_version: tosca_simple_yaml_1_0
+   tosca_definitions_version: tosca_simple_yaml_1_2
 
    imports:
-     - https://raw.githubusercontent.com/micado-scale/tosca/v0.9.0/micado_types.yaml
+     - https://raw.githubusercontent.com/micado-scale/tosca/v0.9.1/micado_types.yaml
 
    repositories:
      docker_hub: https://hub.docker.com/
@@ -113,6 +113,10 @@ Example of the overall structure of an ADT
 Application
 -----------
 
+Please find some example-driven documentation on defining your Kubernetes
+application `here
+<https://micado-scale.github.io/component_submitter/>`__.
+
 Under the node_templates section you can define one or more Docker containers
 and choose to orchestrate them with Kubernetes (see **YOUR-KUBERNETES-APP**).
 Each container is described as a separate named node which references a
@@ -142,8 +146,8 @@ here are a few common keywords:
 
   * **name:**
   * **value:**
-  * **valueFrom:** **!! see note below**
-* **envFrom**: **!! see note below**
+  * **valueFrom:** for use with ConfigMaps, see below
+* **envFrom**: mostly for using ConfigMaps, see below
 * **resource:**
 
   * **requests:**
@@ -168,6 +172,8 @@ here are a few common keywords:
   * **metadata**: service metadata, giving the option to set a name for the
     service. Explicit naming can be used to group different ports together
     (default grouping is by type)
+  * **hostPort**: the port on the node host to expose the pod at
+  * **containerPort**: the port to target if exposing with hostPort
 
 Environment variables can be loaded in from configuration
 data in Kubernetes ConfigMaps. This can be accomplished by using **envFrom:**
@@ -223,6 +229,11 @@ section. Requirements takes a list of map objects:
   ``tosca.nodes.MiCADO.Container.Application.Docker`` type under
   node_templates. The sidecar will share the Kubernetes Pod with
   the main container (the sidecar should not be given an interface)
+  **OR** name of an init container defined as a
+  ``tosca.nodes.MiCADO.Container.Application.Docker.Init`` type
+  under node_templates. The Pod will enter a ready state when
+  the Init Container runs to completion and exits cleanly (ie. with
+  a zero exit code)
 
 If a relationship is not defined for a volume the
 path on container will be the same as the path defined in the volume
@@ -252,13 +263,6 @@ If **inputs:** is omitted a set of defaults will be used to create a Deployment
 
         * **type:** Recreate (kill pods then update instead of RollingUpdate)
 
-* **configure**: *this key configures the Pod for this workload*
-
-  * **inputs**: `PodTemplateSpec <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podspec-v1-core>`__ options follow here... For example
-
-    * **spec:**
-
-      * **restartPolicy:** change the restart policy (defaults to Always)
 
 Types
 ~~~~~
@@ -282,14 +286,17 @@ following types:
 * **tosca.nodes.MiCADO.Container.Application.Docker.DaemonSet** -
   As above, but for a Kubernetes DaemonSet
 
-* **tosca.nodes.MiCADO.Container.Pod.Kubernetes** -
+* **tosca.nodes.MiCADO.Container.Application.Docker.StatefulSet** -
+  As above, but for a Kubernetes StatefulSet
+
+* **tosca.nodes.MiCADO.Container.Application.Pod** -
   Creates an empty Pod. No properties are available, so to use this type
   a container must be defined and **assigned no interface** as type
   ``tosca.nodes.MiCADO.Container.Application.Docker`` and referenced under
   **requirements:** (more than one container can be referenced to run
   multiple containers in a single Pod)
 
-* **tosca.nodes.MiCADO.Container.Pod.Kubernetes.Deployment** -
+* **tosca.nodes.MiCADO.Container.Application.Pod.Deployment** -
   As above, but a Kubernetes Deployment
 
 Examples of the definition of a basic application
@@ -418,19 +425,17 @@ options, here we again use the key **Kubernetes:**
 
   * **inputs**: persistent volume specific spec options... here are two
     popular examples, see `Kubernetes volumes <https://kubernetes.io/docs/concepts/storage/volumes/>`__ for more
+    * **spec:**
 
-    * **nfs:**
+      * **nfs:**
 
-      * **server:** IP of NFS server
-      * **path:** path on NFS share
+        * **server:** IP of NFS server
+        * **path:** path on NFS share
 
-    * **hostPath:**
+      * **hostPath:**
 
-      * **path:** path on host
+        * **path:** path on host
 
-* **configure**:
-
-  * **inputs**: using this key, options can be overwritten in the claim
 
 Types
 ~~~~~
@@ -472,9 +477,10 @@ Examples of the definition of a basic volume
       Kubernetes:
         create:
           inputs:
-            nfs:
-              path: /exports
-              server: 10.96.0.1
+            spec:
+              nfs:
+                path: /exports
+                server: 10.96.0.1
 
   YOUR-KUBERNETES-APP:
     type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
@@ -501,8 +507,9 @@ Examples of the definition of a basic volume
       Kubernetes:
         create:
           inputs:
-            hostPath:
-              path: /etc/mypath
+            spec:
+              hostPath:
+                path: /etc/mypath
 
   YOUR-KUBERNETES-APP:
     type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
@@ -590,7 +597,7 @@ following ConfigMap types:
 * **tosca.nodes.MiCADO.Container.Config** -
   The base and most common type for configuration data in MiCADO. It is
   necessary to define further fields under **interfaces:** as indicated above
-* **tosca.nodes.MiCADO.Container.Config.Kubernetes** -
+* **tosca.nodes.MiCADO.Container.Config.ConfigMap** -
   Defaults to a Kubernetes interface and abstracts the inputs to properties.
   Define the data or binary data fields as **data:** and **binaryData:**
   under **properties:**
@@ -626,7 +633,7 @@ Examples of the definition of a simple ConfigMap
             name: YOUR-CONFIG
             key: color
 
-**All ENV vars with** *tosca.nodes.MiCADO.Container.Config.Kubernetes*
+**All ENV vars with** *tosca.nodes.MiCADO.Container.ConfigMap*
 
   Here an environment variable is created for each key (this becomes the
   variable name) and value pair in the ConfigMap
@@ -646,7 +653,7 @@ Examples of the definition of a simple ConfigMap
     properties:
       envFrom:
       - configMapRef:
-            name: YOUR-CONFIG
+          name: YOUR-CONFIG
 
 **A volume with** *tosca.nodes.MiCADO.Container.Config.Kubernetes*
 
