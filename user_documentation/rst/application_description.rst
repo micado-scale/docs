@@ -1094,7 +1094,7 @@ GCE
 ~~~
 
 To instantiate MiCADO workers on a cloud through Google interface, please use
-the template below. Currently, only **Terraform** has support for Azure,
+the template below. Currently, only **Terraform** has support for Google Cloud,
 so Terraform must be enabled as in :ref:`customize`, and the interface must
 be set to Terraform as in the example below.
 
