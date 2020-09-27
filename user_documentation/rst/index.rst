@@ -29,5 +29,6 @@ In the current release, the status of the system can be inspected through the fo
    rest_api
    application_description
    tutorials
+   MiCADO Client Library <micado>
    release_notes
    whats_new
