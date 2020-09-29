@@ -4,6 +4,29 @@ Release Notes
 | **Changelog since v0.5.x of MiCADO**
 | See more detailed notes about upgrading in :ref:`whatsnew`
 
+v0.9.1 (30 September 2020)
+=====================
+
+- Add support for Oracle Cloud Infrastructure
+- Add support for Ubuntu 20.04 LTS
+- Improve RESTful nature of Submitter with v2.0 API
+- Base component images on ``alpine`` for a smaller footprint
+- Bump Kubernetes to v1.19
+- Support TOSCA v1.2 template files
+- Refactor custom TOSCA type definitions
+- Refactor Submitter parsing modules to improve parsing times
+- Refactor KubernetesAdaptor for more customisable resources
+- Improve validation of translated Kubernetes manifests
+- Support config_drive flag in OpenStack (Terraform only)
+- Port PolicyKeeper to Python3
+- Increase timeout for MiCADO component deployment (for slower machines)
+- Increase timeout for inactive worker node removal (for poor networks)
+- Reduce Prometheus default scrape interval (for custom exporters)
+- Add ``mode`` to Ansible tasks for CVE-2020-1736
+- Include hostname and IP as SANs in self-signed certs
+- Fix: enable secret distribution via ADT policy
+
+
 v0.9.0 (9 April 2020)
 =====================
 

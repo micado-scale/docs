@@ -5,6 +5,56 @@ What's New
 
 **This section contains detailed upgrade notes for recent versions**
 
+v0.9.1
+======
+
+Major Enhancements
+------------------
+
+Support for Oracle Cloud Infrastructure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+MiCADO now includes support for
+`Oracle Cloud Infrastructure <https://www.oracle.com/ca-en/cloud/>`__ !
+
+Provisioning virtual machines in OCI is currently supported by Terraform
+in MiCADO. Details on preparing your ADT for use with Oracle can be found
+in the :ref:`ociadt` section of the documentation.
+
+Submitter API v2.0
+~~~~~~~~~~~~~~~~~~
+
+The MiCADO Submitter RESTful API has been updated to v2.0, to facilitate
+better intergration with other tools and platforms. The functionality of
+the previous API version has been preserved and limited backwards
+compatibility with v1.0 of the API is still maintained in this version.
+
+Expect v1.0 of the API to be deprecated in a future version.
+
+
+Fixes
+-----
+
+Kubernetes Secret Distribution via ADT Policies
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A bug which prevented MiCADO from distributing application secrets defined
+in policies within the ADT has been resolved. See the :ref:`secretdist`
+section of the documentation for details on how to define and assign secrets
+inside an ADT.
+
+
+Known Issues & Deprecations
+---------------------------
+
+Ubuntu 16.04
+~~~~~~~~~~~~
+
+This version of MiCADO adds support for the latest Ubuntu 20.04 LTS. Going
+forward, MiCADO will deprecate support for Ubuntu 16.04 LTS and focus on
+supporting the current long-term support releases of Ubuntu: 18.04 and 20.04
+
+
 v0.9.0
 ======
 
