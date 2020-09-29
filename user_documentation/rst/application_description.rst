@@ -1005,6 +1005,8 @@ inputs are available.:
   multiple security groups in the form of a **list**) for your VM.
 * **network_id** is the id of the network you would like to use on your target
   Nova cloud.
+* **config_drive** (Terraform only) is a boolean to enable use of a configuration
+  drive for metadata storage.
 
 Under the **interfaces** section of a Nova virtual machine definition, the
 **endpoint** input (v3 Identity service) is required as seen in the
