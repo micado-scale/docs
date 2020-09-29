@@ -1149,6 +1149,8 @@ retrieve the key file is as follows :
     In that row, click the **More** button, and then click **Create key**.
   * Select a **Key type** and click **Create**.
 
+.. _ociadt:
+
 OCI
 ~~~
 
@@ -1788,6 +1790,8 @@ There are six types of MiCADO network security policy.
 
 This proxy has no additional properties.
 
+.. _secretdist:
+
 Secret policy
 -------------
 
@@ -1808,7 +1812,7 @@ it to an environment variable (ENV_SALT in the example) in a container:
          properties:
            ...
            env:
-             name: ENV_SALT
+           - name: ENV_SALT
              valueFrom:
                secretKeyRef:
                  name: micado.appsecret
