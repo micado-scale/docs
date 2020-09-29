@@ -42,7 +42,7 @@ Simply clone the respository and add the location to your PYTHONPATH
 
 .. code-block:: console
 
-  $ MCPATH="/usr/local/lib/micado-client"
+  $ MC_PATH="/usr/local/lib/micado-client"
   $ git clone https://github.com/micado-scale/micado-client $MC_PATH
   $ export PYTHONPATH="${PYTHONPATH}:$MC_PATH"
 
@@ -81,7 +81,7 @@ For more detail, see the Documentation Reference section below
     from micado import MicadoClient
 
     client = MicadoClient(launcher="openstack")
-    client.master.create(auth_url='yourendpoint',
+    ID = client.master.create(auth_url='yourendpoint',
                          project_id='project_id',
                          image='image_name or image_id',
                          flavor='flavor_name or flavor_id',
@@ -95,9 +95,7 @@ For more detail, see the Documentation Reference section below
     client.applications.get("hello-world")
     client.applications.delete("hello-world")
 
-    client.master.destroy(id='VM ID',
-                          auth_url='yourendpoint',
-                          project_id='project_id')
+    client.master.destroy(ID)
 
 
 
