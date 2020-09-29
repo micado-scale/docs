@@ -44,7 +44,7 @@ Simply clone the respository and add the location to your PYTHONPATH
 
   $ MC_PATH="/usr/local/lib/micado-client"
   $ git clone https://github.com/micado-scale/micado-client $MC_PATH
-  $ export PYTHONPATH="${PYTHONPATH}:$MC_PATH"
+  $ export PYTHONPATH="$PYTHONPATH:$MC_PATH"
 
 Specify cloud credentials
 ~~~~~~~~~~~~~~~~~~~~~~~~~
