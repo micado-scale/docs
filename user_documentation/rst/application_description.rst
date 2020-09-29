@@ -1005,6 +1005,8 @@ inputs are available.:
   multiple security groups in the form of a **list**) for your VM.
 * **network_id** is the id of the network you would like to use on your target
   Nova cloud.
+* **config_drive** (Terraform only) is a boolean to enable use of a configuration
+  drive for metadata storage.
 
 Under the **interfaces** section of a Nova virtual machine definition, the
 **endpoint** input (v3 Identity service) is required as seen in the
@@ -1147,13 +1149,21 @@ retrieve the key file is as follows :
     In that row, click the **More** button, and then click **Create key**.
   * Select a **Key type** and click **Create**.
 
+.. _ociadt:
+
 OCI
 ~~~
 
 To instantiate MiCADO workers on a cloud through Oracle interface, please use
 the template below. Currently, only **Terraform** has support for Oracle,
 so Terraform must be enabled as in :ref:`customize`, and the interface must
-be set to Terraform as in the example below.
+be set to Terraform as in the example below under ``context``.
+
+**Note** that OCI's Ubuntu VM images feature a number of strict ``iptables``
+rules, which will restrict normal communnication between worker nodes and the
+MiCADO Master. To resolve this issue, it is important to include the VM
+contextualisation commands that can be seen in the example below.
+
 
 ::
 
@@ -1167,7 +1177,13 @@ be set to Terraform as in the example below.
       source_id: <VM_IMAGE_OCID> (e.g ocid1.image.oc1.uk-london-1.aaa)
       subnet_id: <SUBNET_OCID> (e.g ocid1.subnet.oc1.uk-london-1.aaa)
       network_security_group: <NETWORK_SECURITY_GROUP_OCID> (e.g ocid1.networksecuritygroup.oc1.uk-london-1.aaa)
-      ssh-keys: ADD_YOUR_ID_HERE (e.g. ssh-rsa AAAB3N...)
+      ssh_keys: ADD_YOUR_ID_HERE (e.g. ssh-rsa AAAB3N...)
+      context:
+        insert: true
+        cloud_config: |
+          runcmd:
+          - iptables -D INPUT -j REJECT --reject-with icmp-host-prohibited
+          - iptables -D FORWARD -j REJECT --reject-with icmp-host-prohibited
 
     interfaces:
       Terraform:
@@ -1185,9 +1201,9 @@ inputs are available.:
 * **subnet_id** is the OCID of the subnet to create the VNIC in.
 * **network_security_group** specifies the OCID of the network security
   settings for the VM.
-* **ssh-keys** sets the public SSH key to be associated with the instance.
+* **ssh_keys** sets the public SSH key to be associated with the instance.
 
-Under the **interfaces** section of a GCE virtual machine definition no
+Under the **interfaces** section of an OCI virtual machine definition no
 specific inputs are required, but **Terraform: create:** should be present.
 
 **Authentication** in OCI is supported by MiCADO in two ways:
@@ -1774,6 +1790,8 @@ There are six types of MiCADO network security policy.
 
 This proxy has no additional properties.
 
+.. _secretdist:
+
 Secret policy
 -------------
 
@@ -1794,7 +1812,7 @@ it to an environment variable (ENV_SALT in the example) in a container:
          properties:
            ...
            env:
-             name: ENV_SALT
+           - name: ENV_SALT
              valueFrom:
                secretKeyRef:
                  name: micado.appsecret

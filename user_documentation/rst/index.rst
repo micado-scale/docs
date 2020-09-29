@@ -26,7 +26,7 @@ In the current release, the status of the system can be inspected through the fo
 
    deployment
    dashboard
-   rest_api
+   RESTful API <https://micado-scale.github.io/component_submitter/swagger.html>
    application_description
    tutorials
    release_notes
