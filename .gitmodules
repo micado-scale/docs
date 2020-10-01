@@ -1,0 +1,3 @@
+[submodule "micado-client"]
+	path = micado-client
+	url = https://github.com/micado-scale/micado-client

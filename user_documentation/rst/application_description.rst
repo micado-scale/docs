@@ -17,7 +17,7 @@ Main sections of the ADT
 
 **Top-level definitions**
 
-* **tosca_definitions_version**: ``tosca_simple_yaml_1_0``.
+* **tosca_definitions_version**: ``tosca_simple_yaml_1_2``.
 * **imports**: List of urls pointing to custom TOSCA types.
   The default url points to the custom types defined for MiCADO.
   Please, do not modify this url.
@@ -44,10 +44,10 @@ Example of the overall structure of an ADT
 
 ::
 
-   tosca_definitions_version: tosca_simple_yaml_1_0
+   tosca_definitions_version: tosca_simple_yaml_1_2
 
    imports:
-     - https://raw.githubusercontent.com/micado-scale/tosca/v0.9.0/micado_types.yaml
+     - https://raw.githubusercontent.com/micado-scale/tosca/v0.9.1/micado_types.yaml
 
    repositories:
      docker_hub: https://hub.docker.com/
@@ -113,6 +113,10 @@ Example of the overall structure of an ADT
 Application
 -----------
 
+Please find some example-driven documentation on defining your Kubernetes
+application `here
+<https://micado-scale.github.io/component_submitter/>`__.
+
 Under the node_templates section you can define one or more Docker containers
 and choose to orchestrate them with Kubernetes (see **YOUR-KUBERNETES-APP**).
 Each container is described as a separate named node which references a
@@ -142,8 +146,8 @@ here are a few common keywords:
 
   * **name:**
   * **value:**
-  * **valueFrom:** **!! see note below**
-* **envFrom**: **!! see note below**
+  * **valueFrom:** for use with ConfigMaps, see below
+* **envFrom**: mostly for using ConfigMaps, see below
 * **resource:**
 
   * **requests:**
@@ -168,6 +172,8 @@ here are a few common keywords:
   * **metadata**: service metadata, giving the option to set a name for the
     service. Explicit naming can be used to group different ports together
     (default grouping is by type)
+  * **hostPort**: the port on the node host to expose the pod at
+  * **containerPort**: the port to target if exposing with hostPort
 
 Environment variables can be loaded in from configuration
 data in Kubernetes ConfigMaps. This can be accomplished by using **envFrom:**
@@ -223,6 +229,11 @@ section. Requirements takes a list of map objects:
   ``tosca.nodes.MiCADO.Container.Application.Docker`` type under
   node_templates. The sidecar will share the Kubernetes Pod with
   the main container (the sidecar should not be given an interface)
+  **OR** name of an init container defined as a
+  ``tosca.nodes.MiCADO.Container.Application.Docker.Init`` type
+  under node_templates. The Pod will enter a ready state when
+  the Init Container runs to completion and exits cleanly (ie. with
+  a zero exit code)
 
 If a relationship is not defined for a volume the
 path on container will be the same as the path defined in the volume
@@ -252,13 +263,6 @@ If **inputs:** is omitted a set of defaults will be used to create a Deployment
 
         * **type:** Recreate (kill pods then update instead of RollingUpdate)
 
-* **configure**: *this key configures the Pod for this workload*
-
-  * **inputs**: `PodTemplateSpec <https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#podspec-v1-core>`__ options follow here... For example
-
-    * **spec:**
-
-      * **restartPolicy:** change the restart policy (defaults to Always)
 
 Types
 ~~~~~
@@ -282,14 +286,17 @@ following types:
 * **tosca.nodes.MiCADO.Container.Application.Docker.DaemonSet** -
   As above, but for a Kubernetes DaemonSet
 
-* **tosca.nodes.MiCADO.Container.Pod.Kubernetes** -
+* **tosca.nodes.MiCADO.Container.Application.Docker.StatefulSet** -
+  As above, but for a Kubernetes StatefulSet
+
+* **tosca.nodes.MiCADO.Container.Application.Pod** -
   Creates an empty Pod. No properties are available, so to use this type
   a container must be defined and **assigned no interface** as type
   ``tosca.nodes.MiCADO.Container.Application.Docker`` and referenced under
   **requirements:** (more than one container can be referenced to run
   multiple containers in a single Pod)
 
-* **tosca.nodes.MiCADO.Container.Pod.Kubernetes.Deployment** -
+* **tosca.nodes.MiCADO.Container.Application.Pod.Deployment** -
   As above, but a Kubernetes Deployment
 
 Examples of the definition of a basic application
@@ -418,19 +425,17 @@ options, here we again use the key **Kubernetes:**
 
   * **inputs**: persistent volume specific spec options... here are two
     popular examples, see `Kubernetes volumes <https://kubernetes.io/docs/concepts/storage/volumes/>`__ for more
+    * **spec:**
 
-    * **nfs:**
+      * **nfs:**
 
-      * **server:** IP of NFS server
-      * **path:** path on NFS share
+        * **server:** IP of NFS server
+        * **path:** path on NFS share
 
-    * **hostPath:**
+      * **hostPath:**
 
-      * **path:** path on host
+        * **path:** path on host
 
-* **configure**:
-
-  * **inputs**: using this key, options can be overwritten in the claim
 
 Types
 ~~~~~
@@ -472,9 +477,10 @@ Examples of the definition of a basic volume
       Kubernetes:
         create:
           inputs:
-            nfs:
-              path: /exports
-              server: 10.96.0.1
+            spec:
+              nfs:
+                path: /exports
+                server: 10.96.0.1
 
   YOUR-KUBERNETES-APP:
     type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
@@ -501,8 +507,9 @@ Examples of the definition of a basic volume
       Kubernetes:
         create:
           inputs:
-            hostPath:
-              path: /etc/mypath
+            spec:
+              hostPath:
+                path: /etc/mypath
 
   YOUR-KUBERNETES-APP:
     type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
@@ -590,7 +597,7 @@ following ConfigMap types:
 * **tosca.nodes.MiCADO.Container.Config** -
   The base and most common type for configuration data in MiCADO. It is
   necessary to define further fields under **interfaces:** as indicated above
-* **tosca.nodes.MiCADO.Container.Config.Kubernetes** -
+* **tosca.nodes.MiCADO.Container.Config.ConfigMap** -
   Defaults to a Kubernetes interface and abstracts the inputs to properties.
   Define the data or binary data fields as **data:** and **binaryData:**
   under **properties:**
@@ -626,7 +633,7 @@ Examples of the definition of a simple ConfigMap
             name: YOUR-CONFIG
             key: color
 
-**All ENV vars with** *tosca.nodes.MiCADO.Container.Config.Kubernetes*
+**All ENV vars with** *tosca.nodes.MiCADO.Container.ConfigMap*
 
   Here an environment variable is created for each key (this becomes the
   variable name) and value pair in the ConfigMap
@@ -646,7 +653,7 @@ Examples of the definition of a simple ConfigMap
     properties:
       envFrom:
       - configMapRef:
-            name: YOUR-CONFIG
+          name: YOUR-CONFIG
 
 **A volume with** *tosca.nodes.MiCADO.Container.Config.Kubernetes*
 
@@ -681,12 +688,12 @@ previous section is orchestrated by Kubernetes. This section introduces how the
 parameters of the virtual machine can be configured which will host the
 Kubernetes worker node. During operation MiCADO will instantiate as many
 virtual machines with the parameters defined here as required during scaling.
-MiCADO currently supports six different cloud interfaces: CloudSigma,
-CloudBroker, EC2, Nova, Azure and GCE. MiCADO supports multiple virtual machine
-"sets" which can be restricted to host only specific containers (defined in the
-requirements section of the container specification). At the moment multi-cloud
-support is in alpha stage, so only certain combinations of different cloud
-service providers will work.
+MiCADO currently supports seven different cloud interfaces: CloudSigma,
+CloudBroker, EC2, Nova, Azure, OCI and GCE. MiCADO supports multiple virtual
+machine "sets" which can be restricted to host only specific containers
+(defined in the requirements section of the container specification). At the
+moment multi-cloud support is in alpha stage, so only certain combinations of
+different cloud service providers will work.
 
 **NOTE** Underscores are not permitted in virtual machine names
 (ie TOSCA node names). Names should also begin and end with an alphanumeric.
@@ -719,11 +726,11 @@ General
     type: tosca.nodes.MiCADO...Compute
       properties:
         <CLOUD-SPECIFIC VM PROPERTIES>
-      context:
-        insert: true
-        cloud_config: |
-          runcmd:
-          - <some_command_here>
+        context:
+          insert: true
+          cloud_config: |
+            runcmd:
+            - <some_command_here>
 
       capabilities:
         host:
@@ -764,7 +771,7 @@ Properties for each cloud are detailed further below.
   - Setting **insert** to true will add the newly defined configurations
     to the start of the default cloud-init config, before the MiCADO Worker
     is fully initialised
-  
+
 
 
 
@@ -908,9 +915,9 @@ in :ref:`customize` and adjust the interfaces section accordingly.
   YOUR-VIRTUAL-MACHINE:
     type: tosca.nodes.MiCADO.EC2.Compute
     properties:
-          region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
-          image_id: ADD_YOUR_ID_HERE (e.g. ami-12345678)
-          instance_type: ADD_YOUR_INSTANCE_TYPE_HERE (e.g. t1.small)
+      region_name: ADD_YOUR_REGION_NAME_HERE (e.g. eu-west-1)
+      image_id: ADD_YOUR_ID_HERE (e.g. ami-12345678)
+      instance_type: ADD_YOUR_INSTANCE_TYPE_HERE (e.g. t1.small)
 
     interfaces:
       Occopus:
@@ -965,13 +972,13 @@ accordingly.
   YOUR-VIRTUAL-MACHINE:
     type: tosca.nodes.MiCADO.Nova.Compute
     properties:
-          image_id: ADD_YOUR_ID_HERE (e.g. d4f4e496-031a-4f49-b034-f8dafe28e01c)
-          flavor_name: ADD_YOUR_ID_HERE (e.g. 3)
-          project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
-          network_id: ADD_YOUR_ID_HERE (e.g. 3fd4c62d-5fbe-4bd9-9a9f-c161dabeefde)
-          key_name: ADD_YOUR_KEY_HERE (e.g. keyname)
-          security_groups:
-            - ADD_YOUR_ID_HERE (e.g. d509348f-21f1-4723-9475-0cf749e05c33)
+      image_id: ADD_YOUR_ID_HERE (e.g. d4f4e496-031a-4f49-b034-f8dafe28e01c)
+      flavor_name: ADD_YOUR_ID_HERE (e.g. 3)
+      project_id: ADD_YOUR_ID_HERE (e.g. a678d20e71cb4b9f812a31e5f3eb63b0)
+      network_id: ADD_YOUR_ID_HERE (e.g. 3fd4c62d-5fbe-4bd9-9a9f-c161dabeefde)
+      key_name: ADD_YOUR_KEY_HERE (e.g. keyname)
+      security_groups:
+        - ADD_YOUR_ID_HERE (e.g. d509348f-21f1-4723-9475-0cf749e05c33)
 
     interfaces:
       Occopus:
@@ -998,6 +1005,8 @@ inputs are available.:
   multiple security groups in the form of a **list**) for your VM.
 * **network_id** is the id of the network you would like to use on your target
   Nova cloud.
+* **config_drive** (Terraform only) is a boolean to enable use of a configuration
+  drive for metadata storage.
 
 Under the **interfaces** section of a Nova virtual machine definition, the
 **endpoint** input (v3 Identity service) is required as seen in the
@@ -1047,14 +1056,14 @@ a desired WindowsServer Sku (2016-Datacenter). `Refer to this Sku list <https://
   YOUR-VIRTUAL-MACHINE:
     type: tosca.nodes.MiCADO.Azure.Compute
     properties:
-          resource_group: ADD_YOUR_RG_HERE (e.g. my-test)
-          virtual_network: ADD_YOUR_VNET_HERE (e.g. my-test-vnet)
-          subnet: ADD_YOUR_SUBNET_HERE (e.g. default)
-          network_security_group: ADD_YOUR_NSG_HERE (e.g. my-test-nsg)
-          size: ADD_YOUR_ID_HERE (e.g. Standard_B1ms)
-          image: ADD_YOUR_IMAGE_HERE (e.g. 18.04.0-LTS or 2016-Datacenter)
-          public_key: ADD_YOUR_MINIMUM_2048_KEY_HERE (e.g. ssh-rsa ASHFF...)
-          public_ip: [OPTIONAL] BOOLEAN_ENABLE_PUBLIC_IP (e.g. true)
+      resource_group: ADD_YOUR_RG_HERE (e.g. my-test)
+      virtual_network: ADD_YOUR_VNET_HERE (e.g. my-test-vnet)
+      subnet: ADD_YOUR_SUBNET_HERE (e.g. default)
+      network_security_group: ADD_YOUR_NSG_HERE (e.g. my-test-nsg)
+      size: ADD_YOUR_ID_HERE (e.g. Standard_B1ms)
+      image: ADD_YOUR_IMAGE_HERE (e.g. 18.04.0-LTS or 2016-Datacenter)
+      public_key: ADD_YOUR_MINIMUM_2048_KEY_HERE (e.g. ssh-rsa ASHFF...)
+      public_ip: [OPTIONAL] BOOLEAN_ENABLE_PUBLIC_IP (e.g. true)
 
     interfaces:
       Terraform:
@@ -1094,7 +1103,7 @@ GCE
 ~~~
 
 To instantiate MiCADO workers on a cloud through Google interface, please use
-the template below. Currently, only **Terraform** has support for Azure,
+the template below. Currently, only **Terraform** has support for Google Cloud,
 so Terraform must be enabled as in :ref:`customize`, and the interface must
 be set to Terraform as in the example below.
 
@@ -1103,13 +1112,13 @@ be set to Terraform as in the example below.
   YOUR-VIRTUAL-MACHINE:
     type: tosca.nodes.MiCADO.GCE.Compute
     properties:
-          region: ADD_YOUR_ID_HERE (e.g. us-west1)
-          zone: ADD_YOUR_ID_HERE (e.g. us-west1-a)
-          project: ADD_YOUR_ID_HERE (e.g. PGCE)
-          machine_type: ADD_YOUR_ID_HERE (e.g. n1-standard-2)
-          image: ADD_YOUR_ID_HERE (e.g.  ubuntu-os-cloud/ubuntu-1804-lts)
-          network: ADD_YOUR_ID_HERE (e.g. default)
-          ssh-keys: ADD_YOUR_ID_HERE (e.g. ssh-rsa AAAB3N...)
+      region: ADD_YOUR_ID_HERE (e.g. us-west1)
+      zone: ADD_YOUR_ID_HERE (e.g. us-west1-a)
+      project: ADD_YOUR_ID_HERE (e.g. PGCE)
+      machine_type: ADD_YOUR_ID_HERE (e.g. n1-standard-2)
+      image: ADD_YOUR_ID_HERE (e.g.  ubuntu-os-cloud/ubuntu-1804-lts)
+      network: ADD_YOUR_ID_HERE (e.g. default)
+      ssh-keys: ADD_YOUR_ID_HERE (e.g. ssh-rsa AAAB3N...)
 
     interfaces:
       Terraform:
@@ -1139,6 +1148,73 @@ retrieve the key file is as follows :
   * Find the row of the service account that you want to create a key for.
     In that row, click the **More** button, and then click **Create key**.
   * Select a **Key type** and click **Create**.
+
+.. _ociadt:
+
+OCI
+~~~
+
+To instantiate MiCADO workers on a cloud through Oracle interface, please use
+the template below. Currently, only **Terraform** has support for Oracle,
+so Terraform must be enabled as in :ref:`customize`, and the interface must
+be set to Terraform as in the example below under ``context``.
+
+**Note** that OCI's Ubuntu VM images feature a number of strict ``iptables``
+rules, which will restrict normal communnication between worker nodes and the
+MiCADO Master. To resolve this issue, it is important to include the VM
+contextualisation commands that can be seen in the example below.
+
+
+::
+
+  YOUR-VIRTUAL-MACHINE:
+    type: tosca.nodes.MiCADO.OCI.Compute
+    properties:
+      region: <REGION_NAME> (e.g. uk-london-1)
+      availability_domain: <AVAILABILITY_DOMAIN> (e.g. lVvK:UK-LONDON-1-AD-1)
+      compartment_id: <COMPARTMENT_OCID> (e.g ocid1.tenancy.oc1..aaa)
+      shape: <VM_TYPE_NAME> (e.g. VM.Standard.E2.1)
+      source_id: <VM_IMAGE_OCID> (e.g ocid1.image.oc1.uk-london-1.aaa)
+      subnet_id: <SUBNET_OCID> (e.g ocid1.subnet.oc1.uk-london-1.aaa)
+      network_security_group: <NETWORK_SECURITY_GROUP_OCID> (e.g ocid1.networksecuritygroup.oc1.uk-london-1.aaa)
+      ssh_keys: ADD_YOUR_ID_HERE (e.g. ssh-rsa AAAB3N...)
+      context:
+        insert: true
+        cloud_config: |
+          runcmd:
+          - iptables -D INPUT -j REJECT --reject-with icmp-host-prohibited
+          - iptables -D FORWARD -j REJECT --reject-with icmp-host-prohibited
+
+    interfaces:
+      Terraform:
+        create:
+
+Under the **properties** section of a OCI virtual machine definition these
+inputs are available.:
+
+* **availability_domain** is the availability domain of the instance.
+* **source_id** specifies the OCID of an image from which to initialize the
+  VM disk.
+* **region** is the region that the resources should be created in.
+* **shape** specifies the type of machine to create.
+* **compartment_id** is the OCID of the compartment.
+* **subnet_id** is the OCID of the subnet to create the VNIC in.
+* **network_security_group** specifies the OCID of the network security
+  settings for the VM.
+* **ssh_keys** sets the public SSH key to be associated with the instance.
+
+Under the **interfaces** section of an OCI virtual machine definition no
+specific inputs are required, but **Terraform: create:** should be present.
+
+**Authentication** in OCI is supported by MiCADO in two ways:
+
+  The first is by setting up an `Instance Principal <https://www.terraform.io/docs/providers/oci/index.html>`__
+  based authentication on the **MiCADO Master VM** by creating suitable 'Dynamic Group and Policies <https://docs.cloud.oracle.com/en-us/iaas/Content/Identity/Tasks/callingservicesfrominstances.htm>`__
+  associated with it.
+
+  The other option is by enabling an `API Key  <https://docs.cloud.oracle.com/en-us/iaas/Content/API/Concepts/apisigningkey.htm#five>`__
+  based authentication on the **MiCADO Master VM** and providing the required
+  fields in *credentials-cloud-api.yml* during :ref:`cloud-credentials`
 
 
 Types
@@ -1714,18 +1790,37 @@ There are six types of MiCADO network security policy.
 
 This proxy has no additional properties.
 
+.. _secretdist:
+
 Secret policy
 -------------
 
-There is a way to define application-level secrets in the MiCADO application description. These secrets are distributed by kubernetes.
+There is a way to define application-level secrets in the MiCADO application
+description. These secrets are managed by Security Policy Manager and stored
+and distributed as a single secret called **micado.appsecret** by Kubernetes.
+
+See an example below for creating a secret using policies, and assigning
+it to an environment variable (ENV_SALT in the example) in a container:
+
 
 ::
 
-  tosca.policies.Security.MiCADO.Secret.KubernetesSecretDistribution:
-    derived_from: tosca.policies.Root
-    description: distributes secrets to services
-    properties:
-      file_secrets:
-        type: map
-      text_secrets:
-        type: map
+   topology_template:
+     node_templates:
+       my-app-container:
+         type: tosca.nodes.MiCADO.Container.Application.Docker
+         properties:
+           ...
+           env:
+           - name: ENV_SALT
+             valueFrom:
+               secretKeyRef:
+                 name: micado.appsecret
+                 key: salt_value
+
+     policies:
+     - secret:
+         type: tosca.policies.Security.MiCADO.Secret.KubernetesSecretDistribution
+         properties:
+           text_secrets:
+             salt_value: "123456qwerty"

@@ -1,1 +1,7 @@
 sphinx_rtd_theme
+requests==2.24.0
+ruamel.yaml==0.16.10
+pycryptodome==3.9.8
+python-novaclient==17.2.0
+openstacksdk==0.48.0
+ansible==2.9.12

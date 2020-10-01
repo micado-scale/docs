@@ -96,9 +96,9 @@ Step 1: Download the ansible playbook.
 
 ::
 
-   curl --output ansible-micado-0.9.0.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.9.0/ansible-micado-0.9.0.tar.gz
-   tar -zxvf ansible-micado-0.9.0.tar.gz
-   cd ansible-micado-0.9.0/
+   curl --output ansible-micado-0.9.1.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.9.1/ansible-micado-0.9.1.tar.gz
+   tar -zxvf ansible-micado-0.9.1.tar.gz
+   cd ansible-micado-0.9.1/
 
 .. _cloud-credentials:
 
@@ -170,8 +170,22 @@ MiCADO master will use these security-related settings and credentials to authen
 
 Specify the provisioning method for the x509 keypair used for TLS encryption of the management interface in the ``tls`` subtree:
 
-* The 'self-signed' option generates a new keypair with the specified hostname as subject (or 'micado-master' if omitted).
-* The 'user-supplied' option lets the user add the keypair as plain multiline strings (in unencrypted format) in the ansible_user_data.yml file under the 'cert' and 'key' subkeys respectively.
+* The **self-signed** option generates a new keypair with the specified
+  hostname as the subject / CN ('micado-master' by default, but configurable in
+  **micado-master.yml**).
+  
+  Two Subject Alternative Name (SAN) entries are also
+  added by the configuration file at
+  ``roles/micado_master/start/templates/zorp/san.cnf``:
+  
+    - DNS: *<specified hostname>*
+    - IP: *<specified IP>*
+
+  The generated certificate file is located at:
+  ``/var/lib/micado/zorp/config/ssl.pem``
+
+
+* The **user-supplied** option lets the user add the keypair as plain multiline strings (in unencrypted format) in the ansible_user_data.yml file under the 'cert' and 'key' subkeys respectively.
 
 Specify the default username and password for the administrative user in the ``authentication`` subtree.
 
@@ -254,7 +268,7 @@ Please, revise all the parameters, however in most cases the default values are 
 Step 6: Customize the deployment
 --------------------------------
 
-A few parameters can be fine tuned before deployment. They are as follows:
+A few parameters in *micado-master.yml* can be fine tuned before deployment. They are as follows:
 
 - **disable_optimizer**: Setting this parameter to False enables the deployment of the Optimizer module, to perform more advanced scaling. Default is True.
 
