@@ -4,7 +4,7 @@ Release Notes
 | **Changelog since v0.5.x of MiCADO**
 | See more detailed notes about upgrading in :ref:`whatsnew`
 
-v0.9.1 (30 September 2020)
+v0.9.1 (1 October 2020)
 =====================
 
 - Add support for Oracle Cloud Infrastructure
