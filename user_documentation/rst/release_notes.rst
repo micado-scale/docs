@@ -5,7 +5,7 @@ Release Notes
 | See more detailed notes about upgrading in :ref:`whatsnew`
 
 v0.9.1 (1 October 2020)
-=====================
+=======================
 
 - Add support for Oracle Cloud Infrastructure
 - Add support for Ubuntu 20.04 LTS
