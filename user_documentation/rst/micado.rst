@@ -31,7 +31,7 @@ install those before using MiCADO client library. For reference, they are:
 * pycryptodome==3.9.8
 * python-novaclient==17.2.0
 * openstacksdk==0.48.0
-* ansible==2.9.12
+* ansible==2.10.0
 
 Get the MiCADO Client Library
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,11 +45,13 @@ Simply clone the respository and add the location to your PYTHONPATH
   $ MC_PATH="/usr/local/lib/micado-client"
   $ git clone https://github.com/micado-scale/micado-client $MC_PATH
   $ export PYTHONPATH="$PYTHONPATH:$MC_PATH"
+  $ mkdir -p ~/.micado-cli
+  $ touch ~/.micado-cli/credentials-cloud-api.yml
 
 Specify cloud credentials
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-Specify cloud credential for MiCADO master VM creation. This file should
-be saved at ``~/.micado-cli/credentials-cloud-api.yml``
+Specify cloud credential for MiCADO master VM creation. Please,
+edit ``~/.micado-cli/credentials-cloud-api.yml``
 
 .. code:: yaml
 
@@ -69,47 +71,80 @@ be saved at ``~/.micado-cli/credentials-cloud-api.yml``
 Example
 -------
 
-For more detail, see the Documentation Reference section below
-
-**Usage with a launcher:**
-
 .. note::
     Before you start testing, make sure the authentication data in the correct place.
+
+For more details, see the Documentation Reference section below.
+There are three use-cases identified for using micado-client.
+
+**Use-case 1**
+
+MiCADO master is created with the help of MiCADO client library. The create and destroy methods
+are invoked in the same program i.e. storing and retrieving the ``client.master`` object is not needed.
 
 .. code:: Python
 
     from micado import MicadoClient
 
     client = MicadoClient(launcher="openstack")
-    ID = client.master.create(auth_url='yourendpoint',
-                         project_id='project_id',
-                         image='image_name or image_id',
-                         flavor='flavor_name or flavor_id',
-                         network='network_name or network_id',
-                         keypair='keypair_name or keypair_id',
-                         security_group='security_group_name or security_group_id')
- 
+    client.master.create(
+        auth_url='yourendpoint',
+        project_id='project_id',
+        image='image_name or image_id',
+        flavor='flavor_name or flavor_id',
+        network='network_name or network_id',
+        keypair='keypair_name or keypair_id',
+        security_group='security_group_name or security_group_id'
+        )
     client.applications.list()
-    client.applications.create(app_id="hello-world",
-                               url="https://example.com/repo/hw_adt.yaml")
-    client.applications.get("hello-world")
-    client.applications.delete("hello-world")
+    client.master.destroy()
 
-    client.master.destroy(ID)
+**Use-case 2**
 
+MiCADO master is created with the help of MiCADO client library. The create and destroy methods
+are invoked in seperate programs i.e. storing and retrieving the ``client.master`` object is needed.
 
+    .. code:: Python
 
-**Usage without a launcher:**
+        from micado import MicadoClient
 
-.. code:: Python
+        client = MicadoClient(launcher="openstack")
+        master_id = client.master.create(
+            auth_url='yourendpoint',
+            project_id='project_id',
+            image='image_name or image_id',
+            flavor='flavor_name or flavor_id',
+            network='network_name or network_id',
+            keypair='keypair_name or keypair_id',
+            security_group='security_group_name or security_group_id'
+            )
+        client.applications.list()
+        << store your master_id >>
+        << exiting... >>
+        -------------------------------------------------------------
+        << start >>
+        ...
+        master_id = << retrieve master_id >>
+        client = MicadoClient(launcher="openstack")
+        client.master.attach(master_id = master_id)
+        client.applications.list()
+        client.master.destroy()
 
-    from micado import MicadoClient
+**Use-case 3**
 
-    client = MicadoClient(endpoint="https://micado/toscasubmitter/",
-                          version="v2.0",
-                          verify=False,
-                          auth=("ssl_user", "ssl_pass"))
-    client.applications.list()
+MiCADO master is created independently from the MiCADO client library. The create and destroy methods
+are not invoked since the client library used only for handling the applications.
+
+    .. code:: Python
+
+        from micado import MicadoClient
+        client = MicadoClient(
+            endpoint="https://micado/toscasubmitter/",
+            version="v2.0",
+            verify=False,
+            auth=("ssl_user", "ssl_pass")
+            )
+        client.applications.list()
 
 Documentation Reference
 -----------------------
@@ -123,5 +158,4 @@ Documentation Reference
 
 Roadmap
 -------
-* Handle multiple MiCADO-master VM
-* Support additional Cloud interface
+* Support additional Cloud interfaces (e.g EC2)

@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.abspath('../../micado-client'))
 # -- Project information -----------------------------------------------------
 
 project = 'MiCADO'
-copyright = '2018, Cloud Orchestration at the Level of Application'
+copyright = '2020, Cloud Orchestration at the Level of Application'
 author = 'Attila Farkas'
 
 # The short X.Y version

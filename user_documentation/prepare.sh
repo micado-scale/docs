@@ -18,7 +18,7 @@ source "$PDIR"/bin/activate
 pip install --upgrade pip
 
 # Install the locally checked out packages:
-pip install -r requirements.txt 
+pip install -r requirements.txt
 
 set +ex
 
