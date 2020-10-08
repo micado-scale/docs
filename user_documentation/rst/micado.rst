@@ -158,4 +158,4 @@ Documentation Reference
 
 Roadmap
 -------
-* Support additional Cloud interface (e.g EC2)
+* Support additional Cloud interfaces (e.g EC2)
