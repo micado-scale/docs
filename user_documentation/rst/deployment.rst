@@ -24,7 +24,7 @@ Prerequisites
 
 **MiCADO master (a virtual machine on a supported cloud)**
 
-* Ubuntu 16.04 or 18.04
+* Ubuntu 16.04 , 18.04 or 20.04
 * (Minimum) 2GHz CPU & 3GB RAM & 15GB DISK
 * (Recommended) 2GHz CPU & 4GB RAM & 20GB DISK
 
