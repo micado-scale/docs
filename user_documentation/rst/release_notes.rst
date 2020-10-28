@@ -4,6 +4,12 @@ Release Notes
 | **Changelog since v0.5.x of MiCADO**
 | See more detailed notes about upgrading in :ref:`whatsnew`
 
+
+v0.9.1-rev1 (28 October 2020)
+=======================
+
+- Fix an issue where Kubernetes playbook tasks would fail (`ansible-collections/community.kubernetes/issues/273 <https://github.com/ansible-collections/community.kubernetes/issues/273>`__)
+
 v0.9.1 (1 October 2020)
 =======================
 
