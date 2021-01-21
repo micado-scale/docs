@@ -425,6 +425,7 @@ options, here we again use the key **Kubernetes:**
 
   * **inputs**: persistent volume specific spec options... here are two
     popular examples, see `Kubernetes volumes <https://kubernetes.io/docs/concepts/storage/volumes/>`__ for more
+
     * **spec:**
 
       * **nfs:**
