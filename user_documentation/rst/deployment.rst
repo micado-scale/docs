@@ -31,7 +31,7 @@ Prerequisites
 | **Ansible Remote (the host where the Ansible Playbook is executed)**
 | *this could be the MiCADO Master itself, for a "local" execution of the playbook*
 
-* Ansible 2.8 or greater
+* Ansible 2.10 or greater
 * curl
 * jq (to pretty-format API responses)
 * wrk (to load test nginx & wordpress demonstrators)
@@ -39,19 +39,19 @@ Prerequisites
 Ansible
 -------
 
-Note: Ansible in the Ubuntu APT repository is outdated and insufficient (at the time of writing this document)
+Note: At the time of writing, Ansible in the APT repository is either
+outdated (Ubuntu 18.04) or buggy (Ubuntu 20.04).
 
-To install Ansible on Ubuntu, use these commands:
+To install Ansible on Ubuntu, we we prefer using the ``pip`` installation
+method to ensure the latest release:
 
 ::
 
    sudo apt-get update
-   sudo apt-get install software-properties-common
-   sudo apt-add-repository ppa:ansible/ansible
-   sudo apt-get update
-   sudo apt-get install ansible
+   sudo apt-get install python3-pip
+   sudo pip3 install ansible
 
-To install Ansible on other operation systems follow the `official installation guide <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`__.
+To install Ansible without `pip`, follow the `official installation guide <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`__.
 
 curl
 ----
@@ -268,9 +268,9 @@ Please, revise all the parameters, however in most cases the default values are 
 Step 6: Customize the deployment
 --------------------------------
 
-A few parameters in *micado-master.yml* can be fine tuned before deployment. They are as follows:
+A few parameters in *group_vars/micado.yml* can be fine tuned before deployment. They are as follows:
 
-- **disable_optimizer**: Setting this parameter to False enables the deployment of the Optimizer module, to perform more advanced scaling. Default is True.
+- **enable_optimizer**: Setting this parameter to True enables the deployment of the Optimizer module, to perform more advanced scaling. Default is True.
 
 - **disable_worker_updates**: Setting this parameter to False enables periodic software updates of the worker nodes. Default is True.
 
@@ -293,13 +293,13 @@ Run the following command to build and initalise a MiCADO master node on the emp
 
 ::
 
-   ansible-playbook -i hosts.yml micado-master.yml
+   ansible-playbook -i hosts.yml micado.yml
 
 If you have used Vault to encrypt your credentials, you have to add the path to your vault credentials to the command line as described in the `Ansible Vault documentation <https://docs.ansible.com/ansible/2.4/vault.html#providing-vault-passwords>`_ or provide it via command line using the command
 
 ::
 
-   ansible-playbook -i hosts.yml micado-master.yml --ask-vault-pass
+   ansible-playbook -i hosts.yml micado.yml --ask-vault-pass
 
 Optional: Build & Start Roles
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -312,19 +312,40 @@ Optional: Build & Start Roles
 
    ::
 
-      ansible-playbook -i hosts.yml micado-master.yml --tags 'build'
+      ansible-playbook -i hosts.yml micado.yml --tags build
 
    You can then run the following command to ``start`` any **"built"** MiCADO Master node which will initialise and launch the core components for operation.
 
    ::
 
-      ansible-playbook -i hosts.yml micado-master.yml --tags 'start'
+      ansible-playbook -i hosts.yml micado.yml --tags start
 
    As a last measure of increasing efficiency, you can also ``build`` a MiCADO Worker node. You can then clone/snapshot/image the drive of this VM and point to it in your ADT descriptions. Before running this operation, Make sure the *hosts.yml* points to the empty VM where you intend to build the worker image. Adjust the values under the key **micado-target** as needed. The following command will ``build`` a MiCADO Worker node on an empty Ubuntu VM.
 
    ::
 
-      ansible-playbook -i hosts.yml build-micado-worker.yml
+      ansible-playbook -i hosts.yml worker.yml
+
+
+Advanced: Cloud specific fixes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Certain cloud service providers may provide Virtual Machine images that are
+   incompatible with the normal MiCADO installation. Where possible, we have included
+   automated fixes for these, which can be applied using the `--tags` syntax of Ansible.
+   See below for details:
+
+   **CloudSigma**
+
+   At the time of writing, the CloudSigma Ubuntu 18.04 and 20.04 virtual machine disk images
+   are improperly configured, and SSL errors may appear during installation of MiCADO. A special
+   task has been added to MiCADO to automate the fix when installing on CloudSigma instances.
+
+   Simply use the following command instead of the command provided above. Notice the added tags
+
+   ::
+
+      ansible-playbook -i hosts.yml micado.yml --tags all,cloudsigma
 
 
 After deployment
@@ -348,7 +369,7 @@ command:
 
 ::
 
-   ansible-playbook -i hosts.yml micado-master.yml --tags update-auth
+   ansible-playbook -i hosts.yml micado.yml --tags update-auth
 
 
 Check the logs
