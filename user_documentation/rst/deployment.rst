@@ -24,7 +24,7 @@ Prerequisites
 
 **MiCADO master (a virtual machine on a supported cloud)**
 
-* Ubuntu 16.04 , 18.04 or 20.04
+* Ubuntu 18.04 or 20.04
 * (Minimum) 2GHz CPU & 3GB RAM & 15GB DISK
 * (Recommended) 2GHz CPU & 4GB RAM & 20GB DISK
 
@@ -65,7 +65,7 @@ To install curl on Ubuntu, use this command:
 To install curl on other operating systems follow the `official installation guide <https://curl.haxx.se/download.html>`__.
 
 jq
-----
+--
 
 To install jq on Ubuntu, use this command:
 
@@ -75,16 +75,12 @@ To install jq on Ubuntu, use this command:
 
 To install jq on other operating systems follow the `official installation guide <https://stedolan.github.io/jq/download/>`__.
 
-wrk
-----
+wrk (optional)
+--------------
 
-To install wrk on Ubuntu 16.04, use this command:
+`wrk` is used to generate HTTP load for testing certain applications in MiCADO.
 
-::
-
-   sudo apt-get install wrk
-
-To install wrk on other operating versions/systems check the sidebar on the `github wiki <https://github.com/wg/wrk/wiki>`__.
+To install wrk, check the sidebar on the `github wiki <https://github.com/wg/wrk/wiki>`__.
 
 Installation
 ============
@@ -96,9 +92,9 @@ Step 1: Download the ansible playbook.
 
 ::
 
-   curl --output ansible-micado-0.9.1-rev1.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.9.1-rev1/ansible-micado-0.9.1-rev1.tar.gz
-   tar -zxvf ansible-micado-0.9.1-rev1.tar.gz
-   cd ansible-micado-0.9.1-rev1/
+   curl --output ansible-micado-0.9.2.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.9.2/ansible-micado-0.9.2.tar.gz
+   tar -zxvf ansible-micado-0.9.2.tar.gz
+   cd ansible-micado-0.9.2/
 
 .. _cloud-credentials:
 
@@ -156,7 +152,7 @@ Optional: Added security
       ansible-vault edit credentials-cloud-api.yml
 
    Be sure to see the note about deploying a playbook with vault encrypted files
-   in **Step 7**
+   in **Step 7**.
 
 Step 3a: Specify security settings and credentials to access MiCADO.
 --------------------------------------------------------------------
