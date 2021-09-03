@@ -1047,7 +1047,7 @@ appropriate fields during :ref:`cloud-credentials`
   If these fields are filled, **username** and **password** will be
   ignored.
 
-  A third option is with `OpenID Connect <https://openid.net/connect/
+  A third option is with `OpenID Connect <https://openid.net/connect/>`__
   for which the URL of the OpenID provider (**identity_provider**) and
   a valid **access_token** are required. When providing a literal access
   token is not practical (for example
