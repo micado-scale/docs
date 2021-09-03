@@ -1006,6 +1006,12 @@ inputs are available.:
   multiple security groups in the form of a **list**) for your VM.
 * **network_id** is the id of the network you would like to use on your target
   Nova cloud.
+* **floating_ip_pool** (Terraform only) is a string specifying the pool of floating
+  IPs that this instance should be assigned a random available floating IP from. If
+  this property is not specified, the instance will not be assigned a floating IP.
+* **floating_ip** (Terraform only) is a string specifying the specific floating IP
+  from the above specified pool that this instance should have assigned to it. This
+  property should not be used with instances that may scale out to more than one replica.
 * **config_drive** (Terraform only) is a boolean to enable use of a configuration
   drive for metadata storage.
 
