@@ -1027,18 +1027,29 @@ to provide **network_name** in addition to the ID.
             endpoint: ADD_YOUR_ENDPOINT (e.g https://sztaki.cloud.mta.hu:5000/v3)
             network_name: ADD_YOUR_NETWORK_NAME (e.g mynet-default)
 
-**Authentication** in OpenStack is supported by MiCADO in two ways:
+**Authentication** in OpenStack is supported by MiCADO in three ways, by specifying the
+appropriate fields during :ref:`cloud-credentials`
 
   The default method is authenticating with the same credentials
   used to access the OpenStack WebUI by providing
   the **username** and **password** fields in *credentials-cloud-api.yml*
   during :ref:`cloud-credentials`
 
-  The other option is with `Application Credentials <https://docs.openstack.org/keystone/queens/user/application_credentials.html>`__
+  Another option is with `Application Credentials <https://docs.openstack.org/keystone/queens/user/application_credentials.html>`__
   For this method, provide **application_credential_id** and
   **applicaiton_credential_secret** in *credentials-cloud-api.yml*.
   If these fields are filled, **username** and **password** will be
   ignored.
+
+  A third option is with `OpenID Connect <https://openid.net/connect/
+  for which the URL of the OpenID provider (**identity_provider**) and
+  a valid **access_token** are required. When providing a literal access
+  token is not practical (for example
+  with short-lived access tokens), MiCADO supports automatically
+  `refreshing access tokens <https://openid.net/specs/openid-connect-core-1_0.html#RefreshTokens>`__
+  First, complete the ``openid`` section under ``pre-authentication`` with a
+  **url**, **client_id**, **client_secret** and valid **refresh_token**.
+  Then, for the value of **access_token** use the following value: ``*OPENID``
 
 Azure
 ~~~~~
