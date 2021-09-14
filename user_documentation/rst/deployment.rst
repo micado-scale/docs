@@ -202,6 +202,41 @@ Edit credentials-docker-registry.yml and add username, password, and registry ur
 
 Optionally you may use the Ansible Vault mechanism as described in Step 2 to protect the confidentiality and integrity of this file as well.
 
+Advanced: Multiple Registries or Token Auth
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   To login to multiple different Docker Registries, or to
+   use a token for login, it is necessary to SSH to the
+   MiCADO Master node **after** MiCADO has been fully deployed
+   (i.e. after Step 7). You should **not** perform Step 3b above.
+   
+   Once logged into the MiCADO Master, use the docker login
+   command as needed to login to different registries. eg.
+
+   ::
+
+      sudo docker login -u <username> -p <password>
+      sudo docker login registry.gitlab.com -u <username> -p <token>
+      ...
+
+   This will create a config.json file, usually at
+   ``~/.docker/config.json``. With the path to this file in mind,
+   run the following command
+
+   ::
+
+      sudo kubectl create secret generic dockerloginkey \
+          --from-file=.dockerconfigjson=path/to/.docker/config.json \
+          --type=kubernetes.io/dockerconfigjson
+
+   Finally, run the following command.
+
+   ::
+
+      sudo kubectl patch serviceaccount default \
+          --patch '{"imagePullSecrets": [{"name": "dockerloginkey"}]}'
+
+
 Step 4: Launch an empty cloud VM instance for MiCADO master.
 ------------------------------------------------------------
 
