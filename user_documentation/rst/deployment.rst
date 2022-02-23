@@ -24,14 +24,14 @@ Prerequisites
 
 **MiCADO master (a virtual machine on a supported cloud)**
 
-* Ubuntu 16.04 , 18.04 or 20.04
+* Ubuntu 18.04 or 20.04
 * (Minimum) 2GHz CPU & 3GB RAM & 15GB DISK
 * (Recommended) 2GHz CPU & 4GB RAM & 20GB DISK
 
 | **Ansible Remote (the host where the Ansible Playbook is executed)**
 | *this could be the MiCADO Master itself, for a "local" execution of the playbook*
 
-* Ansible 2.8 or greater
+* Ansible 2.10 or greater
 * curl
 * jq (to pretty-format API responses)
 * wrk (to load test nginx & wordpress demonstrators)
@@ -39,19 +39,19 @@ Prerequisites
 Ansible
 -------
 
-Note: Ansible in the Ubuntu APT repository is outdated and insufficient (at the time of writing this document)
+Note: At the time of writing, Ansible in the APT repository is either
+outdated (Ubuntu 18.04) or buggy (Ubuntu 20.04).
 
-To install Ansible on Ubuntu, use these commands:
+To install Ansible on Ubuntu, we we prefer using the ``pip`` installation
+method to ensure the latest release:
 
 ::
 
    sudo apt-get update
-   sudo apt-get install software-properties-common
-   sudo apt-add-repository ppa:ansible/ansible
-   sudo apt-get update
-   sudo apt-get install ansible
+   sudo apt-get install python3-pip
+   sudo pip3 install ansible
 
-To install Ansible on other operation systems follow the `official installation guide <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`__.
+To install Ansible without `pip`, follow the `official installation guide <https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html>`__.
 
 curl
 ----
@@ -65,7 +65,7 @@ To install curl on Ubuntu, use this command:
 To install curl on other operating systems follow the `official installation guide <https://curl.haxx.se/download.html>`__.
 
 jq
-----
+--
 
 To install jq on Ubuntu, use this command:
 
@@ -75,16 +75,12 @@ To install jq on Ubuntu, use this command:
 
 To install jq on other operating systems follow the `official installation guide <https://stedolan.github.io/jq/download/>`__.
 
-wrk
-----
+wrk (optional)
+--------------
 
-To install wrk on Ubuntu 16.04, use this command:
+`wrk` is used to generate HTTP load for testing certain applications in MiCADO.
 
-::
-
-   sudo apt-get install wrk
-
-To install wrk on other operating versions/systems check the sidebar on the `github wiki <https://github.com/wg/wrk/wiki>`__.
+To install wrk, check the sidebar on the `github wiki <https://github.com/wg/wrk/wiki>`__.
 
 Installation
 ============
@@ -96,9 +92,9 @@ Step 1: Download the ansible playbook.
 
 ::
 
-   curl --output ansible-micado-0.9.1-rev1.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.9.1-rev1/ansible-micado-0.9.1-rev1.tar.gz
-   tar -zxvf ansible-micado-0.9.1-rev1.tar.gz
-   cd ansible-micado-0.9.1-rev1/
+   curl --output ansible-micado-v0.10.tar.gz -L https://github.com/micado-scale/ansible-micado/tarball/v0.10
+   tar -zxvf ansible-micado-v0.10.tar.gz
+   cd ansible-micado-v0.10/
 
 .. _cloud-credentials:
 
@@ -114,8 +110,8 @@ before deployment. Please, do not modify the structure of the template!
 
 ::
 
-   cp sample-credentials-cloud-api.yml credentials-cloud-api.yml
-   edit credentials-cloud-api.yml
+   cp credentials/sample-credentials-cloud-api.yml credentials/credentials-cloud-api.yml
+   edit credentials/credentials-cloud-api.yml
 
 
 Edit **credentials-cloud-api.yml** to add cloud credentials. You will find
@@ -128,8 +124,8 @@ target cloud.
 
 ::
 
-   cp sample-credentials-gce.json credentials-gce.json
-   edit credentials-gce.json
+   cp credentials/sample-credentials-gce.json credentials/credentials-gce.json
+   edit credentials/credentials-gce.json
 
 It is possible to modify cloud credentials after MiCADO has been deployed,
 see the section titled **Update Cloud Credentials** further down this page
@@ -145,7 +141,7 @@ Optional: Added security
 
    ::
 
-      ansible-vault create credentials-cloud-api.yml
+      ansible-vault create credentials/credentials-cloud-api.yml
 
 
    This will launch the editor defined in the ``$EDITOR`` environment variable to make changes to
@@ -153,10 +149,10 @@ Optional: Added security
 
    ::
 
-      ansible-vault edit credentials-cloud-api.yml
+      ansible-vault edit credentials/credentials-cloud-api.yml
 
    Be sure to see the note about deploying a playbook with vault encrypted files
-   in **Step 7**
+   in **Step 7**.
 
 Step 3a: Specify security settings and credentials to access MiCADO.
 --------------------------------------------------------------------
@@ -165,8 +161,8 @@ MiCADO master will use these security-related settings and credentials to authen
 
 ::
 
-   cp sample-credentials-micado.yml credentials-micado.yml
-   edit credentials-micado.yml
+   cp credentials/sample-credentials-micado.yml credentials/credentials-micado.yml
+   edit credentials/credentials-micado.yml
 
 Specify the provisioning method for the x509 keypair used for TLS encryption of the management interface in the ``tls`` subtree:
 
@@ -199,12 +195,47 @@ Set the Docker login credentials of your private Docker registry in which your p
 
 ::
 
-   cp sample-credentials-docker-registry.yml credentials-docker-registry.yml
-   edit credentials-docker-registry.yml
+   cp credentials/sample-credentials-docker-registry.yml credentials/credentials-docker-registry.yml
+   edit credentials/credentials-docker-registry.yml
 
 Edit credentials-docker-registry.yml and add username, password, and registry url. To login to the default docker_hub, leave DOCKER_REPO as is (https://index.docker.io/v1/).
 
 Optionally you may use the Ansible Vault mechanism as described in Step 2 to protect the confidentiality and integrity of this file as well.
+
+Advanced: Multiple Registries or Token Auth
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   To login to multiple different Docker Registries, or to
+   use a token for login, it is necessary to SSH to the
+   MiCADO Master node **after** MiCADO has been fully deployed
+   (i.e. after Step 7). You should **not** perform Step 3b above.
+   
+   Once logged into the MiCADO Master, use the docker login
+   command as needed to login to different registries. eg.
+
+   ::
+
+      sudo docker login -u <username> -p <password>
+      sudo docker login registry.gitlab.com -u <username> -p <token>
+      ...
+
+   This will create a config.json file, usually at
+   ``~/.docker/config.json``. With the path to this file in mind,
+   run the following command
+
+   ::
+
+      sudo kubectl create secret generic dockerloginkey \
+          --from-file=.dockerconfigjson=path/to/.docker/config.json \
+          --type=kubernetes.io/dockerconfigjson
+
+   Finally, run the following command.
+
+   ::
+
+      sudo kubectl patch serviceaccount default \
+          --patch '{"imagePullSecrets": [{"name": "dockerloginkey"}]}'
+
 
 Step 4: Launch an empty cloud VM instance for MiCADO master.
 ------------------------------------------------------------
@@ -268,9 +299,9 @@ Please, revise all the parameters, however in most cases the default values are 
 Step 6: Customize the deployment
 --------------------------------
 
-A few parameters in *micado-master.yml* can be fine tuned before deployment. They are as follows:
+A few parameters in *group_vars/micado.yml* can be fine tuned before deployment. They are as follows:
 
-- **disable_optimizer**: Setting this parameter to False enables the deployment of the Optimizer module, to perform more advanced scaling. Default is True.
+- **enable_optimizer**: Setting this parameter to True enables the deployment of the Optimizer module, to perform more advanced scaling. Default is True.
 
 - **disable_worker_updates**: Setting this parameter to False enables periodic software updates of the worker nodes. Default is True.
 
@@ -293,13 +324,13 @@ Run the following command to build and initalise a MiCADO master node on the emp
 
 ::
 
-   ansible-playbook -i hosts.yml micado-master.yml
+   ansible-playbook -i hosts.yml micado.yml
 
 If you have used Vault to encrypt your credentials, you have to add the path to your vault credentials to the command line as described in the `Ansible Vault documentation <https://docs.ansible.com/ansible/2.4/vault.html#providing-vault-passwords>`_ or provide it via command line using the command
 
 ::
 
-   ansible-playbook -i hosts.yml micado-master.yml --ask-vault-pass
+   ansible-playbook -i hosts.yml micado.yml --ask-vault-pass
 
 Optional: Build & Start Roles
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -312,19 +343,40 @@ Optional: Build & Start Roles
 
    ::
 
-      ansible-playbook -i hosts.yml micado-master.yml --tags 'build'
+      ansible-playbook -i hosts.yml micado.yml --tags build
 
    You can then run the following command to ``start`` any **"built"** MiCADO Master node which will initialise and launch the core components for operation.
 
    ::
 
-      ansible-playbook -i hosts.yml micado-master.yml --tags 'start'
+      ansible-playbook -i hosts.yml micado.yml --tags start
 
    As a last measure of increasing efficiency, you can also ``build`` a MiCADO Worker node. You can then clone/snapshot/image the drive of this VM and point to it in your ADT descriptions. Before running this operation, Make sure the *hosts.yml* points to the empty VM where you intend to build the worker image. Adjust the values under the key **micado-target** as needed. The following command will ``build`` a MiCADO Worker node on an empty Ubuntu VM.
 
    ::
 
-      ansible-playbook -i hosts.yml build-micado-worker.yml
+      ansible-playbook -i hosts.yml worker.yml
+
+
+Advanced: Cloud specific fixes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Certain cloud service providers may provide Virtual Machine images that are
+   incompatible with the normal MiCADO installation. Where possible, we have included
+   automated fixes for these, which can be applied using the `--tags` syntax of Ansible.
+   See below for details:
+
+   **CloudSigma**
+
+   At the time of writing, the CloudSigma Ubuntu 18.04 and 20.04 virtual machine disk images
+   are improperly configured, and SSL errors may appear during installation of MiCADO. A special
+   task has been added to MiCADO to automate the fix when installing on CloudSigma instances.
+
+   Simply use the following command instead of the command provided above. Notice the added tags
+
+   ::
+
+      ansible-playbook -i hosts.yml micado.yml --tags all,cloudsigma
 
 
 After deployment
@@ -348,7 +400,7 @@ command:
 
 ::
 
-   ansible-playbook -i hosts.yml micado-master.yml --tags update-auth
+   ansible-playbook -i hosts.yml micado.yml --tags update-auth
 
 
 Check the logs
