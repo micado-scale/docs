@@ -110,8 +110,8 @@ before deployment. Please, do not modify the structure of the template!
 
 ::
 
-   cp sample-credentials-cloud-api.yml credentials-cloud-api.yml
-   edit credentials-cloud-api.yml
+   cp credentials/sample-credentials-cloud-api.yml credentials/credentials-cloud-api.yml
+   edit credentials/credentials-cloud-api.yml
 
 
 Edit **credentials-cloud-api.yml** to add cloud credentials. You will find
@@ -124,8 +124,8 @@ target cloud.
 
 ::
 
-   cp sample-credentials-gce.json credentials-gce.json
-   edit credentials-gce.json
+   cp credentials/sample-credentials-gce.json credentials/credentials-gce.json
+   edit credentials/credentials-gce.json
 
 It is possible to modify cloud credentials after MiCADO has been deployed,
 see the section titled **Update Cloud Credentials** further down this page
@@ -141,7 +141,7 @@ Optional: Added security
 
    ::
 
-      ansible-vault create credentials-cloud-api.yml
+      ansible-vault create credentials/credentials-cloud-api.yml
 
 
    This will launch the editor defined in the ``$EDITOR`` environment variable to make changes to
@@ -149,7 +149,7 @@ Optional: Added security
 
    ::
 
-      ansible-vault edit credentials-cloud-api.yml
+      ansible-vault edit credentials/credentials-cloud-api.yml
 
    Be sure to see the note about deploying a playbook with vault encrypted files
    in **Step 7**.
@@ -161,8 +161,8 @@ MiCADO master will use these security-related settings and credentials to authen
 
 ::
 
-   cp sample-credentials-micado.yml credentials-micado.yml
-   edit credentials-micado.yml
+   cp credentials/sample-credentials-micado.yml credentials/credentials-micado.yml
+   edit credentials/credentials-micado.yml
 
 Specify the provisioning method for the x509 keypair used for TLS encryption of the management interface in the ``tls`` subtree:
 
@@ -195,8 +195,8 @@ Set the Docker login credentials of your private Docker registry in which your p
 
 ::
 
-   cp sample-credentials-docker-registry.yml credentials-docker-registry.yml
-   edit credentials-docker-registry.yml
+   cp credentials/sample-credentials-docker-registry.yml credentials/credentials-docker-registry.yml
+   edit credentials/credentials-docker-registry.yml
 
 Edit credentials-docker-registry.yml and add username, password, and registry url. To login to the default docker_hub, leave DOCKER_REPO as is (https://index.docker.io/v1/).
 
