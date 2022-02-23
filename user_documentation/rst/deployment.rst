@@ -92,9 +92,9 @@ Step 1: Download the ansible playbook.
 
 ::
 
-   curl --output ansible-micado-0.9.2.tar.gz -L https://github.com/micado-scale/ansible-micado/releases/download/v0.9.2/ansible-micado-0.9.2.tar.gz
-   tar -zxvf ansible-micado-0.9.2.tar.gz
-   cd ansible-micado-0.9.2/
+   curl --output ansible-micado-v0.10.tar.gz -L https://github.com/micado-scale/ansible-micado/tarball/v0.10
+   tar -zxvf ansible-micado-v0.10.tar.gz
+   cd ansible-micado-v0.10/
 
 .. _cloud-credentials:
 
