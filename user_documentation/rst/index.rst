@@ -29,6 +29,6 @@ In the current release, the status of the system can be inspected through the fo
    RESTful API <https://micado-scale.github.io/component_submitter/swagger.html>
    application_description
    tutorials
-   MiCADO Client Library <micado>
+   MiCADO Client Library <https://micado-scale.github.io/micado-client>
    release_notes
    whats_new
