@@ -1,12 +1,31 @@
 Release Notes
 *************
 
-| **Changelog since v0.5.x of MiCADO**
 | See more detailed notes about upgrading in :ref:`whatsnew`
+
+v0.10.0 (23 February 2022)
+==========================
+
+- Support TOSCA v1.3 instance_count and occurrences for node replicas
+- Support the Kubernetes subpath feature for multi volume mounting
+- Update Docker, containerd, Kubernetes and KubeEdge versions
+- Fix an issue with SSH keypair name collisions in OpenStack
+
+Internal MiCADO-Edge Release (4 May 2021)
+==================================================
+
+- Add support for Edge nodes with `KubeEdge <https://kubeedge.io>`__
+- Add support for OpenID Connect Authentication in OpenStack
+- Add support for specifying the floating IP of an instance
+- Fix an issue where Playbooks would fail on first `apt-get`
+- Add support for drop-in Ansible plays
+- Organise Playbook as per Ansible best practices
+- Set best practice configuration with ansible.cfg
+- Support domain_name property for v3 Password Authentication
 
 
 v0.9.1-rev1 (28 October 2020)
-=======================
+=============================
 
 - Fix an issue where Kubernetes playbook tasks would fail (`ansible-collections/community.kubernetes/issues/273 <https://github.com/ansible-collections/community.kubernetes/issues/273>`__)
 
