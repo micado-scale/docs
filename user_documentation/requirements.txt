@@ -4,4 +4,4 @@ ruamel.yaml==0.16.10
 pycryptodome==3.9.8
 python-novaclient==17.2.0
 openstacksdk==0.48.0
-ansible==4.2.0
+ansible==7.0.0
