@@ -1,3 +1,9 @@
+.. raw:: html
+
+    <script type="text/javascript">
+        window.location.replace('https://micado-scale.github.io/');
+    </script>
+    
 MiCADO - autoscaling framework for Kubernetes Deployments in the Cloud
 ######################################################################
 
